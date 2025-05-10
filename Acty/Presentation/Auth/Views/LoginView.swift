@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  LoginView.swift
 //  Acty
 //
 //  Created by Sebin Kwon on 5/10/25.
@@ -13,7 +13,7 @@ struct LoginView: View {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundStyle(.tint)
-            Text("Hello, world!")
+            Text("Login")
         }
         .padding()
     }
