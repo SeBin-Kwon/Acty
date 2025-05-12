@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		AEFAE3B62DCF3CCD00CFE05C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = AEFAE3B52DCF3CCD00CFE05C /* .gitignore */; };
+		AEFAE6672DD1789900CFE05C /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = AEFAE6662DD1789900CFE05C /* Alamofire */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AEFAE6672DD1789900CFE05C /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +73,7 @@
 			);
 			name = Acty;
 			packageProductDependencies = (
+				AEFAE6662DD1789900CFE05C /* Alamofire */,
 			);
 			productName = Acty;
 			productReference = AEFAE3A42DCF3CB700CFE05C /* Acty.app */;
@@ -100,6 +103,9 @@
 			);
 			mainGroup = AEFAE39B2DCF3CB700CFE05C;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AEFAE6652DD1789900CFE05C /* XCRemoteSwiftPackageReference "Alamofire" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AEFAE3A52DCF3CB700CFE05C /* Products */;
 			projectDirPath = "";
@@ -341,6 +347,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AEFAE6652DD1789900CFE05C /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.10.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AEFAE6662DD1789900CFE05C /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AEFAE6652DD1789900CFE05C /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AEFAE39C2DCF3CB700CFE05C /* Project object */;
 }
