@@ -9,13 +9,18 @@ import SwiftUI
 
 struct LoginView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Login")
+        NavigationStack {
+            VStack {
+                Image(systemName: "globe")
+                    .imageScale(.large)
+                    .foregroundStyle(.tint)
+                Text("Login")
+                NavigationLink("SignUp") {
+                    SignUpView()
+                }
+            }
+            .padding()
         }
-        .padding()
     }
 }
 
