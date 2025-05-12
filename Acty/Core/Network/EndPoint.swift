@@ -47,6 +47,12 @@ enum EndPoint {
         }
     }
     
+    var encoding: ParameterEncoding {
+        switch self {
+        case .signUp: JSONEncoding.default
+        }
+    }
+    
 //    var error: Error.Type {
 //        switch self {
 //        }
