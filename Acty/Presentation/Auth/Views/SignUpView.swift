@@ -8,28 +8,26 @@
 import SwiftUI
 
 struct SignUpView: View {
-    @State var email: String = ""
-    @State var password: String = ""
-    @State var nickname: String = ""
+    @StateObject var viewModel = SignUpViewModel()
+    
     var body: some View {
         VStack {
             Text("email")
-            TextField("이메일을 입력해주세요.", text: $email)
-            Text("password")
-            TextField("비밀번호를 입력해주세요.", text: $password)
-            Text("nickname")
-            TextField("닉네임을 입력해주세요.", text: $nickname)
-            Button {
-                Task {
-                    do {
-                        let result: SignUpResult = try await NetworkManager.shared.fetchResults(api: .signUp(SignUpRequest(email: email, password: password, nick: nickname)))
-                        // 결과 처리
-                    } catch {
-                        print("오류")
-                        // 오류 처리
-                    }
+            HStack {
+                TextField("이메일을 입력해주세요.", text: $viewModel.input.email)
+                Button {
+                    print("sd")
+                } label: {
+                    Text("이메일 유효성 확인")
                 }
-                
+
+            }
+            Text("password")
+            TextField("비밀번호를 입력해주세요.", text: $viewModel.input.password)
+            Text("nickname")
+            TextField("닉네임을 입력해주세요.", text: $viewModel.input.nickname)
+            Button {
+                viewModel.input.signUpButtonTapped.send(())
             } label: {
                 Text("회원가입 하기")
             }
@@ -39,10 +37,11 @@ struct SignUpView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     SignUpView()
 }
-
+#endif
 
 struct SignUpResult: Decodable {
     let user_id: String
