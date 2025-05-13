@@ -12,7 +12,7 @@ enum EndPoint {
     case signUp(SignUpRequest)
     
     var baseURL: String {
-        Sesac.baseURL
+        BASE_URL
     }
     
     var endPoint: String {
@@ -42,7 +42,7 @@ enum EndPoint {
     var headers: HTTPHeaders {
         switch self {
         case .signUp:
-            ["Content-Type": "application/json", "SeSACKey": Sesac.key]
+            ["Content-Type": "application/json", "SeSACKey": API_KEY]
 
         }
     }

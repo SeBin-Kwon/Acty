@@ -22,7 +22,7 @@ struct SignUpView: View {
             Button {
                 Task {
                     do {
-                        let result: SignUpRequest = try await NetworkManager.shared.fetchResults(api: .signUp(SignUpRequest(email: email, password: password, nick: nickname)))
+                        let result: SignUpResult = try await NetworkManager.shared.fetchResults(api: .signUp(SignUpRequest(email: email, password: password, nick: nickname)))
                         // 결과 처리
                     } catch {
                         print("오류")
@@ -44,3 +44,10 @@ struct SignUpView: View {
 }
 
 
+struct SignUpResult: Decodable {
+    let user_id: String
+    let email: String
+    let nick: String
+    let accessToken: String
+    let refreshToken: String
+}

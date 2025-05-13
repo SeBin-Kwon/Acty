@@ -27,6 +27,7 @@ final class NetworkManager {
                     continuation.resume(returning: result)
                 case .failure(let error):
                     print(error)
+                    continuation.resume(throwing: error)
                 }
             }
         }
