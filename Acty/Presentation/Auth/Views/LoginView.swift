@@ -9,7 +9,7 @@ import SwiftUI
 import AuthenticationServices
 
 struct LoginView: View {
-    
+    @StateObject private var viewModel = LoginViewModel(appleLoginService: AppleLoginService())
     var body: some View {
         NavigationStack {
             VStack {
@@ -17,7 +17,7 @@ struct LoginView: View {
                     .imageScale(.large)
                     .foregroundStyle(.tint)
                 Text("Login")
-                AppleSigninButton()
+                appleButton
                 NavigationLink("SignUp") {
                     SignUpView()
                 }
@@ -25,11 +25,8 @@ struct LoginView: View {
             .padding()
         }
     }
-}
-
-struct AppleSigninButton : View{
     
-    var body: some View{
+    private var appleButton: some View {
         SignInWithAppleButton(
             onRequest: { request in
                 request.requestedScopes = [.fullName, .email]
@@ -46,11 +43,13 @@ struct AppleSigninButton : View{
         )
         .frame(width : UIScreen.main.bounds.width * 0.9, height:50)
         .onTapGesture {
-            print("")
+            viewModel.input.appleLoginTapped.send(())
         }
         .cornerRadius(5)
+
     }
 }
+
 
 #if DEBUG
 #Preview {

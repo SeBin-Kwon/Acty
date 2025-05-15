@@ -10,35 +10,7 @@ import Combine
 import AuthenticationServices
 
 
-final class AppleOAuthServices: NSObject, ViewModelType {
-    
-    var input = Input()
-    @Published var output = Output()
-    var cancellables = Set<AnyCancellable>()
-    
-    @Published var givenName: String = ""
-    @Published var errorMessage: String = ""
-    @Published var oauthUserData = OAuthUserData()
-    
-    struct Input {
-        var appleLoginTapped = PassthroughSubject<Void, Never>()
-    }
-    
-    struct Output {
-    }
-    
-    override init() {
-        super.init()
-        transform()
-    }
-    
-    func transform() {
-        input.appleLoginTapped
-            .sink { [weak self] in
-                self?.signIn()
-            }
-            .store(in: &cancellables)
-    }
+final class AppleLoginService: NSObject {
     
     func signIn() {
         let appleIDProvider = ASAuthorizationAppleIDProvider()//Apple ID 제공자를 생성
@@ -59,7 +31,7 @@ final class AppleOAuthServices: NSObject, ViewModelType {
 }
 
 
-extension AppleOAuthServices: ASAuthorizationControllerPresentationContextProviding, ASAuthorizationControllerDelegate {
+extension AppleLoginService: ASAuthorizationControllerPresentationContextProviding, ASAuthorizationControllerDelegate {
     //    /// Apple ID 연동 성공 시
     func authorizationController(controller _: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         switch authorization.credential {//인증 정보에 따라 다르게 처리
@@ -69,8 +41,8 @@ extension AppleOAuthServices: ASAuthorizationControllerPresentationContextProvid
             let fullName = appleIDCredential.fullName//전체 이름
             let idToken = appleIDCredential.identityToken!//idToken
             
-            oauthUserData.oauthId = userIdentifier
-            oauthUserData.idToken = String(data: idToken, encoding: .utf8) ?? ""
+//            oauthUserData.oauthId = userIdentifier
+//            oauthUserData.idToken = String(data: idToken, encoding: .utf8) ?? ""
         default:
             break
         }
@@ -85,7 +57,7 @@ extension AppleOAuthServices: ASAuthorizationControllerPresentationContextProvid
     }
     
     func authorizationController(controller _: ASAuthorizationController, didCompleteWithError error: Error) {
-        errorMessage = "Authorization failed: \(error.localizedDescription)"
+//        errorMessage = "Authorization failed: \(error.localizedDescription)"
     }
 }
 
