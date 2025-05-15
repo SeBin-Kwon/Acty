@@ -13,6 +13,8 @@ final class SignUpViewModel: ViewModelType {
     @Published var output = Output()
     var cancellables = Set<AnyCancellable>()
     
+    let appleLoginService: AppleOAuthServices
+    
     struct Input {
         var email: String = ""
         var password: String = ""
@@ -26,7 +28,8 @@ final class SignUpViewModel: ViewModelType {
         var isSignUp = false
     }
     
-    init() {
+    init(appleLoginService: AppleOAuthServices) {
+        self.appleLoginService = appleLoginService
         transform()
     }
     
