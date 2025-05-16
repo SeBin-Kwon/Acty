@@ -15,30 +15,35 @@ final class SignInViewModel: ViewModelType {
     @Published var output = Output()
     var cancellables = Set<AnyCancellable>()
     
-//    @Published var givenName: String = ""
-//    @Published var errorMessage: String = ""
-//    @Published var oauthUserData = OAuthUserData()
-    
-    private let appleLoginService: AppleSignInService
+    private let appleSignInService: AppleSignInService
     
     struct Input {
-        var appleLoginTapped = PassthroughSubject<Void, Never>()
-        var kakaoLoginTapped = PassthroughSubject<Void, Never>()
+        var appleSignInService = PassthroughSubject<Void, Never>()
+        var kakaoSigninTapped = PassthroughSubject<Void, Never>()
     }
     
     struct Output {
-        
+        var isSignIn = PassthroughSubject<Bool, Never>()
     }
     
-    init(appleLoginService: AppleSignInService) {
-        self.appleLoginService = appleLoginService
+    init(appleSignInService: AppleSignInService) {
+        self.appleSignInService = appleSignInService
         transform()
     }
     
     func transform() {
-        input.appleLoginTapped
+        var IsSuccessAppleSignIn = PassthroughSubject<Void, Never>()
+        
+        input.appleSignInService
             .sink { [weak self] in
-                self?.appleLoginService.signIn()
+                self?.appleSignInService.signIn()
+            }
+            .store(in: &cancellables)
+        
+        appleSignInService.loginSuccess
+            .sink { [weak self] in
+                print($0)
+                self?.output.isSignIn.send(true)
             }
             .store(in: &cancellables)
     }

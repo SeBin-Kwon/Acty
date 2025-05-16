@@ -10,16 +10,16 @@ import Foundation
 struct EmailSignInRequestDTO {
     let email: String
     let password: String
-    let deviceToken: String
+    let deviceToken: String?
 }
 
 struct AppleSignInRequestDTO {
     let idToken: String
-    let deviceToken: String
-    let nick: String
+    let deviceToken: String?
+    let nick: String?
 }
 
 struct KakaoSignInRequestDTO {
     let oauthToken: String
-    let deviceToken: String
+    let deviceToken: String?
 }

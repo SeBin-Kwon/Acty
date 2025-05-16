@@ -17,6 +17,9 @@ protocol AuthServiceProtocol {
 
 final class AppleSignInService: NSObject {
     
+    let loginSuccess = PassthroughSubject<AppleSignInRequestDTO, Never>()
+    let loginError = PassthroughSubject<String, Never>()
+    
     func signIn() {
         let appleIDProvider = ASAuthorizationAppleIDProvider()//Apple ID 제공자를 생성
         let request = appleIDProvider.createRequest()//인증 요청을 생성
@@ -42,9 +45,12 @@ extension AppleSignInService: ASAuthorizationControllerPresentationContextProvid
         switch authorization.credential {//인증 정보에 따라 다르게 처리
         case let appleIDCredential as ASAuthorizationAppleIDCredential://Apple ID 자격 증명을 처리
             
-            let userIdentifier = appleIDCredential.user//사용자 식별자
-            let fullName = appleIDCredential.fullName//전체 이름
-            let idToken = appleIDCredential.identityToken!//idToken
+            let userIdentifier = appleIDCredential.user //사용자 식별자
+            let fullName = appleIDCredential.fullName //전체 이름
+            let idToken = appleIDCredential.identityToken! //idToken
+            
+            let appleOAuthUser = AppleSignInRequestDTO(idToken: String(data: idToken, encoding: .utf8) ?? "", deviceToken: "deviceToken", nick: userIdentifier)
+            loginSuccess.send(appleOAuthUser)
             
 //            oauthUserData.oauthId = userIdentifier
 //            oauthUserData.idToken = String(data: idToken, encoding: .utf8) ?? ""
@@ -64,9 +70,4 @@ extension AppleSignInService: ASAuthorizationControllerPresentationContextProvid
     func authorizationController(controller _: ASAuthorizationController, didCompleteWithError error: Error) {
 //        errorMessage = "Authorization failed: \(error.localizedDescription)"
     }
-}
-
-struct OAuthUserData {
-    var oauthId: String = ""
-    var idToken: String = ""
 }

@@ -9,7 +9,9 @@ import SwiftUI
 import AuthenticationServices
 
 struct SignInView: View {
-    @StateObject private var viewModel = SignInViewModel(appleLoginService: AppleSignInService())
+    @StateObject private var viewModel = SignInViewModel(appleSignInService: AppleSignInService())
+    @State private var navigateToHome = false
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -21,8 +23,14 @@ struct SignInView: View {
                 NavigationLink("SignUp") {
                     SignUpView()
                 }
+                NavigationLink(destination: HomeView(), isActive: $navigateToHome) {
+                    EmptyView()
+                }
             }
             .padding()
+        }
+        .onReceive(viewModel.output.isSignIn) { _ in
+            navigateToHome = true
         }
     }
     
@@ -43,7 +51,7 @@ struct SignInView: View {
         )
         .frame(width : UIScreen.main.bounds.width * 0.9, height:50)
         .onTapGesture {
-            viewModel.input.appleLoginTapped.send(())
+            viewModel.input.appleSignInService.send(())
         }
         .cornerRadius(5)
 
