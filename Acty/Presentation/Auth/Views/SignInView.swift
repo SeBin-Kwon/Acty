@@ -1,5 +1,5 @@
 //
-//  LoginView.swift
+//  SignInView.swift
 //  Acty
 //
 //  Created by Sebin Kwon on 5/10/25.
@@ -8,8 +8,8 @@
 import SwiftUI
 import AuthenticationServices
 
-struct LoginView: View {
-    @StateObject private var viewModel = LoginViewModel(appleLoginService: AppleLoginService())
+struct SignInView: View {
+    @StateObject private var viewModel = SignInViewModel(appleLoginService: AppleSignInService())
     var body: some View {
         NavigationStack {
             VStack {
@@ -53,6 +53,6 @@ struct LoginView: View {
 
 #if DEBUG
 #Preview {
-    LoginView()
+    SignInView()
 }
 #endif

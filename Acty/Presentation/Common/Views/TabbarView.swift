@@ -10,7 +10,7 @@ import SwiftUI
 struct TabbarView: View {
     var body: some View {
         TabView {
-            LoginView()
+            SignInView()
                 .tabItem {
                     Image(systemName: "star")
                 }

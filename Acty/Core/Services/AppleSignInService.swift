@@ -9,8 +9,13 @@ import Foundation
 import Combine
 import AuthenticationServices
 
+protocol AuthServiceProtocol {
+    func signIn()
+    func signOut()
+}
 
-final class AppleLoginService: NSObject {
+
+final class AppleSignInService: NSObject {
     
     func signIn() {
         let appleIDProvider = ASAuthorizationAppleIDProvider()//Apple ID 제공자를 생성
@@ -31,7 +36,7 @@ final class AppleLoginService: NSObject {
 }
 
 
-extension AppleLoginService: ASAuthorizationControllerPresentationContextProviding, ASAuthorizationControllerDelegate {
+extension AppleSignInService: ASAuthorizationControllerPresentationContextProviding, ASAuthorizationControllerDelegate {
     //    /// Apple ID 연동 성공 시
     func authorizationController(controller _: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         switch authorization.credential {//인증 정보에 따라 다르게 처리

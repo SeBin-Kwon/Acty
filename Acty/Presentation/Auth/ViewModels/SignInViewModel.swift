@@ -1,5 +1,5 @@
 //
-//  LoginViewModel.swift
+//  SignInViewModel.swift
 //  Acty
 //
 //  Created by Sebin Kwon on 5/15/25.
@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 
-final class LoginViewModel: ViewModelType {
+final class SignInViewModel: ViewModelType {
     
     var input = Input()
     @Published var output = Output()
@@ -19,7 +19,7 @@ final class LoginViewModel: ViewModelType {
 //    @Published var errorMessage: String = ""
 //    @Published var oauthUserData = OAuthUserData()
     
-    private let appleLoginService: AppleLoginService
+    private let appleLoginService: AppleSignInService
     
     struct Input {
         var appleLoginTapped = PassthroughSubject<Void, Never>()
@@ -30,7 +30,7 @@ final class LoginViewModel: ViewModelType {
         
     }
     
-    init(appleLoginService: AppleLoginService) {
+    init(appleLoginService: AppleSignInService) {
         self.appleLoginService = appleLoginService
         transform()
     }
