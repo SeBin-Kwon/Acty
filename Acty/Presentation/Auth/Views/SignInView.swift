@@ -15,12 +15,14 @@ struct SignInView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                Image(systemName: "globe")
-                    .imageScale(.large)
-                    .foregroundStyle(.tint)
-                Text("Login")
+                Text("로그인")
+                TextField("아이디", text: $viewModel.input.email)
+                SecureField("비밀번호", text: $viewModel.input.password)
+                Button("로그인") {
+                    print("로그인")
+                }
                 appleButton
-                NavigationLink("SignUp") {
+                NavigationLink("회원가입") {
                     SignUpView()
                 }
                 NavigationLink(destination: HomeView(), isActive: $navigateToHome) {

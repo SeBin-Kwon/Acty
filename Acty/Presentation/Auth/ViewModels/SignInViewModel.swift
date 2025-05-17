@@ -18,6 +18,8 @@ final class SignInViewModel: ViewModelType {
     private let appleSignInService: AppleSignInService
     
     struct Input {
+        var email: String = ""
+        var password: String = ""
         var appleSignInService = PassthroughSubject<Void, Never>()
         var kakaoSigninTapped = PassthroughSubject<Void, Never>()
     }
