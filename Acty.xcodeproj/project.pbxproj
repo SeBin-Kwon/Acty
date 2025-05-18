@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AEDA9D072DDA020D009BE206 /* KakaoSDK in Frameworks */ = {isa = PBXBuildFile; productRef = AEDA9D062DDA020C009BE206 /* KakaoSDK */; };
 		AEFAE3B62DCF3CCD00CFE05C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = AEFAE3B52DCF3CCD00CFE05C /* .gitignore */; };
 		AEFAE6672DD1789900CFE05C /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = AEFAE6662DD1789900CFE05C /* Alamofire */; };
 /* End PBXBuildFile section */
@@ -43,6 +44,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AEFAE6672DD1789900CFE05C /* Alamofire in Frameworks */,
+				AEDA9D072DDA020D009BE206 /* KakaoSDK in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,6 +89,7 @@
 			name = Acty;
 			packageProductDependencies = (
 				AEFAE6662DD1789900CFE05C /* Alamofire */,
+				AEDA9D062DDA020C009BE206 /* KakaoSDK */,
 			);
 			productName = Acty;
 			productReference = AEFAE3A42DCF3CB700CFE05C /* Acty.app */;
@@ -118,6 +121,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				AEFAE6652DD1789900CFE05C /* XCRemoteSwiftPackageReference "Alamofire" */,
+				AEDA9D052DDA020C009BE206 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AEFAE3A52DCF3CB700CFE05C /* Products */;
@@ -276,6 +280,8 @@
 		};
 		AEFAE3B32DCF3CB900CFE05C /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = AEFAE3A62DCF3CB700CFE05C /* Acty */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -312,6 +318,8 @@
 		};
 		AEFAE3B42DCF3CB900CFE05C /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = AEFAE3A62DCF3CB700CFE05C /* Acty */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -371,6 +379,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		AEDA9D052DDA020C009BE206 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kakao/kakao-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.24.2;
+			};
+		};
 		AEFAE6652DD1789900CFE05C /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire";
@@ -382,6 +398,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		AEDA9D062DDA020C009BE206 /* KakaoSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AEDA9D052DDA020C009BE206 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDK;
+		};
 		AEFAE6662DD1789900CFE05C /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = AEFAE6652DD1789900CFE05C /* XCRemoteSwiftPackageReference "Alamofire" */;
