@@ -66,15 +66,19 @@ final class SignInViewModel: ViewModelType {
         
         input.appleSignInService
             .sink { [weak self] in
-                self?.appleSignInService.signIn()
+                guard let self else { return }
+                self.appleSignInService.signIn(
+                    onSuccess: { result in
+                        if let dto = result as? AppleSignInRequestDTO {
+                            print(dto)
+                            self.output.isSignIn.send(true)
+                        }
+                    },
+                    onError: { error in
+                        print("Error: \(error)")
+                    }
+                )
             }
             .store(in: &cancellables)
-        
-//        appleSignInService.loginSuccess
-//            .sink { [weak self] in
-//                print($0)
-//                self?.output.isSignIn.send(true)
-//            }
-//            .store(in: &cancellables)
     }
 }

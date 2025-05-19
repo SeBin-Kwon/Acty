@@ -10,17 +10,24 @@ import Combine
 import AuthenticationServices
 
 protocol AuthServiceProtocol {
-    func signIn()
+    func signIn(onSuccess: @escaping (Any) -> Void, onError: @escaping (String) -> Void)
     func signOut()
 }
 
 
 final class AppleSignInService: NSObject, AuthServiceProtocol {
     
-    let loginSuccess = PassthroughSubject<AppleSignInRequestDTO, Never>()
-    let loginError = PassthroughSubject<String, Never>()
+//    let loginSuccess = PassthroughSubject<AppleSignInRequestDTO, Never>()
+//    let loginError = PassthroughSubject<String, Never>()
+    private var successCallback: ((AppleSignInRequestDTO) -> Void)?
+    private var errorCallback: ((String) -> Void)?
     
-    func signIn() {
+    func signIn(onSuccess: @escaping (Any) -> Void, onError: @escaping (String) -> Void) {
+        self.successCallback = { dto in
+                    onSuccess(dto)
+        }
+        self.errorCallback = onError
+        
         let appleIDProvider = ASAuthorizationAppleIDProvider()//Apple ID 제공자를 생성
         let request = appleIDProvider.createRequest()//인증 요청을 생성
         request.requestedScopes = [.fullName, .email]//사용자로부터 전체 이름과 이메일을 요청
@@ -50,7 +57,7 @@ extension AppleSignInService: ASAuthorizationControllerPresentationContextProvid
             let idToken = appleIDCredential.identityToken! //idToken
             
             let appleOAuthUser = AppleSignInRequestDTO(idToken: String(data: idToken, encoding: .utf8) ?? "", deviceToken: "deviceToken", nick: userIdentifier)
-            loginSuccess.send(appleOAuthUser)
+            successCallback?(appleOAuthUser)
             
 //            oauthUserData.oauthId = userIdentifier
 //            oauthUserData.idToken = String(data: idToken, encoding: .utf8) ?? ""
@@ -68,6 +75,6 @@ extension AppleSignInService: ASAuthorizationControllerPresentationContextProvid
     }
     
     func authorizationController(controller _: ASAuthorizationController, didCompleteWithError error: Error) {
-//        errorMessage = "Authorization failed: \(error.localizedDescription)"
+        errorCallback?("Authorization failed: \(error.localizedDescription)")
     }
 }
