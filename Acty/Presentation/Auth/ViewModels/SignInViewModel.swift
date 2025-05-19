@@ -16,6 +16,7 @@ final class SignInViewModel: ViewModelType {
     var cancellables = Set<AnyCancellable>()
     
     private let appleSignInService: AuthServiceProtocol
+    private let kakaoSignInService: AuthServiceProtocol
     
     struct Input {
         var email: String = ""
@@ -28,8 +29,9 @@ final class SignInViewModel: ViewModelType {
         var isSignIn = PassthroughSubject<Bool, Never>()
     }
     
-    init(appleSignInService: AuthServiceProtocol) {
+    init(appleSignInService: AuthServiceProtocol, kakaoSignInService: AuthServiceProtocol) {
         self.appleSignInService = appleSignInService
+        self.kakaoSignInService = kakaoSignInService
         transform()
     }
     
