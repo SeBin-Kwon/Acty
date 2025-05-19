@@ -7,7 +7,7 @@
 
 import Foundation
 import Combine
-
+import KakaoSDKUser
 
 final class SignInViewModel: ViewModelType {
     
@@ -15,7 +15,7 @@ final class SignInViewModel: ViewModelType {
     @Published var output = Output()
     var cancellables = Set<AnyCancellable>()
     
-    private let appleSignInService: AppleSignInService
+    private let appleSignInService: AuthServiceProtocol
     
     struct Input {
         var email: String = ""
@@ -28,7 +28,7 @@ final class SignInViewModel: ViewModelType {
         var isSignIn = PassthroughSubject<Bool, Never>()
     }
     
-    init(appleSignInService: AppleSignInService) {
+    init(appleSignInService: AuthServiceProtocol) {
         self.appleSignInService = appleSignInService
         transform()
     }
@@ -36,17 +36,45 @@ final class SignInViewModel: ViewModelType {
     func transform() {
         var IsSuccessAppleSignIn = PassthroughSubject<Void, Never>()
         
+        input.kakaoSigninTapped
+            .sink { [weak self] in
+                if (UserApi.isKakaoTalkLoginAvailable()) {
+                    UserApi.shared.loginWithKakaoTalk {(oauthToken, error) in
+                        if let error = error {
+                            print(error)
+                        }
+                        else {
+                            print("loginWithKakaoTalk() success.")
+
+                            // 성공 시 동작 구현
+                            _ = oauthToken
+                        }
+                    }
+                } else {
+                    // 웹 로그인 추가
+                    UserApi.shared.loginWithKakaoAccount { (oauthToken, error) in
+                        if let error = error {
+                            print(error)
+                        } else {
+                            print("loginWithKakaoAccount() success.")
+                            // 성공 시 동작 구현
+                        }
+                    }
+                }
+            }
+            .store(in: &cancellables)
+        
         input.appleSignInService
             .sink { [weak self] in
                 self?.appleSignInService.signIn()
             }
             .store(in: &cancellables)
         
-        appleSignInService.loginSuccess
-            .sink { [weak self] in
-                print($0)
-                self?.output.isSignIn.send(true)
-            }
-            .store(in: &cancellables)
+//        appleSignInService.loginSuccess
+//            .sink { [weak self] in
+//                print($0)
+//                self?.output.isSignIn.send(true)
+//            }
+//            .store(in: &cancellables)
     }
 }

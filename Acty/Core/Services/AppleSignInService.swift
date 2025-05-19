@@ -15,7 +15,7 @@ protocol AuthServiceProtocol {
 }
 
 
-final class AppleSignInService: NSObject {
+final class AppleSignInService: NSObject, AuthServiceProtocol {
     
     let loginSuccess = PassthroughSubject<AppleSignInRequestDTO, Never>()
     let loginError = PassthroughSubject<String, Never>()

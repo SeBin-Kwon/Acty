@@ -7,7 +7,6 @@
 
 import SwiftUI
 import AuthenticationServices
-import KakaoSDKUser
 
 struct SignInView: View {
     @StateObject private var viewModel = SignInViewModel(appleSignInService: AppleSignInService())
@@ -23,36 +22,7 @@ struct SignInView: View {
                     print("로그인")
                 }
                 appleButton
-                
-                Button {
-                    if (UserApi.isKakaoTalkLoginAvailable()) {
-                        UserApi.shared.loginWithKakaoTalk {(oauthToken, error) in
-                            if let error = error {
-                                print(error)
-                            }
-                            else {
-                                print("loginWithKakaoTalk() success.")
-
-                                // 성공 시 동작 구현
-                                _ = oauthToken
-                            }
-                        }
-                    } else {
-                        // 웹 로그인 추가
-                        UserApi.shared.loginWithKakaoAccount { (oauthToken, error) in
-                            if let error = error {
-                                print(error)
-                            } else {
-                                print("loginWithKakaoAccount() success.")
-                                // 성공 시 동작 구현
-                            }
-                        }
-                    }
-                } label: {
-                    Text("카카오톡 로그인")
-                }
-
-                
+                kakaoButton
                 NavigationLink("회원가입") {
                     SignUpView()
                 }
@@ -67,6 +37,14 @@ struct SignInView: View {
         }
     }
     
+    private var kakaoButton: some View {
+        Button {
+            viewModel.input.kakaoSigninTapped.send(())
+        } label: {
+            Text("카카오톡 로그인")
+        }
+    }
+    
     private var appleButton: some View {
         SignInWithAppleButton(
             onRequest: { request in
@@ -74,7 +52,7 @@ struct SignInView: View {
             },
             onCompletion: { result in
                 switch result {
-                case .success(let authResults):
+                case .success(_):
                     print("Authorization successful.")
                     break
                 case .failure(let error):
@@ -92,8 +70,8 @@ struct SignInView: View {
 }
 
 
-#if DEBUG
-#Preview {
-    SignInView()
-}
-#endif
+//#if DEBUG
+//#Preview {
+//    SignInView()
+//}
+//#endif
