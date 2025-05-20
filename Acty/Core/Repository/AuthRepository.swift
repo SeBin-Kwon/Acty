@@ -27,7 +27,7 @@ final class AuthRepository: AuthRepositoryProtocol {
         static let refreshToken = "refreshToken"
     }
     
-    init(networkManager: NetworkManager = .shared,
+    init(networkManager: NetworkManager,
          keychainManager: KeychainManager = .shared) {
         self.networkManager = networkManager
         self.keychainManager = keychainManager

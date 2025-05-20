@@ -73,6 +73,12 @@ enum EndPoint {
             return JSONEncoding.default
         }
     }
+    
+    var requiresAuth: Bool {
+        switch self {
+        case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken: false
+        }
+    }
 }
 
 struct SignUpRequest {

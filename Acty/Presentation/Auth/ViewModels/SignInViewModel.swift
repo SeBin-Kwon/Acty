@@ -21,12 +21,13 @@ final class SignInViewModel: ViewModelType {
     struct Input {
         var email: String = ""
         var password: String = ""
-        var appleSignInService = PassthroughSubject<Void, Never>()
-        var kakaoSigninTapped = PassthroughSubject<Void, Never>()
+        var appleSignInTapped = PassthroughSubject<Void, Never>()
+        var kakaoSignInTapped = PassthroughSubject<Void, Never>()
     }
     
     struct Output {
         var isSignIn = PassthroughSubject<Bool, Never>()
+        var errorMessage = PassthroughSubject<String, Never>()
     }
     
     init(appleSignInService: AuthServiceProtocol, kakaoSignInService: AuthServiceProtocol) {
@@ -38,35 +39,26 @@ final class SignInViewModel: ViewModelType {
     func transform() {
         var IsSuccessAppleSignIn = PassthroughSubject<Void, Never>()
         
-        input.kakaoSigninTapped
+        input.kakaoSignInTapped
             .sink { [weak self] in
-                if (UserApi.isKakaoTalkLoginAvailable()) {
-                    UserApi.shared.loginWithKakaoTalk {(oauthToken, error) in
-                        if let error = error {
-                            print(error)
+                guard let self = self else { return }
+                self.kakaoSignInService.signIn(
+                    onSuccess: { result in
+                        if let dto = result as? KakaoSignInRequestDTO {
+                            print("카카오 로그인 성공: \(dto)")
+                            self.output.isSignIn.send(true)
                         }
-                        else {
-                            print("loginWithKakaoTalk() success.")
-
-                            // 성공 시 동작 구현
-                            _ = oauthToken
-                        }
+                    },
+                    onError: { error in
+                        print("카카오 로그인 오류: \(error)")
+                        self.output.errorMessage.send(error)
+                        self.output.isSignIn.send(false)
                     }
-                } else {
-                    // 웹 로그인 추가
-                    UserApi.shared.loginWithKakaoAccount { (oauthToken, error) in
-                        if let error = error {
-                            print(error)
-                        } else {
-                            print("loginWithKakaoAccount() success.")
-                            // 성공 시 동작 구현
-                        }
-                    }
-                }
+                )
             }
             .store(in: &cancellables)
         
-        input.appleSignInService
+        input.appleSignInTapped
             .sink { [weak self] in
                 guard let self else { return }
                 self.appleSignInService.signIn(
@@ -77,6 +69,8 @@ final class SignInViewModel: ViewModelType {
                         }
                     },
                     onError: { error in
+                        self.output.errorMessage.send(error)
+                        self.output.isSignIn.send(false)
                         print("Error: \(error)")
                     }
                 )
