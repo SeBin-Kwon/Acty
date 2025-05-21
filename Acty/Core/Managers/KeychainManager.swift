@@ -29,7 +29,7 @@ final class KeychainManager {
             ]
             
             let status = SecItemAdd(query as CFDictionary, nil)
-            
+            print("토큰 저장")
             if status == errSecDuplicateItem {
                 // 이미 존재하는 경우 업데이트
                 try updateToken(token: token, for: account)
@@ -55,7 +55,7 @@ final class KeychainManager {
             ]
             
             let status = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
-            
+            print("토큰 저장")
             guard status == errSecSuccess else {
                 throw KeychainError.unknown(status)
             }
@@ -81,7 +81,7 @@ final class KeychainManager {
                   let token = String(data: tokenData, encoding: .utf8) else {
                 throw KeychainError.unexpectedData
             }
-            
+            print("토큰 가져오기")
             return token
         }
         
@@ -93,7 +93,7 @@ final class KeychainManager {
             ]
             
             let status = SecItemDelete(query as CFDictionary)
-            
+            print("토큰 삭제")
             guard status == errSecSuccess || status == errSecItemNotFound else {
                 throw KeychainError.unknown(status)
             }

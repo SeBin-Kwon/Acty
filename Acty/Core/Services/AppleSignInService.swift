@@ -17,14 +17,12 @@ protocol AuthServiceProtocol {
 
 final class AppleSignInService: NSObject, AuthServiceProtocol {
     
-//    let loginSuccess = PassthroughSubject<AppleSignInRequestDTO, Never>()
-//    let loginError = PassthroughSubject<String, Never>()
     private var successCallback: ((AppleSignInRequestDTO) -> Void)?
     private var errorCallback: ((String) -> Void)?
     
     func signIn(onSuccess: @escaping (Any) -> Void, onError: @escaping (String) -> Void) {
         self.successCallback = { dto in
-                    onSuccess(dto)
+                onSuccess(dto)
         }
         self.errorCallback = onError
         

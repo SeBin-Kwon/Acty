@@ -21,6 +21,8 @@ protocol AuthRepositoryProtocol {
 final class AuthRepository: AuthRepositoryProtocol {
     private let networkManager: NetworkManager
     private let keychainManager: KeychainManager
+
+    var authStateDidChange = PassthroughSubject<Bool, Never>()
     
     private enum TokenType {
         static let accessToken = "accessToken"
@@ -48,7 +50,17 @@ final class AuthRepository: AuthRepositoryProtocol {
         }
         
         let result: UserDTO = try await networkManager.fetchResults(api: endpoint)
+        
+        print("로그인 성공, 토큰 저장 시작")
+        print("Access Token: \(result.accessToken.prefix(10))...")
+        print("Refresh Token: \(result.refreshToken.prefix(10))...")
+        
         try saveTokens(accessToken: result.accessToken, refreshToken: result.refreshToken)
+        
+        print("AuthRepository: 토큰 저장 완료")
+        
+        authStateDidChange.send(true)
+        
         return result
     }
     
@@ -62,8 +74,23 @@ final class AuthRepository: AuthRepositoryProtocol {
     }
     
     func saveTokens(accessToken: String, refreshToken: String) throws {
+        print("키체인에 토큰 저장 시도")
+                
         try keychainManager.saveToken(token: accessToken, for: TokenType.accessToken)
         try keychainManager.saveToken(token: refreshToken, for: TokenType.refreshToken)
+        
+        // 저장 후 검증
+        do {
+            let savedAccessToken = try keychainManager.getToken(for: TokenType.accessToken)
+            let savedRefreshToken = try keychainManager.getToken(for: TokenType.refreshToken)
+            
+            print("저장된 토큰 확인:")
+            print("Access Token 저장됨: \(savedAccessToken.prefix(10))...")
+            print("Refresh Token 저장됨: \(savedRefreshToken.prefix(10))...")
+        } catch {
+            print("토큰 검증 실패: \(error)")
+            throw error
+        }
     }
     
     func getAccessToken() throws -> String {
