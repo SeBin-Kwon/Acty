@@ -17,7 +17,7 @@ final class SignInViewModel: ViewModelType {
     
     private let appleSignInService: SignInServiceProtocol
     private let kakaoSignInService: SignInServiceProtocol
-    private let authRepository: AuthRepositoryProtocol
+    private let authService: AuthServiceProtocol
     
     struct Input {
         var email: String = ""
@@ -33,10 +33,10 @@ final class SignInViewModel: ViewModelType {
         var isLoading = PassthroughSubject<Bool, Never>()
     }
     
-    init(appleSignInService: SignInServiceProtocol, kakaoSignInService: SignInServiceProtocol, authReportository: AuthRepositoryProtocol) {
+    init(appleSignInService: SignInServiceProtocol, kakaoSignInService: SignInServiceProtocol, authService: AuthServiceProtocol) {
         self.appleSignInService = appleSignInService
         self.kakaoSignInService = kakaoSignInService
-        self.authRepository = authReportository
+        self.authService = authService
         transform()
     }
     
@@ -51,7 +51,7 @@ final class SignInViewModel: ViewModelType {
                 Task {
                     do {
                         let dto = EmailSignInRequestDTO(email: self.input.email, password: self.input.password, deviceToken: nil)
-                        let _ = try await self.authRepository.signIn(with: dto)
+                        let _ = try await self.authService.signIn(with: dto)
                         await MainActor.run {
                             self.output.isLoading.send(false)
                             self.output.isSignIn.send(true)
@@ -78,7 +78,7 @@ final class SignInViewModel: ViewModelType {
                             print("카카오 로그인 성공: \(dto)")
                             Task {
                                 do {
-                                    let _ = try await self.authRepository.signIn(with: dto)
+                                    let _ = try await self.authService.signIn(with: dto)
                                     
                                     await MainActor.run {
                                         self.output.isLoading.send(false)
@@ -115,7 +115,7 @@ final class SignInViewModel: ViewModelType {
                             print("애플 로그인 성공: \(dto)")
                             Task {
                             do {
-                                let _ = try await self.authRepository.signIn(with: dto)
+                                let _ = try await self.authService.signIn(with: dto)
                                 
                                 await MainActor.run {
                                     self.output.isLoading.send(false)

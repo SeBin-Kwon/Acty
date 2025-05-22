@@ -1,5 +1,5 @@
 //
-//  AuthRepository.swift
+//  AuthService.swift
 //  Acty
 //
 //  Created by Sebin Kwon on 5/20/25.
@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-protocol AuthRepositoryProtocol {
+protocol AuthServiceProtocol {
     func signIn(with dto: Any) async throws -> UserDTO
 //    func refreshToken() async throws -> String
 //    func saveTokens(accessToken: String, refreshToken: String) throws
@@ -18,7 +18,7 @@ protocol AuthRepositoryProtocol {
     func isLoggedIn() -> Bool
 }
 
-final class AuthRepository: AuthRepositoryProtocol {
+final class AuthService: AuthServiceProtocol {
     private let networkManager: NetworkManager
     private let tokenService: TokenServiceProtocol
     
