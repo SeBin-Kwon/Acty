@@ -7,47 +7,43 @@
 
 import Foundation
 
-protocol DIContainerProtocol {
+//protocol DIContainerProtocol {
 //    var authRepository: AuthRepositoryProtocol { get }
 //    var networkManager: NetworkManager { get }
-    var appleSignInService: AuthServiceProtocol { get }
-    var kakaoSignInService: AuthServiceProtocol { get }
-    
+//    var tokenService: TokenServiceProtocol { get }
+//    var appleSignInService: AuthServiceProtocol { get }
+//    var kakaoSignInService: AuthServiceProtocol { get }
+//    
 //    func makeSignInViewModel() -> SignInViewModel
-    func makeSignUpViewModel() -> SignUpViewModel
-}
+//    func makeSignUpViewModel() -> SignUpViewModel
+//}
 
-final class AppDIContainer: DIContainerProtocol, ObservableObject {
-    static let shared = AppDIContainer()
+final class DIContainer: ObservableObject {
+    static let shared = DIContainer()
     
     let keychainManager: KeychainManager
-//    let networkManager: NetworkManager
-//    let authRepository: AuthRepositoryProtocol
+    let networkManager: NetworkManager
+    let authRepository: AuthRepositoryProtocol
+    let tokenService: TokenServiceProtocol
     let appleSignInService: AuthServiceProtocol
     let kakaoSignInService: AuthServiceProtocol
     
     private init() {
         self.keychainManager = KeychainManager.shared
-        
-//        let tempNetworkManager = NetworkManager()
-//        let authRepository = AuthRepository(networkManager: tempNetworkManager,
-//                                          keychainManager: self.keychainManager)
-//        tempNetworkManager.authRepository = authRepository
-        
-//        self.networkManager = tempNetworkManager
-//        self.authRepository = authRepository
+        self.tokenService = TokenService(keychainManager: keychainManager)
+        self.networkManager = NetworkManager(tokenService: tokenService)
         self.appleSignInService = AppleSignInService()
         self.kakaoSignInService = KakaoSignInService()
+        self.authRepository = AuthRepository(networkManager: networkManager, tokenService: tokenService)
     }
     
-    // 팩토리 메서드 구현
-//    func makeSignInViewModel() -> SignInViewModel {
-//        return SignInViewModel(
-//            authRepository: authRepository,
-//            appleSignInService: appleSignInService,
-//            kakaoSignInService: kakaoSignInService
-//        )
-//    }
+    func makeSignInViewModel() -> SignInViewModel {
+        return SignInViewModel(
+            appleSignInService: appleSignInService,
+            kakaoSignInService: kakaoSignInService,
+            authReportository: authRepository
+        )
+    }
     
     func makeSignUpViewModel() -> SignUpViewModel {
         return SignUpViewModel()

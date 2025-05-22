@@ -17,10 +17,12 @@ final class SignInViewModel: ViewModelType {
     
     private let appleSignInService: AuthServiceProtocol
     private let kakaoSignInService: AuthServiceProtocol
+    private let authRepository: AuthRepositoryProtocol
     
     struct Input {
         var email: String = ""
         var password: String = ""
+        var emailSignInTapped = PassthroughSubject<Void, Never>()
         var appleSignInTapped = PassthroughSubject<Void, Never>()
         var kakaoSignInTapped = PassthroughSubject<Void, Never>()
     }
@@ -28,16 +30,44 @@ final class SignInViewModel: ViewModelType {
     struct Output {
         var isSignIn = PassthroughSubject<Bool, Never>()
         var errorMessage = PassthroughSubject<String, Never>()
+        var isLoading = PassthroughSubject<Bool, Never>()
     }
     
-    init(appleSignInService: AuthServiceProtocol, kakaoSignInService: AuthServiceProtocol) {
+    init(appleSignInService: AuthServiceProtocol, kakaoSignInService: AuthServiceProtocol, authReportository: AuthRepositoryProtocol) {
         self.appleSignInService = appleSignInService
         self.kakaoSignInService = kakaoSignInService
+        self.authRepository = authReportository
         transform()
     }
     
     func transform() {
-        var IsSuccessAppleSignIn = PassthroughSubject<Void, Never>()
+        
+        input.emailSignInTapped
+            .sink { [weak self] in
+                guard let self = self else { return }
+                
+                self.output.isLoading.send(true)
+                
+                Task {
+                    do {
+                        let dto = EmailSignInRequestDTO(email: self.input.email, password: self.input.password, deviceToken: nil)
+                        let _ = try await self.authRepository.signIn(with: dto)
+                        await MainActor.run {
+                            self.output.isLoading.send(false)
+                            self.output.isSignIn.send(true)
+                        }
+                    } catch {
+                        print("이메일 로그인 오류: \(error)")
+                        
+                        await MainActor.run {
+                            self.output.isLoading.send(false)
+                            self.output.errorMessage.send("로그인 실패: \(error.localizedDescription)")
+                            self.output.isSignIn.send(false)
+                        }
+                    }
+                }
+            }
+            .store(in: &cancellables)
         
         input.kakaoSignInTapped
             .sink { [weak self] in
@@ -46,11 +76,29 @@ final class SignInViewModel: ViewModelType {
                     onSuccess: { result in
                         if let dto = result as? KakaoSignInRequestDTO {
                             print("카카오 로그인 성공: \(dto)")
-                            self.output.isSignIn.send(true)
+                            Task {
+                                do {
+                                    let _ = try await self.authRepository.signIn(with: dto)
+                                    
+                                    await MainActor.run {
+                                        self.output.isLoading.send(false)
+                                        self.output.isSignIn.send(true)
+                                    }
+                                } catch {
+                                    print("카카오 로그인 서버 오류: \(error)")
+                                    
+                                    await MainActor.run {
+                                        self.output.isLoading.send(false)
+                                        self.output.errorMessage.send("서버 로그인 실패: \(error.localizedDescription)")
+                                        self.output.isSignIn.send(false)
+                                    }
+                                }
+                            }
                         }
                     },
                     onError: { error in
                         print("카카오 로그인 오류: \(error)")
+                        self.output.isLoading.send(false)
                         self.output.errorMessage.send(error)
                         self.output.isSignIn.send(false)
                     }
@@ -64,17 +112,39 @@ final class SignInViewModel: ViewModelType {
                 self.appleSignInService.signIn(
                     onSuccess: { result in
                         if let dto = result as? AppleSignInRequestDTO {
-                            print(dto)
-                            self.output.isSignIn.send(true)
+                            print("애플 로그인 성공: \(dto)")
+                            Task {
+                            do {
+                                let _ = try await self.authRepository.signIn(with: dto)
+                                
+                                await MainActor.run {
+                                    self.output.isLoading.send(false)
+                                    self.output.isSignIn.send(true)
+                                }
+                            } catch {
+                                print("애플 로그인 서버 오류: \(error)")
+                                
+                                await MainActor.run {
+                                    self.output.isLoading.send(false)
+                                    self.output.errorMessage.send("서버 로그인 실패: \(error.localizedDescription)")
+                                    self.output.isSignIn.send(false)
+                                }
+                            }
+                        }
                         }
                     },
                     onError: { error in
+                        print("애플 로그인 오류: \(error)")
+                        self.output.isLoading.send(false)
                         self.output.errorMessage.send(error)
                         self.output.isSignIn.send(false)
-                        print("Error: \(error)")
                     }
                 )
             }
             .store(in: &cancellables)
+    }
+    
+    private func signIn() {
+        print("")
     }
 }
