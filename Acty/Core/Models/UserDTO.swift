@@ -8,15 +8,15 @@
 import Foundation
 
 struct UserDTO: Codable {
-    let id: Int
+    let id: String
     let email: String
-    let nickname: String
+    let nick: String
     let profileImage: String?
     let accessToken: String
     let refreshToken: String
     
     enum CodingKeys: String, CodingKey {
         case id = "user_id"
-        case email, nickname, profileImage, accessToken, refreshToken
+        case email, nick, profileImage, accessToken, refreshToken
     }
 }
