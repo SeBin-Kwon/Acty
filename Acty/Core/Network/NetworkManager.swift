@@ -8,42 +8,75 @@
 import Foundation
 import Alamofire
 
-final class NetworkManager {
-    var authRepository: AuthRepositoryProtocol
+final class AuthInterceptor: RequestInterceptor {
+    private let tokenService: TokenServiceProtocol
     
-    init(authRepository: AuthRepositoryProtocol) {
-        self.authRepository = authRepository
+    init(tokenService: TokenServiceProtocol) {
+        self.tokenService = tokenService
+    }
+    
+    func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
+        var request = urlRequest
+        
+        if let url = request.url?.absoluteString,
+           !url.contains("login") && !url.contains("refresh") {
+            do {
+                let token = try tokenService.getAccessToken()
+                request.headers.add(name: "Authorization", value: "Bearer \(token)")
+                completion(.success(request))
+            } catch {
+                completion(.success(request))
+            }
+        } else {
+            completion(.success(request))
+        }
+    }
+
+    func retry(_ request: Request, for session: Session, dueTo error: Error, completion: @escaping (RetryResult) -> Void) {
+        guard let response = request.task?.response as? HTTPURLResponse,
+              response.statusCode == 401 else {
+            completion(.doNotRetry)
+            return
+        }
+        if let url = request.request?.url?.absoluteString, url.contains("refresh") {
+            completion(.doNotRetry)
+            return
+        }
+        
+        Task {
+            do {
+                _ = try await tokenService.refreshToken()
+                completion(.retry)
+            } catch {
+                try? tokenService.deleteTokens()
+                completion(.doNotRetry)
+            }
+        }
+    }
+}
+
+final class NetworkManager {
+    private let session: Session
+    var tokenService: TokenServiceProtocol?
+    
+    init() {
+        self.tokenService = nil
+        self.session = Session()
+    }
+    
+    init(tokenService: TokenServiceProtocol) {
+        self.tokenService = tokenService
+        let interceptor = AuthInterceptor(tokenService: tokenService)
+        self.session = Session(interceptor: interceptor)
     }
     
     func fetchResults<T: Decodable>(api: EndPoint) async throws -> T {
-        do {
-            return try await performRequest(api: api)
-        } catch {
-            if let afError = error as? AFError,
-               let response = afError.responseCode,
-               response == 401 {
-                if case .refreshToken = api {
-                    throw error
-                }
-                do {
-                    _ = try await authRepository.refreshToken()
-                    return try await performRequest(api: api)
-                } catch {
-                    try? authRepository.deleteTokens()
-                    throw error
-                }
-            }
-            throw error
-        }
-    }
-    
-    private func performRequest<T: Decodable>(api: EndPoint) async throws -> T {
         
         var headers = api.headers
         
-        if api.requiresAuth {
+        if api.requiresAuth, let tokenService = self.tokenService {
             do {
-                let token = try authRepository.getAccessToken()
+                let token = try tokenService.getAccessToken()
                 headers.add(name: "Authorization", value: "Bearer \(token)")
             } catch {
                 throw NSError(domain: "인증 정보가 없습니다", code: 401)
@@ -55,7 +88,7 @@ final class NetworkManager {
                        method: api.method,
                        parameters: api.parameters,
                        encoding: api.encoding,
-                       headers: api.headers)
+                       headers: headers)
             .validate(statusCode: 200..<300)
             .responseDecodable(of: T.self) { response in
                 switch response.result {
