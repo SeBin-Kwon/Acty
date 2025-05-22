@@ -9,13 +9,13 @@ import Foundation
 import Combine
 import AuthenticationServices
 
-protocol AuthServiceProtocol {
+protocol SignInServiceProtocol {
     func signIn(onSuccess: @escaping (Any) -> Void, onError: @escaping (String) -> Void)
     func signOut()
 }
 
 
-final class AppleSignInService: NSObject, AuthServiceProtocol {
+final class AppleSignInService: NSObject, SignInServiceProtocol {
     
     private var successCallback: ((AppleSignInRequestDTO) -> Void)?
     private var errorCallback: ((String) -> Void)?

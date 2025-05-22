@@ -15,8 +15,8 @@ final class SignInViewModel: ViewModelType {
     @Published var output = Output()
     var cancellables = Set<AnyCancellable>()
     
-    private let appleSignInService: AuthServiceProtocol
-    private let kakaoSignInService: AuthServiceProtocol
+    private let appleSignInService: SignInServiceProtocol
+    private let kakaoSignInService: SignInServiceProtocol
     private let authRepository: AuthRepositoryProtocol
     
     struct Input {
@@ -33,7 +33,7 @@ final class SignInViewModel: ViewModelType {
         var isLoading = PassthroughSubject<Bool, Never>()
     }
     
-    init(appleSignInService: AuthServiceProtocol, kakaoSignInService: AuthServiceProtocol, authReportository: AuthRepositoryProtocol) {
+    init(appleSignInService: SignInServiceProtocol, kakaoSignInService: SignInServiceProtocol, authReportository: AuthRepositoryProtocol) {
         self.appleSignInService = appleSignInService
         self.kakaoSignInService = kakaoSignInService
         self.authRepository = authReportository

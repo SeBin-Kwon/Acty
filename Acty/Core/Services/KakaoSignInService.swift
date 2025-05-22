@@ -8,7 +8,7 @@
 import Foundation
 import KakaoSDKUser
 
-final class KakaoSignInService: AuthServiceProtocol {
+final class KakaoSignInService: SignInServiceProtocol {
     
     func signIn(onSuccess: @escaping (Any) -> Void, onError: @escaping (String) -> Void) {
             if (UserApi.isKakaoTalkLoginAvailable()) {
