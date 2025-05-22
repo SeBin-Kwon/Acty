@@ -13,6 +13,7 @@ final class KakaoSignInService: SignInServiceProtocol {
     func signIn(onSuccess: @escaping (Any) -> Void, onError: @escaping (String) -> Void) {
             if (UserApi.isKakaoTalkLoginAvailable()) {
                 // 카카오톡 앱을 통한 로그인
+                print("카카오톡 앱 로그인")
                 UserApi.shared.loginWithKakaoTalk { (oauthToken, error) in
                     if let error = error {
                         onError("카카오톡 로그인 실패: \(error.localizedDescription)")
@@ -24,6 +25,7 @@ final class KakaoSignInService: SignInServiceProtocol {
                 }
             } else {
                 // 카카오 계정을 통한 웹 로그인
+                print("카카오톡 웹 로그인")
                 UserApi.shared.loginWithKakaoAccount { (oauthToken, error) in
                     if let error = error {
                         onError("카카오 계정 로그인 실패: \(error.localizedDescription)")
