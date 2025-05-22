@@ -8,9 +8,10 @@
 import SwiftUI
 
 struct TabbarView: View {
+    @EnvironmentObject var diContainer: DIContainer
     var body: some View {
         TabView {
-            SignInView()
+            SignInView(viewModel: diContainer.makeSignInViewModel())
                 .tabItem {
                     Image(systemName: "star")
                 }

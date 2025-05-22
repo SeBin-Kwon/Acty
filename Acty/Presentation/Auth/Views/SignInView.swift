@@ -9,7 +9,8 @@ import SwiftUI
 import AuthenticationServices
 
 struct SignInView: View {
-    @StateObject private var viewModel = SignInViewModel(appleSignInService: AppleSignInService(), kakaoSignInService: KakaoSignInService(), authReportository: AuthRepository())
+    @EnvironmentObject var diContainer: DIContainer
+    @StateObject var viewModel: SignInViewModel
     @State private var navigateToHome = false
     
     var body: some View {
@@ -19,7 +20,7 @@ struct SignInView: View {
                 TextField("아이디", text: $viewModel.input.email)
                 SecureField("비밀번호", text: $viewModel.input.password)
                 Button("로그인") {
-                    print("로그인")
+                    viewModel.input.signInTapped.send(.email)
                 }
                 appleButton
                 kakaoButton
@@ -32,14 +33,16 @@ struct SignInView: View {
             }
             .padding()
         }
-        .onReceive(viewModel.output.isSignIn) { _ in
-            navigateToHome = true
+        .onReceive(viewModel.output.isSignIn) { value in
+            if value {
+                navigateToHome = true
+            }
         }
     }
     
     private var kakaoButton: some View {
         Button {
-            viewModel.input.kakaoSignInTapped.send(())
+            viewModel.input.signInTapped.send(.kakao)
         } label: {
             Text("카카오톡 로그인")
         }
@@ -62,7 +65,7 @@ struct SignInView: View {
         )
         .frame(width : UIScreen.main.bounds.width * 0.9, height:50)
         .onTapGesture {
-            viewModel.input.appleSignInTapped.send(())
+            viewModel.input.signInTapped.send(.apple)
         }
         .cornerRadius(5)
 

@@ -22,9 +22,7 @@ final class SignInViewModel: ViewModelType {
     struct Input {
         var email: String = ""
         var password: String = ""
-        var emailSignInTapped = PassthroughSubject<Void, Never>()
-        var appleSignInTapped = PassthroughSubject<Void, Never>()
-        var kakaoSignInTapped = PassthroughSubject<Void, Never>()
+        var signInTapped = PassthroughSubject<SignInType, Never>()
     }
     
     struct Output {
@@ -42,78 +40,51 @@ final class SignInViewModel: ViewModelType {
     
     func transform() {
         
-        input.emailSignInTapped
-            .sink { [weak self] in
-                guard let self = self else { return }
-                
-                self.output.isLoading.send(true)
-                
-                Task {
-                    do {
-                        let dto = EmailSignInRequestDTO(email: self.input.email, password: self.input.password, deviceToken: nil)
-                        let _ = try await self.authService.signIn(with: dto)
-                        await MainActor.run {
-                            self.output.isLoading.send(false)
-                            self.output.isSignIn.send(true)
-                        }
-                    } catch {
-                        print("이메일 로그인 오류: \(error)")
-                        
-                        await MainActor.run {
-                            self.output.isLoading.send(false)
-                            self.output.errorMessage.send("로그인 실패: \(error.localizedDescription)")
-                            self.output.isSignIn.send(false)
-                        }
+        input.signInTapped
+            .sink { [weak self] type in
+                guard let self else { return }
+                self.signIn(type)
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func signIn(_ type: SignInType) {
+        output.isLoading.send(true)
+        
+        switch type {
+        case .email:
+            // 이메일 로그인
+            Task {
+                do {
+                    let dto = EmailSignInRequestDTO(
+                        email: input.email,
+                        password: input.password,
+                        deviceToken: nil
+                    )
+                    let result = try await authService.signIn(with: dto)
+                    
+                    await MainActor.run {
+                        self.output.isLoading.send(false)
+                        self.output.isSignIn.send(true)
+                    }
+                } catch {
+                    print("이메일 로그인 오류: \(error)")
+                    
+                    await MainActor.run {
+                        self.output.isLoading.send(false)
+                        self.output.errorMessage.send("로그인 실패: \(error.localizedDescription)")
+                        self.output.isSignIn.send(false)
                     }
                 }
             }
-            .store(in: &cancellables)
-        
-        input.kakaoSignInTapped
-            .sink { [weak self] in
-                guard let self = self else { return }
-                self.kakaoSignInService.signIn(
-                    onSuccess: { result in
-                        if let dto = result as? KakaoSignInRequestDTO {
-                            print("카카오 로그인 성공: \(dto)")
-                            Task {
-                                do {
-                                    let _ = try await self.authService.signIn(with: dto)
-                                    
-                                    await MainActor.run {
-                                        self.output.isLoading.send(false)
-                                        self.output.isSignIn.send(true)
-                                    }
-                                } catch {
-                                    print("카카오 로그인 서버 오류: \(error)")
-                                    
-                                    await MainActor.run {
-                                        self.output.isLoading.send(false)
-                                        self.output.errorMessage.send("서버 로그인 실패: \(error.localizedDescription)")
-                                        self.output.isSignIn.send(false)
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    onError: { error in
-                        print("카카오 로그인 오류: \(error)")
-                        self.output.isLoading.send(false)
-                        self.output.errorMessage.send(error)
-                        self.output.isSignIn.send(false)
-                    }
-                )
-            }
-            .store(in: &cancellables)
-        
-        input.appleSignInTapped
-            .sink { [weak self] in
-                guard let self else { return }
-                self.appleSignInService.signIn(
-                    onSuccess: { result in
-                        if let dto = result as? AppleSignInRequestDTO {
-                            print("애플 로그인 성공: \(dto)")
-                            Task {
+            
+        case .apple:
+            // 애플 로그인
+            appleSignInService.signIn(
+                onSuccess: { result in
+                    if let dto = result as? AppleSignInRequestDTO {
+                        print("애플 로그인 시도: \(dto)")
+                        Task {
                             do {
                                 let _ = try await self.authService.signIn(with: dto)
                                 
@@ -131,20 +102,55 @@ final class SignInViewModel: ViewModelType {
                                 }
                             }
                         }
-                        }
-                    },
-                    onError: { error in
-                        print("애플 로그인 오류: \(error)")
-                        self.output.isLoading.send(false)
-                        self.output.errorMessage.send(error)
-                        self.output.isSignIn.send(false)
                     }
-                )
-            }
-            .store(in: &cancellables)
+                },
+                onError: { error in
+                    print("애플 로그인 오류: \(error)")
+                    self.output.isLoading.send(false)
+                    self.output.errorMessage.send(error)
+                    self.output.isSignIn.send(false)
+                }
+            )
+            
+        case .kakao:
+            // 카카오 로그인
+            kakaoSignInService.signIn(
+                onSuccess: { result in
+                    if let dto = result as? KakaoSignInRequestDTO {
+                        print("카카오 로그인 시도: \(dto)")
+                        Task {
+                            do {
+                                let _ = try await self.authService.signIn(with: dto)
+                                
+                                await MainActor.run {
+                                    self.output.isLoading.send(false)
+                                    self.output.isSignIn.send(true)
+                                }
+                            } catch {
+                                print("카카오 로그인 서버 오류: \(error)")
+                                
+                                await MainActor.run {
+                                    self.output.isLoading.send(false)
+                                    self.output.errorMessage.send("서버 로그인 실패: \(error.localizedDescription)")
+                                    self.output.isSignIn.send(false)
+                                }
+                            }
+                        }
+                    }
+                },
+                onError: { error in
+                    print("카카오 로그인 오류: \(error)")
+                    self.output.isLoading.send(false)
+                    self.output.errorMessage.send(error)
+                    self.output.isSignIn.send(false)
+                }
+            )
+        }
     }
-    
-    private func signIn() {
-        print("")
-    }
+}
+
+enum SignInType {
+    case email
+    case apple
+    case kakao
 }

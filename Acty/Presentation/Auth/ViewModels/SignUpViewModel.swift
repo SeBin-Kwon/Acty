@@ -47,7 +47,7 @@ final class SignUpViewModel: ViewModelType {
     private func signUp() {
         Task {
             do {
-                let result: SignUpResult = try await NetworkManager.shared.fetchResults(api: .signUp(SignUpRequest(email: input.email, password: input.password, nick: input.nickname)))
+//                let result: SignUpResult = try await NetworkManager.fetchResults(api: .signUp(SignUpRequest(email: input.email, password: input.password, nick: input.nickname)))
             } catch {
                 print("오류")
             }

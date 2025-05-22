@@ -10,12 +10,6 @@ import Combine
 
 protocol AuthServiceProtocol {
     func signIn(with dto: Any) async throws -> UserDTO
-//    func refreshToken() async throws -> String
-//    func saveTokens(accessToken: String, refreshToken: String) throws
-//    func getAccessToken() throws -> String
-//    func getRefreshToken() throws -> String
-//    func deleteTokens() throws
-    func isLoggedIn() -> Bool
 }
 
 final class AuthService: AuthServiceProtocol {
@@ -43,7 +37,7 @@ final class AuthService: AuthServiceProtocol {
         default:
             throw NSError(domain: "Invalid DTO type", code: 400)
         }
-        
+        print("@@@@@@@@@@@@@@@@@@@ 네트워킹 직전")
         let result: UserDTO = try await networkManager.fetchResults(api: endpoint)
         
         print("로그인 성공, 토큰 저장 시작")
@@ -57,15 +51,6 @@ final class AuthService: AuthServiceProtocol {
         authStateDidChange.send(true)
         
         return result
-    }
-    
-    func isLoggedIn() -> Bool {
-        do {
-            _ = try tokenService.getAccessToken()
-            return true
-        } catch {
-            return false
-        }
     }
 }
 

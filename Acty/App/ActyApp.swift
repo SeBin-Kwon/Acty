@@ -12,6 +12,8 @@ import KakaoSDKAuth
 @main
 struct ActyApp: App {
     
+    @StateObject private var diContainer = DIContainer.shared
+    
     init() {
         if let appKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_NATIVE_APP_KEY") as? String {
             KakaoSDK.initSDK(appKey: appKey)
@@ -20,11 +22,13 @@ struct ActyApp: App {
     
     var body: some Scene {
         WindowGroup {
-            TabbarView().onOpenURL(perform: { url in
+            TabbarView()
+                .onOpenURL(perform: { url in
                 if (AuthApi.isKakaoTalkLoginUrl(url)) {
-                    AuthController.handleOpenUrl(url: url)
+                    _ = AuthController.handleOpenUrl(url: url)
                 }
             })
+                .environmentObject(diContainer)
         }
     }
 }
