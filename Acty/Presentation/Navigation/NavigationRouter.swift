@@ -8,21 +8,21 @@
 import SwiftUI
 
 final class NavigationRouter: ObservableObject {
-    @Published var authPath: [Route] = []
-    @Published var tabPaths: [MainTab: [Route]] = [:]
+    @Published var authPath = NavigationPath()
+    @Published var tabPaths: [MainTab: NavigationPath] = [:]
     @Published var selectedTab: MainTab = .home
     
     init() {
-        // 각 탭의 경로 배열 초기화
+        // 각 탭의 경로를 NavigationPath로 초기화
         MainTab.allCases.forEach { tab in
-            tabPaths[tab] = []
+            tabPaths[tab] = NavigationPath()
         }
     }
     
     // 현재 탭의 경로를 반환
-    var currentPath: Binding<[Route]> {
+    var currentPath: Binding<NavigationPath> {
         Binding(
-            get: { self.tabPaths[self.selectedTab] ?? [] },
+            get: { self.tabPaths[self.selectedTab] ?? NavigationPath() },
             set: { self.tabPaths[self.selectedTab] = $0 }
         )
     }
@@ -31,7 +31,7 @@ final class NavigationRouter: ObservableObject {
         if flow == .auth {
             authPath.append(route)
         } else if flow == .main {
-            tabPaths[selectedTab, default: []].append(route)
+            tabPaths[selectedTab, default: NavigationPath()].append(route)
         }
     }
     
@@ -40,22 +40,22 @@ final class NavigationRouter: ObservableObject {
             if !authPath.isEmpty {
                 authPath.removeLast()
             }
-        } else if flow == .main && !tabPaths[selectedTab, default: []].isEmpty {
+        } else if flow == .main && !tabPaths[selectedTab, default: NavigationPath()].isEmpty {
             tabPaths[selectedTab]?.removeLast()
         }
     }
     
     func navigateToRoot(in flow: RootFlow) {
         if flow == .auth {
-            authPath.removeAll()
+            authPath = NavigationPath()
         } else if flow == .main {
-            tabPaths[selectedTab]?.removeAll()
+            tabPaths[selectedTab] = NavigationPath()
         }
     }
     
     func resetAllTabs() {
         tabPaths.keys.forEach { tab in
-            tabPaths[tab] = []
+            tabPaths[tab] = NavigationPath()
         }
         selectedTab = .home
     }
