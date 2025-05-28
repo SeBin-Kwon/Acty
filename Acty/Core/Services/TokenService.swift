@@ -70,3 +70,8 @@ final class TokenService: TokenServiceProtocol {
         try keychainManager.deleteToken(for: TokenType.refreshToken)
     }
 }
+
+struct RefreshTokenResponse: Decodable {
+    let accessToken: String
+    let refreshToken: String
+}
