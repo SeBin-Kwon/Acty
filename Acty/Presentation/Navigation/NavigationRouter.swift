@@ -13,13 +13,11 @@ final class NavigationRouter: ObservableObject {
     @Published var selectedTab: MainTab = .home
     
     init() {
-        // 각 탭의 경로를 NavigationPath로 초기화
         MainTab.allCases.forEach { tab in
             tabPaths[tab] = NavigationPath()
         }
     }
     
-    // 현재 탭의 경로를 반환
     var currentPath: Binding<NavigationPath> {
         Binding(
             get: { self.tabPaths[self.selectedTab] ?? NavigationPath() },

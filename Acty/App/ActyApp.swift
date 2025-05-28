@@ -22,7 +22,7 @@ struct ActyApp: App {
     
     var body: some Scene {
         WindowGroup {
-            TabbarView()
+            RootView()
                 .onOpenURL(perform: { url in
                 if (AuthApi.isKakaoTalkLoginUrl(url)) {
                     _ = AuthController.handleOpenUrl(url: url)

@@ -8,7 +8,7 @@
 import Foundation
 
 enum MainTab: String, CaseIterable {
-    case home, search, activity, profile
+    case home, search, favorite, profile
     
     var title: String { rawValue.capitalized }
     
@@ -16,7 +16,7 @@ enum MainTab: String, CaseIterable {
         switch self {
         case .home: return "house"
         case .search: return "magnifyingglass"
-        case .activity: return "heart"
+        case .favorite: return "heart"
         case .profile: return "person"
         }
     }
