@@ -8,29 +8,22 @@
 import Foundation
 
 enum Route: Hashable {
-    case auth(AuthRoute)
-    case home(HomeRoute)
-    case search(SearchRoute)
-    case activity(ActivityRoute)
-    case profile(ProfileRoute)
-}
-
-enum AuthRoute: Hashable {
+    // Auth
     case signIn, signUp
-}
-
-enum HomeRoute: Hashable {
-    case feed, postDetail(postId: String), userProfile(userId: String)
-}
-
-enum SearchRoute: Hashable {
-    case searchMain, searchResults(query: String), categoryDetail(category: String)
-}
-
-enum ActivityRoute: Hashable {
-    case activityFeed, notifications, activityDetail(activityId: String)
-}
-
-enum ProfileRoute: Hashable {
-    case myProfile, editProfile, settings, changePassword
+    
+    // Home
+    case homeFeed
+    case postDetail(postId: String)
+    case userProfile(userId: String)
+    
+    // Search
+    case searchMain
+    case searchResults(query: String)
+    case categoryDetail(category: String)
+    
+    // Activity
+    case activityFeed
+    
+    // Profile
+    case myProfile, editProfile, settings
 }
