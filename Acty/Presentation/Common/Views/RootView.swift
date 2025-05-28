@@ -8,11 +8,85 @@
 import SwiftUI
 
 struct RootView: View {
+    @StateObject private var rootRouter = RootRouter()
+    @StateObject private var navigationRouter = NavigationRouter()
+    @EnvironmentObject var diContainer: DIContainer
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Group {
+            switch rootRouter.currentFlow {
+            case .splash:
+                SplashView()
+                    .task {
+                        await checkAuthenticationAndNavigate()
+                    }
+                
+            case .auth:
+                NavigationStack(path: $navigationRouter.authPath) {
+                    SignInView(viewModel: diContainer.makeSignInViewModel())
+                        .navigationDestination(for: Route.self) { route in
+                            authDestinationView(for: route)
+                        }
+                }
+                
+            case .main:
+                TabbarView()
+            }
+        }
+        .environmentObject(rootRouter)
+        .environmentObject(navigationRouter)
+        .animation(.easeInOut, value: rootRouter.currentFlow)
+        .onReceive(diContainer.authService.isAuthenticated) { isAuthenticated in
+                    withAnimation {
+                        rootRouter.currentFlow = isAuthenticated ? .main : .auth
+                    }
+                }
+    }
+    
+    private func checkAuthenticationAndNavigate() async {
+        print("스플래시: 인증 상태 체크 시작")
+        
+        let isAuthenticated = await diContainer.authService.checkAuthenticationStatus()
+        
+        await MainActor.run {
+            withAnimation(.easeInOut(duration: 0.5)) {
+                if isAuthenticated {
+                    print("스플래시: 인증됨 -> 메인으로 이동")
+                    rootRouter.currentFlow = .main
+                } else {
+                    print("스플래시: 미인증 -> 로그인으로 이동")
+                    rootRouter.currentFlow = .auth
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func authDestinationView(for route: Route) -> some View {
+        switch route {
+        case .signIn:
+            SignInView(viewModel: diContainer.makeSignInViewModel())
+        case .signUp:
+            SignUpView(viewModel: diContainer.makeSignUpViewModel())
+        default:
+            EmptyView()
+        }
     }
 }
 
-#Preview {
-    RootView()
+struct SplashView: View {
+    var body: some View {
+        VStack {
+            Image(systemName: "star.fill")
+                .font(.system(size: 60))
+            Text("Acty")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+        }
+    }
 }
+
+//#Preview {
+//    RootView()
+//        .environmentObject(DIContainer.shared)
+//}
