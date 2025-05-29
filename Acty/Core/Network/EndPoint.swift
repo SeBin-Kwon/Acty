@@ -14,6 +14,8 @@ enum EndPoint {
     case appleSignIn(AppleSignInRequestDTO)
     case kakaoSignIn(KakaoSignInRequestDTO)
     case refreshToken(String)
+    case myProfileGet(String)
+    case activity(ActivityRequest)
     
     var baseURL: String {
         BASE_URL
@@ -26,12 +28,15 @@ enum EndPoint {
         case .appleSignIn: baseURL + "users/login/apple"
         case .kakaoSignIn: baseURL + "users/login/kakao"
         case .refreshToken: baseURL + "auth/refresh"
+        case .myProfileGet: baseURL + "users/me/profile"
+        case .activity: baseURL + "activities"
         }
     }
     
     var method: HTTPMethod {
         switch self {
         case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken: .post
+        case .activity, .myProfileGet: .get
         }
     }
     
@@ -57,6 +62,12 @@ enum EndPoint {
                    "deviceToken": dto.deviceToken ?? ""]
         case .refreshToken(let token):
             return ["refreshToken": token]
+        case .myProfileGet: return nil
+        case .activity(let activity):
+            return ["country": activity.country,
+                    "category": activity.category,
+                    "limit": activity.limit,
+                    "next": activity.nextCursor]
         }
     }
     
@@ -64,12 +75,16 @@ enum EndPoint {
         switch self {
         case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken:
             return ["Content-Type": "application/json", "SeSACKey": API_KEY]
+        case .myProfileGet(let accessToken):
+            return ["Content-Type": "application/json", "Authorization": accessToken, "SeSACKey": API_KEY]
+        case .activity(let activity):
+            return ["Content-Type": "application/json", "Authorization": activity.accessToken, "SeSACKey": API_KEY]
         }
     }
     
     var encoding: ParameterEncoding {
         switch self {
-        case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken:
+        case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken, .myProfileGet, .activity:
             return JSONEncoding.default
         }
     }
@@ -77,6 +92,7 @@ enum EndPoint {
     var requiresAuth: Bool {
         switch self {
         case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken: false
+        case .myProfileGet, .activity: true
         }
     }
 }
@@ -88,4 +104,13 @@ struct SignUpRequest {
     let phoneNum: String = ""
     let introduction: String = ""
     let deviceToken: String = ""
+}
+
+struct ActivityRequest {
+    let country: String
+    let category: String
+    let next: String
+    let limit: Int
+    let nextCursor: String
+    let accessToken: String
 }
