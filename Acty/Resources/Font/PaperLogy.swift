@@ -11,22 +11,21 @@ enum PaperLogy: ActyFontConvertible {
     case title1
     case body1
     case caption1
-    case custom(_ weight: String, _ size: CGFloat)
+    case custom(_ weight: PaperLogyWeight, _ size: CGFloat)
     
     private var name: String {
         switch self {
-        case .title1, .body1:
+        case .title1, .body1, .caption1:
             return "Paperlogy-9Black"
-        case .caption1: return "Paperlogy-9Black"
         case let .custom(weight, _):
-            return "Paperlogy-9Black"
+            return "Paperlogy-\(weight.number)\(weight.rawValue)"
         }
     }
     
     private var size: CGFloat {
         switch self {
-        case .title1: return 32
-        case .body1: return 20
+        case .title1: return 26
+        case .body1: return 22
         case .caption1: return 14
         case let .custom(_, size):
             return size
@@ -57,60 +56,19 @@ enum PaperLogy: ActyFontConvertible {
     
 }
 
-//extension YonderTripsFont {
-//    
-//    enum Pretendard {
-//        case title1
-//        case body1
-//        case body2
-//        case body3
-//        case caption1
-//        case caption2
-//        case caption3
-//        
-//        var font: Font {
-//            switch self {
-//            case .title1:
-//                return .custom("Pretendard-Bold", size: 20)
-//            case .body1:
-//                return .custom("Pretendard-Medium", size: 16)
-//            case .body2:
-//                return .custom("Pretendard-Medium", size: 14)
-//            case .body3:
-//                return .custom("Pretendard-Medium", size: 13)
-//            case .caption1:
-//                return .custom("Pretendard-Regular", size: 12)
-//            case .caption2:
-//                return .custom("Pretendard-Regular", size: 10)
-//            case .caption3:
-//                return .custom("Pretendard-Regular", size: 8)
-//            }
-//        }
-//    }
-//    
-//    enum Paperlogy {
-//        case slogan1
-//        case slogan2
-//        case title1
-//        case body1
-//        case caption1
-//        case caption2
-//        
-//        var font: Font {
-//            switch self {
-//            case .slogan1:
-//                return .custom("Paperlogy-9Black", size: 32)
-//            case .slogan2:
-//                return .custom("Paperlogy-3Light", size: 16)
-//            case .title1:
-//                return .custom("Paperlogy-9Black", size: 26)
-//            case .body1:
-//                return .custom("Paperlogy-9Black", size: 22)
-//            case .caption1:
-//                return .custom("Paperlogy-9Black", size: 14)
-//            case .caption2:
-//                return .custom("Paperlogy-8ExtraBold", size: 12)
-//            }
-//        }
-//    }
-//}
+enum PaperLogyWeight: String {
+    case Thin, ExtraLight, Light, Regular, Medium, Semibold, Bold, ExtraBold, Black
+    var number: Int {
+        switch self {
+        case .Thin: 1
+        case .ExtraLight: 2
+        case .Light: 3
+        case .Regular: 4
+        case .Medium: 5
+        case .Semibold: 6
+        case .Bold: 7
+        case .ExtraBold: 8
+        case .Black: 9
+        }
+    }
+}
