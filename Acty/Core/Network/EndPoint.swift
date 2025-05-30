@@ -89,7 +89,7 @@ enum EndPoint {
         }
     }
     
-    var requiresAuth: Bool {
+    var isAuthRequired: Bool {
         switch self {
         case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken: false
         case .myProfileGet, .activity: true

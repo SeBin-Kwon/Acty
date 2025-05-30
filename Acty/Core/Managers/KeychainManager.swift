@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class KeychainManager {
+final class KeychainManager: Sendable {
     static let shared = KeychainManager()
     private init() {}
     
@@ -18,8 +18,8 @@ final class KeychainManager {
             case unexpectedData
         }
         
-        // MARK: - 토큰 저장
         func saveToken(token: String, for account: String) throws {
+            print("KeychainManager", #function)
             let tokenData = token.data(using: .utf8)!
             
             let query: [String: Any] = [
@@ -29,7 +29,6 @@ final class KeychainManager {
             ]
             
             let status = SecItemAdd(query as CFDictionary, nil)
-            print("토큰 저장")
             if status == errSecDuplicateItem {
                 // 이미 존재하는 경우 업데이트
                 try updateToken(token: token, for: account)
@@ -41,8 +40,8 @@ final class KeychainManager {
             }
         }
         
-        // MARK: - 토큰 업데이트
         func updateToken(token: String, for account: String) throws {
+            print("KeychainManager", #function)
             let tokenData = token.data(using: .utf8)!
             
             let query: [String: Any] = [
@@ -55,14 +54,13 @@ final class KeychainManager {
             ]
             
             let status = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
-            print("토큰 저장")
             guard status == errSecSuccess else {
                 throw KeychainError.unknown(status)
             }
         }
         
-        // MARK: - 토큰 가져오기
         func getToken(for account: String) throws -> String {
+            print("KeychainManager", #function)
             let query: [String: Any] = [
                 kSecClass as String: kSecClassGenericPassword,
                 kSecAttrAccount as String: account,
@@ -85,15 +83,14 @@ final class KeychainManager {
             return token
         }
         
-        // MARK: - 토큰 삭제하기
         func deleteToken(for account: String) throws {
+            print("KeychainManager", #function)
             let query: [String: Any] = [
                 kSecClass as String: kSecClassGenericPassword,
                 kSecAttrAccount as String: account
             ]
             
             let status = SecItemDelete(query as CFDictionary)
-            print("토큰 삭제")
             guard status == errSecSuccess || status == errSecItemNotFound else {
                 throw KeychainError.unknown(status)
             }

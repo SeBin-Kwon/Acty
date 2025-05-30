@@ -19,15 +19,19 @@ final class AuthInterceptor: RequestInterceptor {
         var request = urlRequest
         
         if let url = request.url?.absoluteString,
-           !url.contains("login") && !url.contains("refresh") {
-            do {
-                let token = try tokenService.getAccessToken()
-                request.headers.add(name: "Authorization", value: "Bearer \(token)")
-                completion(.success(request))
-            } catch {
-                completion(.success(request))
-            }
-        } else {
+           (url.contains("login") || url.contains("join") || url.contains("refresh")) {
+            print("🔓 인증 불필요한 API: \(url)")
+            completion(.success(request))
+            return
+        }
+        
+        do {
+            let token = try tokenService.getAccessToken()
+            request.headers.add(name: "Authorization", value: token)
+            print("🔐 토큰 추가됨: Bearer \(token.prefix(10))...")
+            completion(.success(request))
+        } catch {
+            print("❌ 토큰 없음: \(error)")
             completion(.success(request))
         }
     }
@@ -35,19 +39,26 @@ final class AuthInterceptor: RequestInterceptor {
     func retry(_ request: Request, for session: Session, dueTo error: Error, completion: @escaping (RetryResult) -> Void) {
         guard let response = request.task?.response as? HTTPURLResponse,
               response.statusCode == 401 else {
-            completion(.doNotRetry)
-            return
-        }
-        if let url = request.request?.url?.absoluteString, url.contains("refresh") {
+            print("🚫 재시도 불가: \(error)")
             completion(.doNotRetry)
             return
         }
         
+
+        if let url = request.request?.url?.absoluteString, url.contains("refresh") {
+            print("🔄 리프레시 API 실패 - 재시도 안함")
+            completion(.doNotRetry)
+            return
+        }
+        
+        print("🔄 401 에러 - 토큰 갱신 시도")
         Task {
             do {
-                _ = try await tokenService.refreshToken()
+                let newToken = try await tokenService.refreshToken()
+                print("✅ 토큰 갱신 성공: \(newToken.prefix(10))...")
                 completion(.retry)
             } catch {
+                print("❌ 토큰 갱신 실패 - 로그아웃: \(error)")
                 try? tokenService.deleteTokens()
                 completion(.doNotRetry)
             }
@@ -55,48 +66,37 @@ final class AuthInterceptor: RequestInterceptor {
     }
 }
 
-final class NetworkManager {
+final class NetworkManager: Sendable {
     private let session: Session
-    var tokenService: TokenServiceProtocol?
     
     init() {
-        self.tokenService = nil
         self.session = Session()
     }
     
     init(tokenService: TokenServiceProtocol) {
-        self.tokenService = tokenService
         let interceptor = AuthInterceptor(tokenService: tokenService)
         self.session = Session(interceptor: interceptor)
     }
     
     func fetchResults<T: Decodable>(api: EndPoint) async throws -> T {
-        
-        var headers = api.headers
-        
-        if api.requiresAuth, let tokenService = self.tokenService {
-            do {
-                let token = try tokenService.getAccessToken()
-                headers.add(name: "Authorization", value: "Bearer \(token)")
-            } catch {
-                throw NSError(domain: "인증 정보가 없습니다", code: 401)
-            }
-        }
+        print("📤 API 요청: \(api.method.rawValue) \(api.endPoint)")
         
         return try await withCheckedThrowingContinuation { continuation in
-            AF.request(api.endPoint,
-                       method: api.method,
-                       parameters: api.parameters,
-                       encoding: api.encoding,
-                       headers: headers)
+            session.request(
+                api.endPoint,
+                method: api.method,
+                parameters: api.parameters,
+                encoding: api.encoding,
+                headers: api.headers
+            )
             .validate(statusCode: 200..<300)
             .responseDecodable(of: T.self) { response in
                 switch response.result {
                 case .success(let result):
-                    print(result)
+                    print("✅ API 성공: \(api.endPoint)")
                     continuation.resume(returning: result)
                 case .failure(let error):
-                    print(error)
+                    print("❌ API 실패: \(api.endPoint) - \(error)")
                     continuation.resume(throwing: error)
                 }
             }

@@ -40,28 +40,32 @@ final class AuthService: AuthServiceProtocol {
         default:
             throw NSError(domain: "Invalid DTO type", code: 400)
         }
-        print("@@@@@@@@@@@@@@@@@@@ 네트워킹 직전")
         let result: UserDTO = try await networkManager.fetchResults(api: endpoint)
         
+        print("Access Token: \(result.accessToken)")
+        print("Refresh Token: \(result.refreshToken)")
         print("로그인 성공, 토큰 저장 시작")
-        print("Access Token: \(result.accessToken.prefix(10))...")
-        print("Refresh Token: \(result.refreshToken.prefix(10))...")
-        
         try tokenService.saveTokens(accessToken: result.accessToken, refreshToken: result.refreshToken)
         
         print("AuthRepository: 토큰 저장 완료")
         
-        isAuthenticated.send(true)
+        await MainActor.run {
+            isAuthenticated.send(true)
+        }
         
         return result
     }
     
+    @MainActor
     func checkAuthenticationStatus() async -> Bool {
         print(#function)
-        print("인증 상태 체크 시작")
+        
         do {
             let accessToken = try tokenService.getAccessToken()
-            print("액세스 토큰 발견: \(accessToken.prefix(10))...")
+            print(#function, "액세스 토큰 발견: \(accessToken.prefix(10))...")
+            
+            let _: ProfileGetDTO = try await networkManager.fetchResults(api: .myProfileGet(accessToken))
+            
             isAuthenticated.send(true)
             return true
         } catch {
@@ -91,4 +95,18 @@ final class AuthService: AuthServiceProtocol {
         print("로그아웃 완료")
     }
     
+}
+
+struct ProfileGetDTO: Decodable {
+    let userId: String
+    let email: String
+    let nick: String?
+    let profileImage: String?
+    let phoneNum: String?
+    let introduction: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case userId = "user_id"
+        case email, nick, profileImage, phoneNum, introduction
+    }
 }

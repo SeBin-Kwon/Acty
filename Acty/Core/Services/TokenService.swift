@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol TokenServiceProtocol {
+protocol TokenServiceProtocol: Sendable {
     func refreshToken() async throws -> String
     func saveTokens(accessToken: String, refreshToken: String) throws
     func getAccessToken() throws -> String
