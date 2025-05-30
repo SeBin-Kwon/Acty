@@ -10,5 +10,5 @@ import SwiftUI
 extension Font {
     static func pretendard(_ font: Pretendard) -> Pretendard { font }
     
-    static func mulgyeol(_ font: Mulgyeol) -> Mulgyeol { font }
+    static func paperLogy(_ font: PaperLogy) -> PaperLogy { font }
 }

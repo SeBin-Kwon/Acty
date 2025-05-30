@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum FilteeFont {
+enum ActyFont {
     case pretendard(Pretendard)
-    case mulgyeol(Mulgyeol)
+    case paperLogy(PaperLogy)
 }

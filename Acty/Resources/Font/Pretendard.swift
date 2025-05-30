@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-enum Pretendard: FilteeFontConvertible {
+enum Pretendard: ActyFontConvertible {
     case title(Weight = .bold)
     case body1(Weight = .medium)
     case body2(Weight = .medium)

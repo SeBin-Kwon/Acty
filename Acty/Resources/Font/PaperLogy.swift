@@ -1,5 +1,5 @@
 //
-//  mulgyeal.swift
+//  PaperLogy.swift
 //  Acty
 //
 //  Created by Sebin Kwon on 5/22/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum Mulgyeol: FilteeFontConvertible {
+enum PaperLogy: ActyFontConvertible {
     case title1
     case body1
     case caption1
@@ -16,10 +16,10 @@ enum Mulgyeol: FilteeFontConvertible {
     private var name: String {
         switch self {
         case .title1, .body1:
-            return "Paperlogy"
-        case .caption1: return "OTHakgyoansimMulgyeolR"
+            return "Paperlogy-9Black"
+        case .caption1: return "Paperlogy-9Black"
         case let .custom(weight, _):
-            return "OTHakgyoansimMulgyeol\(weight)"
+            return "Paperlogy-9Black"
         }
     }
     

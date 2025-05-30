@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-private struct FilteeFontModifier<F: FilteeFontConvertible>: ViewModifier {
+private struct ActyFontModifier<F: ActyFontConvertible>: ViewModifier {
     private let font: F
     
     init(_ font: F) {
@@ -28,12 +28,12 @@ private struct FilteeFontModifier<F: FilteeFontConvertible>: ViewModifier {
 
 extension View {
     @ViewBuilder
-    func font(_ font: FilteeFont) -> some View {
+    func font(_ font: ActyFont) -> some View {
         switch font {
         case .pretendard(let pretendard):
-            modifier(FilteeFontModifier(pretendard))
-        case .mulgyeol(let mulgyeol):
-            modifier(FilteeFontModifier(mulgyeol))
+            modifier(ActyFontModifier(pretendard))
+        case .paperLogy(let paperLogy):
+            modifier(ActyFontModifier(paperLogy))
         }
     }
 }
@@ -63,13 +63,13 @@ extension View {
                 .font(.pretendard(.caption3()))
             
             Text("새싹을 담은 필터")
-                .font(.mulgyeol(.title1))
+                .font(.paperLogy(.title1))
             
             Text("새싹을 담은 필터")
-                .font(.mulgyeol(.body1))
+                .font(.paperLogy(.body1))
             
             Text("새싹을 담은 필터")
-                .font(.mulgyeol(.caption1))
+                .font(.paperLogy(.caption1))
         }
     }
     .frame(maxWidth: .infinity)

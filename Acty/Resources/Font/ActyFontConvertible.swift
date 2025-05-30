@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-protocol FilteeFontConvertible {
+protocol ActyFontConvertible {
     var font: Font { get }
     var uiFont: UIFont? { get }
     var height: CGFloat { get }
