@@ -74,6 +74,8 @@ struct TabbarView: View {
     }
 }
 
-//#Preview {
-//    TabbarView()
-//}
+#Preview {
+    TabbarView()
+        .environmentObject(DIContainer.shared)
+        .environmentObject(NavigationRouter())
+}
