@@ -31,7 +31,7 @@ final class TokenService: TokenServiceProtocol {
     
     func refreshToken() async throws -> String {
         let refreshToken = try getRefreshToken()
-        let endpoint: EndPoint = .refreshToken(refreshToken)
+        let endpoint: AuthEndPoint = .refreshToken(refreshToken)
         let result: RefreshTokenResponse = try await networkManager.fetchResults(api: endpoint)
         
         try saveTokens(accessToken: result.accessToken, refreshToken: result.refreshToken)

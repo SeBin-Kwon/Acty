@@ -8,7 +8,8 @@
 import Foundation
 import Alamofire
 
-enum AuthEndPoint {
+enum AuthEndPoint: EndPoint {
+    
     case signUp(SignUpRequest)
     case emailSignIn(EmailSignInRequestDTO)
     case appleSignIn(AppleSignInRequestDTO)

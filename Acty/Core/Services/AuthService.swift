@@ -28,7 +28,7 @@ final class AuthService: AuthServiceProtocol {
     
     func signIn(with dto: Any) async throws -> UserDTO {
         print(#function)
-        let endpoint: EndPoint
+        let endpoint: AuthEndPoint
         
         switch dto {
         case let emailDTO as EmailSignInRequestDTO:

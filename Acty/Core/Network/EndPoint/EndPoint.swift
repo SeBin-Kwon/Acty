@@ -8,17 +8,17 @@
 import Foundation
 import Alamofire
 
-protocol Endpoint: URLRequestConvertible {
+protocol EndPoint {
     var baseURL: String { get }
-    var path: String { get }
+    var endPoint: String { get }
     var method: HTTPMethod { get }
     var parameters: Parameters? { get }
     var headers: HTTPHeaders { get }
-    var encoder: ParameterEncoder? { get }
-    var decoder: JSONDecoder { get }
+    var encoding: ParameterEncoding { get }
+//    var decoder: JSONDecoder { get }
 }
 
-extension Endpoint {
+extension EndPoint {
     var baseURL: String {
         return "Bundle.main.baseURL"
     }
