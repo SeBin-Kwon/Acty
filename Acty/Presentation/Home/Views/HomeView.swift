@@ -17,6 +17,9 @@ struct HomeView: View {
             }
             .padding(20)
         }
+        .onAppear {
+            
+        }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -24,7 +27,6 @@ struct HomeView: View {
                     .font(.paperLogy(.caption1))
                     .foregroundStyle(.accent)
             }
-            
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 Button {
                     print("bell")
@@ -80,6 +82,6 @@ extension HomeView {
 }
 
 
-#Preview {
-    HomeView()
-}
+//#Preview {
+//    HomeView()
+//}
