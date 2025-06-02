@@ -56,46 +56,25 @@ extension HomeView {
     }
     
     private func countryFilterButton(_ country: Country) -> some View {
-        
-        Button {
-            selectedCountry = country
-        } label: {
-            HStack(spacing: 12) {
+        HStack(spacing: 12) {
+            
+            Image(country.rawValue)
+            Text(country.koreaName)
                 
-                Image(country.rawValue)
-                Text(country.koreaName)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(selectedCountry == country ? .accent.opacity(0.5) : Color.clear)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(
-                        selectedCountry == country ? .accent : Color.gray.opacity(0.3),
-                        lineWidth: selectedCountry == country ? 2 : 1
-                    )
-            )
+                .foregroundColor(selectedCountry == country ? .accent : .primary)
         }
-        .foregroundColor(selectedCountry == country ? .blue : .primary)
-    }
-}
-
-
-private enum Country: String, CaseIterable {
-    case Korea, Japan, Australia, Philippines, Taiwan, Thailand, Argentina
-    
-    var koreaName: String {
-        switch self {
-        case .Korea: "대한민국"
-        case .Japan: "일본"
-        case .Australia: "호주"
-        case .Philippines: "필리핀"
-        case .Thailand: "태국"
-        case .Taiwan: "대만"
-        case .Argentina: "아르헨티나"
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(selectedCountry == country ? .accent.opacity(0.2) : .white)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(selectedCountry == country ? .accent : Color.gray.opacity(0.3), lineWidth: 2)
+        )
+        .clipShape(.rect(cornerRadius: 10))
+        .wrapToButton {
+            withAnimation {
+                selectedCountry = country
+            }
         }
     }
 }
