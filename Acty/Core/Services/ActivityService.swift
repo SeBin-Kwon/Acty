@@ -8,7 +8,7 @@
 import Foundation
 
 protocol ActivityServiceProtocol {
-    func fetchActivities() -> [Activity]
+    func fetchActivities(dto: ActivityRequestDTO) async -> [Activity]
 }
 
 final class ActivityService: ActivityServiceProtocol {
@@ -18,8 +18,15 @@ final class ActivityService: ActivityServiceProtocol {
         self.networkManager = networkManager
     }
     
-    func fetchActivities() -> [Activity] {
-//        let result: ActivityResponseDTO = try await networkManager.fetchResults(api: .activity)
+    func fetchActivities(dto: ActivityRequestDTO) async -> [Activity] {
+        do {
+            let result: ActivityResponseDTO = try await networkManager.fetchResults(api: ActivityEndPoint.activity(dto))
+            print("액티비티 fetch 성공")
+            print(result)
+        } catch {
+            print("액티비티 fetch 실패")
+            print(error)
+        }
         return []
     }
 }

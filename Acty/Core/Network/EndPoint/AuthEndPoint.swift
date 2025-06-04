@@ -16,7 +16,6 @@ enum AuthEndPoint: EndPoint {
     case kakaoSignIn(KakaoSignInRequestDTO)
     case refreshToken(String)
     case myProfileGet
-    case activity(ActivityRequest)
     
     var path: String {
         switch self {
@@ -26,14 +25,13 @@ enum AuthEndPoint: EndPoint {
         case .kakaoSignIn: baseURL + "users/login/kakao"
         case .refreshToken: baseURL + "auth/refresh"
         case .myProfileGet: baseURL + "users/me/profile"
-        case .activity: baseURL + "activities"
         }
     }
     
     var method: HTTPMethod {
         switch self {
         case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken: .post
-        case .activity, .myProfileGet: .get
+        case .myProfileGet: .get
         }
     }
     
@@ -60,18 +58,13 @@ enum AuthEndPoint: EndPoint {
         case .refreshToken(let token):
             return ["refreshToken": token]
         case .myProfileGet: return nil
-        case .activity(let activity):
-            return ["country": activity.country,
-                    "category": activity.category,
-                    "limit": activity.limit,
-                    "next": activity.nextCursor]
         }
     }
     
     var isAuthRequired: Bool {
         switch self {
         case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken: false
-        case .myProfileGet, .activity: true
+        case .myProfileGet: true
         }
     }
 }
