@@ -19,7 +19,7 @@ final class ActivityService: ActivityServiceProtocol {
     }
     
     func fetchActivities() -> [Activity] {
-//        let result: ActivityDTO = try await networkManager.fetchResults(api: .activity)
+//        let result: ActivityResponseDTO = try await networkManager.fetchResults(api: .activity)
         return []
     }
 }

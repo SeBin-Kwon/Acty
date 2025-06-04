@@ -8,7 +8,7 @@
 import Foundation
 
 struct ActivityListResponseDTO: Decodable {
-    let data: [ActivityDTO]
+    let data: [ActivityResponseDTO]
     let nextCursor: String?
     
     enum CodingKeys: String, CodingKey {
@@ -17,7 +17,7 @@ struct ActivityListResponseDTO: Decodable {
     }
 }
 
-struct ActivityDTO: Decodable, Identifiable {
+struct ActivityResponseDTO: Decodable, Identifiable {
     let id: String
     let title: String
     let country: String
@@ -51,7 +51,7 @@ struct PriceDTO: Decodable {
     let final: Int
 }
 
-extension ActivityDTO {
+extension ActivityResponseDTO {
     func toEntity() -> Activity {
         return Activity(
             id: id,

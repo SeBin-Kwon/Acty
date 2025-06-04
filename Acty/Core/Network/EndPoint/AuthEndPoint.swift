@@ -10,7 +10,7 @@ import Alamofire
 
 enum AuthEndPoint: EndPoint {
     
-    case signUp(SignUpRequest)
+    case signUp(SignUpRequestDTO)
     case emailSignIn(EmailSignInRequestDTO)
     case appleSignIn(AppleSignInRequestDTO)
     case kakaoSignIn(KakaoSignInRequestDTO)
@@ -76,19 +76,3 @@ enum AuthEndPoint: EndPoint {
     }
 }
 
-struct SignUpRequest {
-    let email: String
-    let password: String
-    let nick: String
-    let phoneNum: String = ""
-    let introduction: String = ""
-    let deviceToken: String = ""
-}
-
-struct ActivityRequest {
-    let country: String
-    let category: String
-    let next: String
-    let limit: Int
-    let nextCursor: String
-}
