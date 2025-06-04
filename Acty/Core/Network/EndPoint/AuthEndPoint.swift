@@ -15,14 +15,10 @@ enum AuthEndPoint: EndPoint {
     case appleSignIn(AppleSignInRequestDTO)
     case kakaoSignIn(KakaoSignInRequestDTO)
     case refreshToken(String)
-    case myProfileGet(String)
+    case myProfileGet
     case activity(ActivityRequest)
     
-    var baseURL: String {
-        BASE_URL
-    }
-    
-    var endPoint: String {
+    var path: String {
         switch self {
         case .signUp: baseURL + "users/join"
         case .emailSignIn: baseURL + "users/login"
@@ -72,24 +68,6 @@ enum AuthEndPoint: EndPoint {
         }
     }
     
-    var headers: HTTPHeaders {
-        switch self {
-        case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken:
-            return ["Content-Type": "application/json", "SeSACKey": API_KEY]
-        case .myProfileGet(let accessToken):
-            return ["Content-Type": "application/json", "Authorization": accessToken, "SeSACKey": API_KEY]
-        case .activity(let activity):
-            return ["Content-Type": "application/json", "Authorization": activity.accessToken, "SeSACKey": API_KEY]
-        }
-    }
-    
-    var encoding: ParameterEncoding {
-        switch self {
-        case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken, .myProfileGet, .activity:
-            return JSONEncoding.default
-        }
-    }
-    
     var isAuthRequired: Bool {
         switch self {
         case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken: false
@@ -113,5 +91,4 @@ struct ActivityRequest {
     let next: String
     let limit: Int
     let nextCursor: String
-    let accessToken: String
 }

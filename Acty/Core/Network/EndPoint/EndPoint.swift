@@ -8,18 +8,26 @@
 import Foundation
 import Alamofire
 
-protocol EndPoint {
+protocol EndPoint: Sendable {
     var baseURL: String { get }
-    var endPoint: String { get }
+    var path: String { get }
     var method: HTTPMethod { get }
     var parameters: Parameters? { get }
     var headers: HTTPHeaders { get }
     var encoding: ParameterEncoding { get }
-//    var decoder: JSONDecoder { get }
+    var isAuthRequired: Bool { get }
 }
 
 extension EndPoint {
     var baseURL: String {
-        return "Bundle.main.baseURL"
+        BASE_URL
+    }
+    
+    var headers: HTTPHeaders {
+        ["Content-Type": "application/json", "SeSACKey": API_KEY]
+    }
+    
+    var encoding: ParameterEncoding {
+        JSONEncoding.default
     }
 }

@@ -64,7 +64,7 @@ final class AuthService: AuthServiceProtocol {
             let accessToken = try tokenService.getAccessToken()
             print(#function, "액세스 토큰 발견: \(accessToken.prefix(10))...")
             
-//            let _: ProfileGetDTO = try await networkManager.fetchResults(api: .myProfileGet(accessToken))
+            let _: ProfileGetDTO = try await networkManager.fetchResults(api: AuthEndPoint.myProfileGet)
             
             isAuthenticated.send(true)
             return true

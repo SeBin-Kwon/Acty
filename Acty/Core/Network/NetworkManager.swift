@@ -18,11 +18,13 @@ final class AuthInterceptor: RequestInterceptor {
     func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
         var request = urlRequest
         
-        if let url = request.url?.absoluteString,
-           (url.contains("login") || url.contains("join") || url.contains("refresh")) {
-            print("🔓 인증 불필요한 API: \(url)")
-            completion(.success(request))
-            return
+        if let requiresAuth = request.value(forHTTPHeaderField: "X-Requires-Auth") {
+            request.setValue(nil, forHTTPHeaderField: "X-Requires-Auth")
+            if requiresAuth == "false" {
+                print("🔓 인증 불필요한 API: \(request.url?.absoluteString ?? "")")
+                completion(.success(request))
+                return
+            }
         }
         
         do {
@@ -32,7 +34,7 @@ final class AuthInterceptor: RequestInterceptor {
             completion(.success(request))
         } catch {
             print("❌ 토큰 없음: \(error)")
-            completion(.success(request))
+            completion(.failure(AppError.authenticationRequired))
         }
     }
 
@@ -79,24 +81,29 @@ final class NetworkManager: Sendable {
     }
     
     func fetchResults<T: Decodable>(api: EndPoint) async throws -> T {
-        print("📤 API 요청: \(api.method.rawValue) \(api.endPoint)")
+        print("📤 API 요청: \(api.method.rawValue) \(api.path)")
+        var headers = api.headers
+                
+        if !api.isAuthRequired {
+            headers.add(name: "X-Requires-Auth", value: "false")
+        }
         
         return try await withCheckedThrowingContinuation { continuation in
             session.request(
-                api.endPoint,
+                api.path,
                 method: api.method,
                 parameters: api.parameters,
                 encoding: api.encoding,
-                headers: api.headers
+                headers: headers
             )
             .validate(statusCode: 200..<300)
             .responseDecodable(of: T.self) { response in
                 switch response.result {
                 case .success(let result):
-                    print("✅ API 성공: \(api.endPoint)")
+                    print("✅ API 성공: \(api.path)")
                     continuation.resume(returning: result)
                 case .failure(let error):
-                    print("❌ API 실패: \(api.endPoint) - \(error)")
+                    print("❌ API 실패: \(api.path) - \(error)")
                     continuation.resume(throwing: error)
                 }
             }
