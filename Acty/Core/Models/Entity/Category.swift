@@ -8,7 +8,7 @@
 import Foundation
 
 enum Category: String {
-    case sightseeing, tours, packages, exciting, experiences, random
+    case sightseeing, tours, packages, exciting, experiences
     
     var koreaName: String {
         switch self {
@@ -17,7 +17,6 @@ enum Category: String {
         case .packages: "패키지"
         case .exciting: "익사이팅"
         case .experiences: "체험"
-        case .random: "랜덤"
         }
     }
 }
