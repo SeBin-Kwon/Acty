@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Category: String {
+enum Category: String, CaseIterable {
     case sightseeing, tours, packages, exciting, experiences
     
     var koreaName: String {

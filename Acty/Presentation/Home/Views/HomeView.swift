@@ -9,11 +9,14 @@ import SwiftUI
 
 struct HomeView: View {
     
-    @State private var selectedCountry: Country = .Korea
+    @State private var selectedCountry: Country? = nil
+    @State private var selectedCategory: Category? = nil
     
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading) {                filterRow
+            LazyVStack(alignment: .leading) {
+                filterRow
+                categoryFilterRow
             }
             .padding(20)
         }
@@ -57,6 +60,16 @@ extension HomeView {
         }
     }
     
+    private var categoryFilterRow: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack {
+                ForEach(Category.allCases, id: \.rawValue) { category in
+                    categoryFilterButton(category)
+                }
+            }
+        }
+    }
+    
     private func countryFilterButton(_ country: Country) -> some View {
         HStack(spacing: 12) {
             
@@ -79,6 +92,16 @@ extension HomeView {
             }
         }
     }
+    
+    private func categoryFilterButton(_ category: Category) -> some View {
+        Text(category.koreaName)
+            .wrapToButton {
+                print("D")
+            }
+//            .buttonStyle(.actySelected(true))
+    }
+    
+    
 }
 
 
