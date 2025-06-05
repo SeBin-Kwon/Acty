@@ -8,7 +8,10 @@
 import SwiftUI
 
 struct SignUpView: View {
-    @StateObject var viewModel = SignUpViewModel()
+    
+    @EnvironmentObject var diContainer: DIContainer
+    @EnvironmentObject var navigationRouter: NavigationRouter
+    @StateObject var viewModel: SignUpViewModel
     
     var body: some View {
         VStack {
@@ -38,9 +41,9 @@ struct SignUpView: View {
 }
 
 #if DEBUG
-#Preview {
-    SignUpView()
-}
+//#Preview {
+//    SignUpView()
+//}
 #endif
 
 struct SignUpResult: Decodable {

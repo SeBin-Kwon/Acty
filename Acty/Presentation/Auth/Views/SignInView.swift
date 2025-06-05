@@ -10,6 +10,8 @@ import AuthenticationServices
 
 struct SignInView: View {
     @EnvironmentObject var diContainer: DIContainer
+    @EnvironmentObject var navigationRouter: NavigationRouter
+    @EnvironmentObject var rootRouter: RootRouter
     @StateObject var viewModel: SignInViewModel
     @State private var navigateToHome = false
     
@@ -24,12 +26,12 @@ struct SignInView: View {
                 }
                 appleButton
                 kakaoButton
-                NavigationLink("회원가입") {
-                    SignUpView()
-                }
-                NavigationLink(destination: HomeView(), isActive: $navigateToHome) {
-                    EmptyView()
-                }
+                Button("회원가입") {
+                    navigationRouter.navigate(to: .signUp, in: .auth)
+               }
+//                NavigationLink(destination: HomeView(), isActive: $navigateToHome) {
+//                    EmptyView()
+//                }
             }
             .padding()
         }

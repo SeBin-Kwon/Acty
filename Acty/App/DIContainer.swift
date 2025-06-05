@@ -27,6 +27,7 @@ final class DIContainer: ObservableObject {
     let tokenService: TokenServiceProtocol
     let appleSignInService: SignInServiceProtocol
     let kakaoSignInService: SignInServiceProtocol
+    let activityService: ActivityServiceProtocol
     
     private init() {
         self.keychainManager = KeychainManager.shared
@@ -35,6 +36,7 @@ final class DIContainer: ObservableObject {
         self.appleSignInService = AppleSignInService()
         self.kakaoSignInService = KakaoSignInService()
         self.authService = AuthService(networkManager: networkManager, tokenService: tokenService)
+        self.activityService = ActivityService(networkManager: networkManager)
     }
     
     func makeSignInViewModel() -> SignInViewModel {
@@ -47,5 +49,9 @@ final class DIContainer: ObservableObject {
     
     func makeSignUpViewModel() -> SignUpViewModel {
         return SignUpViewModel()
+    }
+    
+    func makeHomeViewModel() -> HomeViewModel {
+        return HomeViewModel(activityService: activityService)
     }
 }

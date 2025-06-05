@@ -13,7 +13,7 @@ final class HomeViewModel: ViewModelType {
     var input = Input()
     @Published var output = Output()
     var cancellables = Set<AnyCancellable>()
-    
+    private let activityService: ActivityServiceProtocol
     
     struct Input {
         var onAppear = PassthroughSubject<Bool, Never>()
@@ -23,14 +23,18 @@ final class HomeViewModel: ViewModelType {
         
     }
     
-    init() {
+    init(activityService: ActivityServiceProtocol) {
+        self.activityService = activityService
         transform()
     }
     
     func transform() {
         input.onAppear
             .sink { [weak self] _ in
-                
+                let dto = ActivityRequestDTO(country: nil, category: nil, limit: nil, next: nil)
+                Task {
+                    await self?.activityService.fetchActivities(dto: dto)
+                }
             }
             .store(in: &cancellables)
     }
