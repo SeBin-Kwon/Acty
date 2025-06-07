@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AE6DBCD92DF461B8006D3A74 /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = AE6DBCD82DF461B8006D3A74 /* Nuke */; };
+		AE6DBCDB2DF461B8006D3A74 /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = AE6DBCDA2DF461B8006D3A74 /* NukeUI */; };
+		AE6DBCDD2DF461B8006D3A74 /* NukeVideo in Frameworks */ = {isa = PBXBuildFile; productRef = AE6DBCDC2DF461B8006D3A74 /* NukeVideo */; };
 		AEDA9D072DDA020D009BE206 /* KakaoSDK in Frameworks */ = {isa = PBXBuildFile; productRef = AEDA9D062DDA020C009BE206 /* KakaoSDK */; };
 		AEFAE3B62DCF3CCD00CFE05C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = AEFAE3B52DCF3CCD00CFE05C /* .gitignore */; };
 		AEFAE6672DD1789900CFE05C /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = AEFAE6662DD1789900CFE05C /* Alamofire */; };
@@ -43,8 +46,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AE6DBCD92DF461B8006D3A74 /* Nuke in Frameworks */,
 				AEFAE6672DD1789900CFE05C /* Alamofire in Frameworks */,
+				AE6DBCDD2DF461B8006D3A74 /* NukeVideo in Frameworks */,
 				AEDA9D072DDA020D009BE206 /* KakaoSDK in Frameworks */,
+				AE6DBCDB2DF461B8006D3A74 /* NukeUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,6 +96,9 @@
 			packageProductDependencies = (
 				AEFAE6662DD1789900CFE05C /* Alamofire */,
 				AEDA9D062DDA020C009BE206 /* KakaoSDK */,
+				AE6DBCD82DF461B8006D3A74 /* Nuke */,
+				AE6DBCDA2DF461B8006D3A74 /* NukeUI */,
+				AE6DBCDC2DF461B8006D3A74 /* NukeVideo */,
 			);
 			productName = Acty;
 			productReference = AEFAE3A42DCF3CB700CFE05C /* Acty.app */;
@@ -122,6 +131,7 @@
 			packageReferences = (
 				AEFAE6652DD1789900CFE05C /* XCRemoteSwiftPackageReference "Alamofire" */,
 				AEDA9D052DDA020C009BE206 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
+				AE6DBCD72DF461B7006D3A74 /* XCRemoteSwiftPackageReference "Nuke" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AEFAE3A52DCF3CB700CFE05C /* Products */;
@@ -379,6 +389,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		AE6DBCD72DF461B7006D3A74 /* XCRemoteSwiftPackageReference "Nuke" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kean/Nuke.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.8.0;
+			};
+		};
 		AEDA9D052DDA020C009BE206 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kakao/kakao-ios-sdk";
@@ -398,6 +416,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		AE6DBCD82DF461B8006D3A74 /* Nuke */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AE6DBCD72DF461B7006D3A74 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = Nuke;
+		};
+		AE6DBCDA2DF461B8006D3A74 /* NukeUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AE6DBCD72DF461B7006D3A74 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeUI;
+		};
+		AE6DBCDC2DF461B8006D3A74 /* NukeVideo */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AE6DBCD72DF461B7006D3A74 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeVideo;
+		};
 		AEDA9D062DDA020C009BE206 /* KakaoSDK */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = AEDA9D052DDA020C009BE206 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
