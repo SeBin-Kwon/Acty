@@ -11,6 +11,7 @@ struct HomeView: View {
     
     @State private var selectedCountry: Country? = nil
     @State private var selectedCategory: Category? = nil
+    @StateObject var viewModel: HomeViewModel
     
     var body: some View {
         ScrollView {
@@ -21,7 +22,7 @@ struct HomeView: View {
             .padding(20)
         }
         .onAppear {
-            
+            viewModel.input.onAppear.send(())
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

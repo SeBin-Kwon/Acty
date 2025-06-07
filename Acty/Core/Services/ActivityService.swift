@@ -20,9 +20,9 @@ final class ActivityService: ActivityServiceProtocol {
     
     func fetchActivities(dto: ActivityRequestDTO) async -> [Activity] {
         do {
-            let result: ActivityResponseDTO = try await networkManager.fetchResults(api: ActivityEndPoint.activity(dto))
+            let result: ActivityListResponseDTO = try await networkManager.fetchResults(api: ActivityEndPoint.activity(dto))
             print("액티비티 fetch 성공")
-            print(result)
+            print(result.data)
         } catch {
             print("액티비티 fetch 실패")
             print(error)

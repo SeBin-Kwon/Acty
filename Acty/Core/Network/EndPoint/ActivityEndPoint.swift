@@ -33,6 +33,13 @@ enum ActivityEndPoint: EndPoint {
         }
     }
     
+    var encoding: ParameterEncoding {
+        switch self {
+        case .activity:
+            return URLEncoding(destination: .queryString)
+        }
+    }
+    
     var isAuthRequired: Bool {
         true
     }

@@ -35,7 +35,7 @@ struct TabbarView: View {
     private func rootViewForTab(_ tab: MainTab) -> some View {
         switch tab {
         case .home:
-            HomeView()
+            HomeView(viewModel: diContainer.makeHomeViewModel())
         case .search:
             Text("Search")
         case .favorite:
@@ -49,7 +49,7 @@ struct TabbarView: View {
     private func mainDestinationView(for route: Route) -> some View {
         switch route {
         case .homeFeed:
-            HomeView()
+            HomeView(viewModel: diContainer.makeHomeViewModel())
         case .postDetail(let postId):
             Text("Post Detail: \(postId)")
         case .userProfile(let userId):

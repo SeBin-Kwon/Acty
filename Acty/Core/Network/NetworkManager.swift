@@ -30,7 +30,7 @@ final class AuthInterceptor: RequestInterceptor {
         do {
             let token = try tokenService.getAccessToken()
             request.headers.add(name: "Authorization", value: token)
-            print("🔐 토큰 추가됨: Bearer \(token.prefix(10))...")
+            print("🔐 토큰 추가됨: \(token)")
             completion(.success(request))
         } catch {
             print("❌ 토큰 없음: \(error)")
@@ -104,6 +104,9 @@ final class NetworkManager: Sendable {
                     continuation.resume(returning: result)
                 case .failure(let error):
                     print("❌ API 실패: \(api.path) - \(error)")
+                    if let data = response.data, let errorString = String(data: data, encoding: .utf8) {
+                        print("📋 서버 응답: \(errorString)")
+                    }
                     continuation.resume(throwing: error)
                 }
             }

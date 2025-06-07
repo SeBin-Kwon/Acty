@@ -26,8 +26,4 @@ extension EndPoint {
     var headers: HTTPHeaders {
         ["Content-Type": "application/json", "SeSACKey": API_KEY]
     }
-    
-    var encoding: ParameterEncoding {
-        JSONEncoding.default
-    }
 }

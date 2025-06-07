@@ -16,7 +16,7 @@ final class HomeViewModel: ViewModelType {
     private let activityService: ActivityServiceProtocol
     
     struct Input {
-        var onAppear = PassthroughSubject<Bool, Never>()
+        var onAppear = PassthroughSubject<Void, Never>()
     }
     
     struct Output {
@@ -31,7 +31,7 @@ final class HomeViewModel: ViewModelType {
     func transform() {
         input.onAppear
             .sink { [weak self] _ in
-                let dto = ActivityRequestDTO(country: nil, category: nil, limit: nil, next: nil)
+                let dto = ActivityRequestDTO(country: "대한민국", category: "관광", limit: 5, next: "")
                 Task {
                     await self?.activityService.fetchActivities(dto: dto)
                 }

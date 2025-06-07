@@ -18,18 +18,18 @@ struct ActivityListResponseDTO: Decodable {
 }
 
 struct ActivityResponseDTO: Decodable, Identifiable {
-    let id: String
-    let title: String
-    let country: String
-    let category: String
-    let thumbnails: [String]
-    let geolocation: GeolocationDTO
-    let price: PriceDTO
-    let tags: [String]
-    let pointReward: Int
-    let isAdvertisement: Bool
-    let isKeep: Bool
-    let keepCount: Int
+    let id: String?
+    let title: String?
+    let country: String?
+    let category: String?
+    let thumbnails: [String]?
+    let geolocation: GeolocationDTO?
+    let price: PriceDTO?
+    let tags: [String]?
+    let pointReward: Int?
+    let isAdvertisement: Bool?
+    let isKeep: Bool?
+    let keepCount: Int?
     
     enum CodingKeys: String, CodingKey {
         case id = "activity_id"
@@ -54,24 +54,24 @@ struct PriceDTO: Decodable {
 extension ActivityResponseDTO {
     func toEntity() -> Activity {
         return Activity(
-            id: id,
-            title: title,
-            country: country,
-            category: category,
-            thumbnails: thumbnails,
+            id: id ?? "",
+            title: title ?? "",
+            country: country ?? "",
+            category: category ?? "",
+            thumbnails: thumbnails ?? [],
             geolocation: Geolocation(
-                longitude: geolocation.longitude,
-                latitude: geolocation.latitude
+                longitude: geolocation?.longitude ?? 0,
+                latitude: geolocation?.latitude ?? 0
             ),
             price: Price(
-                original: price.original,
-                final: price.final
+                original: price?.original ?? 0,
+                final: price?.final ?? 0
             ),
-            tags: tags,
-            pointReward: pointReward,
-            isAdvertisement: isAdvertisement,
-            isKeep: isKeep,
-            keepCount: keepCount
+            tags: tags ?? [],
+            pointReward: pointReward ?? 0,
+            isAdvertisement: isAdvertisement ?? false,
+            isKeep: isKeep ?? false,
+            keepCount: keepCount ?? 0
         )
     }
 }

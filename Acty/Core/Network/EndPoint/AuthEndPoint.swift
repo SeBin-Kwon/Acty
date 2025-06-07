@@ -61,6 +61,14 @@ enum AuthEndPoint: EndPoint {
         }
     }
     
+    var encoding: ParameterEncoding {
+        switch self {
+        case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken:  JSONEncoding.default
+        case .myProfileGet: URLEncoding(destination: .queryString)
+        }
+       
+    }
+    
     var isAuthRequired: Bool {
         switch self {
         case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken: false
