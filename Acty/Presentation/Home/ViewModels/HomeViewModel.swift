@@ -20,7 +20,7 @@ final class HomeViewModel: ViewModelType {
     }
     
     struct Output {
-        
+        var activityList = [Activity]()
     }
     
     init(activityService: ActivityServiceProtocol) {
@@ -31,9 +31,13 @@ final class HomeViewModel: ViewModelType {
     func transform() {
         input.onAppear
             .sink { [weak self] _ in
+                guard let self else { return }
                 let dto = ActivityRequestDTO(country: "대한민국", category: "관광", limit: 5, next: "")
                 Task {
-                    await self?.activityService.fetchActivities(dto: dto)
+                    let result = await self.activityService.fetchActivities(dto: dto)
+                    await MainActor.run {
+                        self.output.activityList = result
+                    }
                 }
             }
             .store(in: &cancellables)

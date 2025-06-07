@@ -18,6 +18,7 @@ struct HomeView: View {
             LazyVStack(alignment: .leading) {
                 filterRow
                 categoryFilterRow
+                activityList
             }
             .padding(20)
         }
@@ -50,6 +51,12 @@ struct HomeView: View {
 
 
 extension HomeView {
+    
+    private var activityList: some View {
+        ForEach(viewModel.output.activityList, id: \.id) { activity in
+            Text(activity.title)
+        }
+    }
     
     private var filterRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -106,6 +113,6 @@ extension HomeView {
 }
 
 
-//#Preview {
-//    HomeView()
-//}
+#Preview {
+    HomeView(viewModel: HomeViewModel(activityService: MockActivityService()))
+}
