@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NukeUI
 
 struct HomeView: View {
     
@@ -53,9 +54,41 @@ struct HomeView: View {
 extension HomeView {
     
     private var activityList: some View {
-        ForEach(viewModel.output.activityList, id: \.id) { activity in
-            Text(activity.title)
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack {
+                ForEach(viewModel.output.activityList, id: \.id) { activity in
+                    LazyImage(url: URL(string: activity.thumbnails.first!)) { state in
+                        if let image = state.image {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } else if state.error != nil {
+                            Rectangle()
+                                .fill(LinearGradient(
+                                    colors: [Color.blue.opacity(0.6), Color.cyan.opacity(0.8)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ))
+                        } else {
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.3))
+                                .overlay(
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                )
+                        }
+                    }
+                    .frame(width: 350, height: 450)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    Text(activity.title)
+                }
+            }
         }
+    }
+    
+    private func newActivityCard(_ activity: Activity) -> some View {
+        RoundedRectangle(cornerRadius: 24)
+            .fill(Color.gray.opacity(0.2))
     }
     
     private var filterRow: some View {
