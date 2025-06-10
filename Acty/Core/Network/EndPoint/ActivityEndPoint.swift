@@ -13,7 +13,7 @@ enum ActivityEndPoint: EndPoint {
     
     var path: String {
         switch self {
-        case .activity: baseURL + "activities"
+        case .activity: baseURL + "/activities"
         }
     }
     

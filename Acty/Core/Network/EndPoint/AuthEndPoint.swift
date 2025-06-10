@@ -19,12 +19,12 @@ enum AuthEndPoint: EndPoint {
     
     var path: String {
         switch self {
-        case .signUp: baseURL + "users/join"
-        case .emailSignIn: baseURL + "users/login"
-        case .appleSignIn: baseURL + "users/login/apple"
-        case .kakaoSignIn: baseURL + "users/login/kakao"
-        case .refreshToken: baseURL + "auth/refresh"
-        case .myProfileGet: baseURL + "users/me/profile"
+        case .signUp: baseURL + "/users/join"
+        case .emailSignIn: baseURL + "/users/login"
+        case .appleSignIn: baseURL + "/users/login/apple"
+        case .kakaoSignIn: baseURL + "/users/login/kakao"
+        case .refreshToken: baseURL + "/auth/refresh"
+        case .myProfileGet: baseURL + "/users/me/profile"
         }
     }
     
