@@ -13,8 +13,7 @@ struct ActivityBannerView: View {
     
     var body: some View {
         ZStack {
-            // 배경 이미지 (Nuke 사용)
-            LazyImage(url: URL(string: activity.mainThumbnail ?? "")) { state in
+            LazyImage(url: URL(string: activity.fullImageURL() ?? "")) { state in
                 if let image = state.image {
                     image
                         .resizable()
@@ -37,10 +36,8 @@ struct ActivityBannerView: View {
                         )
                 }
             }
-            .frame(width: 350, height: 450)
-            .clipped()
+            .frame(width: 300, height: 300)
             
-            // 오버레이 그라데이션
             LinearGradient(
                 colors: [
                     Color.black.opacity(0.1),
@@ -118,9 +115,9 @@ struct ActivityBannerView: View {
             }
             .padding(20)
         }
-        .frame(width: 350, height: 450)
+        .frame(width: 300, height: 300)
         .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+        .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 5)
     }
 }
 

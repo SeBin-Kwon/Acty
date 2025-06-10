@@ -17,11 +17,10 @@ final class ImagePipelineManager {
         
         // 2. 기본 캐시 설정만
         configuration.imageCache = ImageCache(
-            costLimit: 100 * 1024 * 1024, // 100MB
+            costLimit: 100 * 1024 * 1024,
             countLimit: 300
         )
         
-        // 전역 파이프라인 설정
         ImagePipeline.shared = ImagePipeline(configuration: configuration)
     }
 }

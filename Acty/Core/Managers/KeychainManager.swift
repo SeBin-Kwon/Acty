@@ -79,7 +79,6 @@ final class KeychainManager: Sendable {
                   let token = String(data: tokenData, encoding: .utf8) else {
                 throw KeychainError.unexpectedData
             }
-            print("토큰 가져오기")
             return token
         }
         

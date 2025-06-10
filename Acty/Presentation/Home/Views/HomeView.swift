@@ -58,6 +58,9 @@ extension HomeView {
             LazyHStack {
                 ForEach(viewModel.output.activityList, id: \.id) { activity in
                     ActivityBannerView(activity: activity)
+                        .id(activity.id)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 20)
                 }
             }
         }
@@ -107,18 +110,18 @@ extension HomeView {
     }
     
     private func categoryFilterButton(_ category: Category) -> some View {
-        Text(category.koreaName)
-            .wrapToButton {
-                print("D")
+        Button(category.koreaName) {
+                withAnimation {
+                    selectedCategory = category
+                }
             }
-//            .buttonStyle(.actySelected(true))
+            .buttonStyle(.actySelected(selectedCategory == category))
     }
     
     
 }
 
 
-
-#Preview {
-    HomeView(viewModel: HomeViewModel(activityService: MockActivityService()))
-}
+//#Preview {
+//    HomeView(viewModel: HomeViewModel(activityService: MockActivityService()))
+//}

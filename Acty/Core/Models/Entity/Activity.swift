@@ -51,12 +51,14 @@ extension Activity {
     
     /// 메인 썸네일 이미지 URL (첫 번째 이미지)
     var mainThumbnail: String? {
-        return thumbnails.first
+        let images = thumbnails.filter { $0.hasSuffix(".jpg") || $0.hasSuffix(".jpeg") || $0.hasSuffix(".png") }
+        return images.first
     }
     
     /// 완전한 이미지 URL 생성 (BASE_URL과 결합)
     func fullImageURL(baseURL: String = BASE_URL) -> String? {
         guard let thumbnail = mainThumbnail else { return nil }
+        print(baseURL + thumbnail)
         return baseURL + thumbnail
     }
     

@@ -42,7 +42,7 @@ class MockActivityService: ActivityServiceProtocol {
                title: "한강 피크닉 패키지",
                country: "대한민국",
                category: "관광",
-               thumbnails: ["/data/activities/hangang_picnic_1.jpg"],
+               thumbnails: ["/data/activities/6842398-sd_640_360_30fps_1747149175575.mp4", "/data/activities/niklas-ohlrogge-niamoh-de-tc2Cts4aXCw_1747149046143.jpg"],
                geolocation: Geolocation(longitude: 126.9356, latitude: 37.5219),
                price: Price(original: 50000, final: 35000),
                tags: ["인기", "할인"],
