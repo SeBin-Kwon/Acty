@@ -19,6 +19,10 @@ final class TokenService: TokenServiceProtocol {
     private let networkManager: NetworkManager
     private let keychainManager: KeychainManager
     
+    private var cachedAccessToken: String?
+    private var tokenCacheTime: Date?
+    private let cacheValidDuration: TimeInterval = 60 * 5
+    
     private enum TokenType {
         static let accessToken = "accessToken"
         static let refreshToken = "refreshToken"
@@ -47,7 +51,7 @@ final class TokenService: TokenServiceProtocol {
         do {
             let savedAccessToken = try keychainManager.getToken(for: TokenType.accessToken)
             let savedRefreshToken = try keychainManager.getToken(for: TokenType.refreshToken)
-            
+            cachedAccessToken = accessToken
             print("저장된 토큰 확인:")
             print("Access Token 저장됨: \(savedAccessToken.prefix(10))...")
             print("Refresh Token 저장됨: \(savedRefreshToken.prefix(10))...")
@@ -58,7 +62,18 @@ final class TokenService: TokenServiceProtocol {
     }
     
     func getAccessToken() throws -> String {
-        return try keychainManager.getToken(for: TokenType.accessToken)
+        
+        if let cached = cachedAccessToken,
+           let cacheTime = tokenCacheTime,
+           Date().timeIntervalSince(cacheTime) < cacheValidDuration {
+            return cached
+        }
+        
+        let token = try keychainManager.getToken(for: TokenType.accessToken)
+        cachedAccessToken = token
+        tokenCacheTime = Date()
+        
+        return token
     }
     
     func getRefreshToken() throws -> String {
@@ -68,6 +83,8 @@ final class TokenService: TokenServiceProtocol {
     func deleteTokens() throws {
         try keychainManager.deleteToken(for: TokenType.accessToken)
         try keychainManager.deleteToken(for: TokenType.refreshToken)
+        cachedAccessToken = nil
+        tokenCacheTime = nil
     }
 }
 
