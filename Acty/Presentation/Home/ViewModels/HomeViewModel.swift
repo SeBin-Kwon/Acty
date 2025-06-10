@@ -20,6 +20,7 @@ final class HomeViewModel: ViewModelType {
     }
     
     struct Output {
+        var newActivityList = [Activity]()
         var activityList = [Activity]()
     }
     
@@ -34,9 +35,11 @@ final class HomeViewModel: ViewModelType {
                 guard let self else { return }
                 let dto = ActivityRequestDTO(country: "대한민국", category: "관광", limit: 5, next: "")
                 Task {
-                    let result = await self.activityService.fetchActivities(dto: dto)
+                    let activityResult = await self.activityService.fetchActivities(dto: dto)
+                    let newActivityResult = await self.activityService.fetchNewActivities(dto: dto)
                     await MainActor.run {
-                        self.output.activityList = result
+                        self.output.newActivityList = newActivityResult
+                        self.output.activityList = activityResult
                     }
                 }
             }
