@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import NukeUI
 
 struct HomeView: View {
     
@@ -17,11 +16,20 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading) {
+                HStack {
+                    Text("NEW 액티비티")
+                        .font(.pretendard(.body2(.bold)))
+                }
+                .padding(20)
+                ActivityCarouselListView(activities: viewModel.output.newActivityList) { activity in
+                    ActivityBannerView(activity: activity)
+                }
+                .frame(height: 320)
                 filterRow
+                    .padding(20)
                 categoryFilterRow
-                activityBannerList
+                    .padding(20)
             }
-            .padding(20)
         }
         .onAppear {
             viewModel.input.onAppear.send(())
@@ -49,7 +57,6 @@ struct HomeView: View {
         }
     }
 }
-
 
 extension HomeView {
     

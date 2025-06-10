@@ -12,7 +12,7 @@ struct ActivityList {
     let nextCursor: String?
 }
 
-struct Activity: Identifiable {
+struct Activity: Identifiable, Hashable {
     let id: String
     let title: String
     let country: String
@@ -25,14 +25,18 @@ struct Activity: Identifiable {
     let isAdvertisement: Bool
     var isKeep: Bool
     let keepCount: Int
+    
+//    static func == (lhs: Activity, rhs: Activity) -> Bool {
+//        return lhs.id == rhs.id
+//    }
 }
 
-struct Geolocation {
+struct Geolocation: Hashable {
     let longitude: Double
     let latitude: Double
 }
 
-struct Price {
+struct Price: Hashable {
     let original: Int
     let final: Int
 }
