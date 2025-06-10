@@ -18,6 +18,8 @@ struct ActyApp: App {
         if let appKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_NATIVE_APP_KEY") as? String {
             KakaoSDK.initSDK(appKey: appKey)
         }
+        
+        ImagePipelineManager.configure(with: DIContainer.shared.tokenService)
     }
     
     var body: some Scene {
