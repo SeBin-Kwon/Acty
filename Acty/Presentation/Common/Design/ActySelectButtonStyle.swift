@@ -9,15 +9,36 @@ import SwiftUI
 
 struct ActySelectButtonStyle: ButtonStyle {
     private let isSelected: Bool
+    private let isDisabled: Bool
     
-    init(isSelected: Bool) {
+    init(isSelected: Bool, isDisabled: Bool = false) {
         self.isSelected = isSelected
+        self.isDisabled = isDisabled
     }
     
     func makeBody(configuration: Configuration) -> some View {
         let weight: Pretendard.Weight = isSelected ? .bold : .medium
-        let textColor: Color = isSelected ? .accent : .black
-        let backgroundColor: Color = isSelected ? .accent.opacity(0.2) : .white
+        let textColor: Color = {
+            if isDisabled {
+                return .gray.opacity(0.5)
+            } else {
+                return isSelected ? .accent : .black
+            }
+        }()
+        let backgroundColor: Color = {
+            if isDisabled {
+                return .gray.opacity(0.1)
+            } else {
+                return isSelected ? .accent.opacity(0.2) : .white
+            }
+        }()
+        let strokeColor: Color = {
+            if isDisabled {
+                return .gray.opacity(0.2)
+            } else {
+                return isSelected ? .accent : Color.gray.opacity(0.3)
+            }
+        }()
         
         configuration.label
             .font(.pretendard(.body2(weight)))
@@ -39,6 +60,9 @@ extension ButtonStyle where Self == ActySelectButtonStyle {
     static func actySelected(_ isSelected: Bool) -> Self {
         ActySelectButtonStyle(isSelected: isSelected)
     }
+    static func actySelected(_ isSelected: Bool, _ isDisabled: Bool) -> Self {
+        ActySelectButtonStyle(isSelected: isSelected, isDisabled: isDisabled)
+    }
 }
 
 #Preview {
@@ -52,5 +76,11 @@ extension ButtonStyle where Self == ActySelectButtonStyle {
             
         }
         .buttonStyle(.actySelected(false))
+        
+        Button("UnSelected + Disabled") {
+                   
+       }
+        .buttonStyle(.actySelected(false, true))
+       .disabled(true)
     }
 }
