@@ -28,11 +28,13 @@ enum PaymentEndPoint: EndPoint {
     var parameters: Parameters? {
         switch self {
         case .orders(let order):
-            return ["activity_id": activity.country,
-                    "reservation_item_name": activity.category,
-                    "reservation_item_time": activity.limit,
-                    "participant_count": activity.next]
-        case .ordersHistory: nil
+            return ["activity_id": order.id,
+                    "reservation_item_name": order.reservationItemName,
+                    "reservation_item_time": order.reservationItemTime,
+                    "participant_count": order.participantCount,
+                    "total_price": order.totalPrice]
+        case .ordersHistory:
+            return nil
         }
     }
     
