@@ -6,12 +6,11 @@
 //
 
 import SwiftUI
-import NukeUI
 
 struct HomeView: View {
     
     @State private var selectedCountry: Country? = nil
-    @State private var selectedCategory: Category? = nil
+    @State private var selectedCategory: ActivityCategory? = nil
     @StateObject var viewModel: HomeViewModel
     
     var body: some View {
@@ -27,9 +26,6 @@ struct HomeView: View {
                     ActivityBannerView(activity: activity)
                 }
                 .frame(height: 320)
-                //                Text("추천 액티비티")
-                //                    .font(.pretendard(.body2(.bold)))
-                //                    .padding(20)
                 countryFilterRow
                 categoryFilterRow
                 activityListView
@@ -68,6 +64,7 @@ extension HomeView {
         ForEach(viewModel.output.activityList, id: \.id) { activity in
             ActivityCell(activity: activity)
         }
+        .allowsHitTesting(false)
         .padding(.horizontal, 20)
     }
     
@@ -86,7 +83,7 @@ extension HomeView {
     private var categoryFilterRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack {
-                ForEach(Category.allCases, id: \.rawValue) { category in
+                ForEach(ActivityCategory.allCases, id: \.rawValue) { category in
                     categoryFilterButton(category)
                 }
             }
@@ -113,22 +110,33 @@ extension HomeView {
         .clipShape(.rect(cornerRadius: 10))
         .wrapToButton {
             withAnimation {
-                selectedCountry = country
+                if selectedCountry == country {
+                    selectedCountry = nil
+                } else {
+                    selectedCountry = country
+                }
+                viewModel.input.filterButtonTapped.send((selectedCountry, selectedCategory))
             }
         }
     }
     
-    private func categoryFilterButton(_ category: Category) -> some View {
+    private func categoryFilterButton(_ category: ActivityCategory) -> some View {
         Button(category.koreaName) {
+            print("d")
             withAnimation {
-                selectedCategory = category
+                if selectedCategory == category {
+                    selectedCategory = nil
+                } else {
+                    selectedCategory = category
+                }
+                viewModel.input.filterButtonTapped.send((selectedCountry, selectedCategory))
             }
         }
         .buttonStyle(.actySelected(selectedCategory == category))
     }
 }
 
-
-#Preview {
-    HomeView(viewModel: HomeViewModel(activityService: MockActivityService()))
-}
+//
+//#Preview {
+//    HomeView(viewModel: HomeViewModel(activityService: MockActivityService()))
+//}

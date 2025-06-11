@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NukeUI
 
 struct ActivityCell: View {
     
@@ -16,7 +17,7 @@ struct ActivityCell: View {
         VStack() {
             // 이미지 섹션
             ZStack {
-                AsyncImage(url: URL(string: activity.fullImageURL() ?? "")) { state in
+                LazyImage(url: URL(string: activity.fullImageURL() ?? "")) { state in
                     if let image = state.image {
                         image
                             .resizable()
@@ -130,9 +131,8 @@ struct ActivityCell: View {
             
             // 컨텐츠 섹션
             VStack(alignment: .leading, spacing: 12) {
-                // 제목과 통계
                 HStack {
-                    Text("세상 패러글라이딩 2기")
+                    Text(activity.title)
                         .font(.headline)
                         .fontWeight(.bold)
                     
@@ -143,7 +143,7 @@ struct ActivityCell: View {
                             Image(systemName: "heart.fill")
                                 .foregroundColor(.pink)
                                 .font(.caption)
-                            Text("35개")
+                            Text("\(activity.keepCount)개")
                                 .font(.caption)
                                 .fontWeight(.semibold)
                         }
@@ -152,7 +152,7 @@ struct ActivityCell: View {
                             Image(systemName: "person.2.fill")
                                 .foregroundColor(.blue)
                                 .font(.caption)
-                            Text("200P")
+                            Text("\(activity.pointReward)개")
                                 .font(.caption)
                                 .fontWeight(.semibold)
                         }
@@ -175,11 +175,11 @@ struct ActivityCell: View {
                     
                     // 가격 정보
                     HStack(spacing: 2) {
-                        Text("605,000원")
+                        Text(activity.formattedFinalPrice)
                             .font(.title3)
                             .fontWeight(.bold)
                         
-                        Text("14%")
+                        Text("\(activity.discountPercentage)%")
                             .font(.caption)
                             .fontWeight(.semibold)
                             .foregroundColor(.blue)
@@ -194,7 +194,6 @@ struct ActivityCell: View {
                 .foregroundStyle(.gray30)
                 .padding(.bottom, 20)
         }
-//        .background(Color.white)
     }
 }
 

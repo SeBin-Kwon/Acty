@@ -23,7 +23,6 @@ final class ActivityService: ActivityServiceProtocol {
         do {
             let result: ActivityListResponseDTO = try await networkManager.fetchResults(api: ActivityEndPoint.activity(dto))
             print("액티비티 fetch 성공")
-            print(result.data)
             return result.toEntity().activities
         } catch {
             print("액티비티 fetch 실패")

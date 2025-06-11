@@ -1,5 +1,5 @@
 //
-//  Category.swift
+//  ActivityCategory.swift
 //  Acty
 //
 //  Created by Sebin Kwon on 6/4/25.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Category: String, CaseIterable {
+enum ActivityCategory: String, CaseIterable {
     case sightseeing, tours, packages, exciting, experiences
     
     var koreaName: String {

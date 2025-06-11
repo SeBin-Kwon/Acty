@@ -17,6 +17,7 @@ final class HomeViewModel: ViewModelType {
     
     struct Input {
         var onAppear = PassthroughSubject<Void, Never>()
+        var filterButtonTapped = PassthroughSubject<(Country?, ActivityCategory?), Never>()
     }
     
     struct Output {
@@ -33,12 +34,30 @@ final class HomeViewModel: ViewModelType {
         input.onAppear
             .sink { [weak self] _ in
                 guard let self else { return }
-                let dto = ActivityRequestDTO(country: "대한민국", category: "관광", limit: 5, next: "")
+                let dto = ActivityRequestDTO(country: "", category: "", limit: 5, next: "")
                 Task {
                     let activityResult = await self.activityService.fetchActivities(dto: dto)
                     let newActivityResult = await self.activityService.fetchNewActivities(dto: dto)
                     await MainActor.run {
+                        print("😀 newActivityList: \(newActivityResult)")
+                        print("🤣 activityList: \(activityResult)")
                         self.output.newActivityList = newActivityResult
+                        self.output.activityList = activityResult
+                    }
+                }
+            }
+            .store(in: &cancellables)
+        
+        input.filterButtonTapped
+            .sink { [weak self] (country, category) in
+                guard let self else { return }
+                
+                let dto = ActivityRequestDTO(country: country?.koreaName ?? "", category: category?.koreaName ?? "", limit: 5, next: "")
+                
+                Task {
+                    let activityResult = await self.activityService.fetchActivities(dto: dto)
+                    await MainActor.run {
+                        print("🤣 activityList: \(activityResult)")
                         self.output.activityList = activityResult
                     }
                 }
