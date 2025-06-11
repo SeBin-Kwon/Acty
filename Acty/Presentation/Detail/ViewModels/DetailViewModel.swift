@@ -20,7 +20,7 @@ final class DetailViewModel: ViewModelType {
     }
     
     struct Output {
-        var activityDetails = [String: ActivityDetail]()
+        var activityDetail: ActivityDetail? = nil
     }
     
     init(activityService: ActivityServiceProtocol) {
@@ -35,9 +35,10 @@ final class DetailViewModel: ViewModelType {
                 guard let self else { return }
                 print("detail: \(id)")
                 Task {
-                    let activityResult = await self.activityService.fetchActivityDetails(id: id)
+                    let result = await self.activityService.fetchActivityDetails(id: id)
+//                    print("🤣 Detail: \(result)")
                     await MainActor.run {
-                        self.output.activityDetails[id] = activityResult
+                        self.output.activityDetail = result
                     }
                 }
             }

@@ -42,8 +42,8 @@ final class HomeViewModel: ViewModelType {
                     let activityResult = await self.activityService.fetchActivities(dto: dto)
                     let newActivityResult = await self.activityService.fetchNewActivities(dto: dto)
                     await MainActor.run {
-                        print("😀 newActivityList: \(newActivityResult)")
-                        print("🤣 activityList: \(activityResult)")
+//                        print("😀 newActivityList: \(newActivityResult)")
+//                        print("🤣 activityList: \(activityResult)")
                         self.output.newActivityList = newActivityResult
                         self.output.activityList = activityResult
                     }
@@ -60,7 +60,7 @@ final class HomeViewModel: ViewModelType {
                 Task {
                     let activityResult = await self.activityService.fetchActivities(dto: dto)
                     await MainActor.run {
-                        print("🤣 activityList: \(activityResult)")
+//                        print("🤣 activityList: \(activityResult)")
                         self.output.activityList = activityResult
                     }
                 }

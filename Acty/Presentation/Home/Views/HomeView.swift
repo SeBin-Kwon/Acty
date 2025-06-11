@@ -68,9 +68,6 @@ extension HomeView {
 //                    viewModel.input.activityDetail.send(activity.id)
                     navigationRouter.navigate(to: .activityDetails(detailId: activity.id), in: .main)
                 }
-//                .onAppear {
-//                    viewModel.input.activityDetail.send(activity.id)
-//                }
         }
         .padding(.horizontal, 20)
     }
@@ -101,10 +98,8 @@ extension HomeView {
     
     private func countryFilterButton(_ country: Country) -> some View {
         HStack(spacing: 12) {
-            
             Image(country.rawValue)
             Text(country.koreaName)
-            
                 .foregroundColor(selectedCountry == country ? .accent : .primary)
         }
         .padding(.horizontal, 14)

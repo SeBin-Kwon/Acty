@@ -136,10 +136,10 @@ class MockActivityService: ActivityServiceProtocol {
                     date: "2025-07-03",
                     times: [
                         ReservationTime(time: "09:00", isReserved: true),
-                        ReservationTime(time: "11:00", isReserved: false),
-                        ReservationTime(time: "13:00", isReserved: false),
+                        ReservationTime(time: "11:00", isReserved: true),
+                        ReservationTime(time: "13:00", isReserved: true),
                         ReservationTime(time: "15:00", isReserved: true),
-                        ReservationTime(time: "17:00", isReserved: false)
+                        ReservationTime(time: "17:00", isReserved: true)
                     ]
                 )
             ],

@@ -175,15 +175,15 @@ struct ActivityCell: View {
                 }
                 
                 // 설명 텍스트
-                VStack(alignment: .leading, spacing: 2) {
-//                    Text(description ?? "")
+//                VStack(alignment: .leading, spacing: 2) {
+////                    Text(description ?? "")
+////                        .font(.caption)
+////                        .foregroundColor(.secondary)
+//                    
+//                    Text("야적은 시들지만, 하늘을 향한 마음은 누구보다 단단한 세상 팀의 비상.")
 //                        .font(.caption)
 //                        .foregroundColor(.secondary)
-                    
-                    Text("야적은 시들지만, 하늘을 향한 마음은 누구보다 단단한 세상 팀의 비상.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
+//                }
                 
                 // 가격
                 HStack(alignment: .bottom) {

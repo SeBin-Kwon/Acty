@@ -54,4 +54,8 @@ final class DIContainer: ObservableObject {
     func makeHomeViewModel() -> HomeViewModel {
         return HomeViewModel(activityService: activityService)
     }
+    
+    func makeDetailViewModel() -> DetailViewModel {
+        return DetailViewModel(activityService: activityService)
+    }
 }
