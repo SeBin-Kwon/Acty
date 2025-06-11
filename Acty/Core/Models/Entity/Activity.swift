@@ -25,10 +25,6 @@ struct Activity: Identifiable, Hashable {
     let isAdvertisement: Bool
     var isKeep: Bool
     let keepCount: Int
-    
-//    static func == (lhs: Activity, rhs: Activity) -> Bool {
-//        return lhs.id == rhs.id
-//    }
 }
 
 struct Geolocation: Hashable {
