@@ -65,8 +65,12 @@ extension HomeView {
         ForEach(viewModel.output.activityList, id: \.id) { activity in
             ActivityCell(activity: activity)
                 .onTapGesture {
-                    navigationRouter.navigate(to: .activityDetails(activityId: activity.id), in: .main)
+//                    viewModel.input.activityDetail.send(activity.id)
+                    navigationRouter.navigate(to: .activityDetails(detailId: activity.id), in: .main)
                 }
+//                .onAppear {
+//                    viewModel.input.activityDetail.send(activity.id)
+//                }
         }
         .padding(.horizontal, 20)
     }

@@ -11,6 +11,7 @@ import NukeUI
 struct ActivityCell: View {
     
     let activity: Activity
+//    var description: String?
     
     var body: some View {
         
@@ -175,9 +176,9 @@ struct ActivityCell: View {
                 
                 // 설명 텍스트
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("두려움을 넘고, 하늘을 향한 두 번째 도전이 시작됩니다.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+//                    Text(description ?? "")
+//                        .font(.caption)
+//                        .foregroundColor(.secondary)
                     
                     Text("야적은 시들지만, 하늘을 향한 마음은 누구보다 단단한 세상 팀의 비상.")
                         .font(.caption)

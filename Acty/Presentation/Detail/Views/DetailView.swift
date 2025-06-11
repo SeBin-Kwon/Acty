@@ -12,7 +12,9 @@ struct DetailView: View {
     let id: String
     
     var body: some View {
-        Text(id)
+        VStack {
+            
+        }
     }
 }
 

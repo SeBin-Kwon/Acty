@@ -11,17 +11,19 @@ import Alamofire
 enum ActivityEndPoint: EndPoint {
     case activity(ActivityRequestDTO)
     case newActivity(ActivityRequestDTO)
+    case activityDetail(_ id: String)
     
     var path: String {
         switch self {
         case .activity: baseURL + "/activities"
         case .newActivity: baseURL + "/activities/new"
+        case .activityDetail(let id): baseURL + "/activities/" + id
         }
     }
     
     var method: HTTPMethod {
         switch self {
-        case .activity, .newActivity: .get
+        case .activity, .newActivity, .activityDetail: .get
         }
     }
     
@@ -35,12 +37,14 @@ enum ActivityEndPoint: EndPoint {
         case .newActivity(let activity):
             return ["country": activity.country,
                     "category": activity.category]
+        case .activityDetail(let id):
+            return ["activity_id": id]
         }
     }
     
     var encoding: ParameterEncoding {
         switch self {
-        case .activity, .newActivity:
+        case .activity, .newActivity, .activityDetail:
             return URLEncoding(destination: .queryString)
         }
     }

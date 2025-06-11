@@ -18,11 +18,14 @@ final class HomeViewModel: ViewModelType {
     struct Input {
         var onAppear = PassthroughSubject<Void, Never>()
         var filterButtonTapped = PassthroughSubject<(Country?, ActivityCategory?), Never>()
+//        var activityDetail = PassthroughSubject<String, Never>()
     }
     
     struct Output {
         var newActivityList = [Activity]()
         var activityList = [Activity]()
+//        var activityDescription = ""
+//        var activityDetails = [String: ActivityDetail]()
     }
     
     init(activityService: ActivityServiceProtocol) {
@@ -63,5 +66,19 @@ final class HomeViewModel: ViewModelType {
                 }
             }
             .store(in: &cancellables)
+        
+//        input.activityDetail
+//            .sink { [weak self] id in
+//                guard let self else { return }
+//                print("detail: \(id)")
+//                Task {
+//                    let activityResult = await self.activityService.fetchActivityDetails(id: id)
+//                    await MainActor.run {
+//                        self.output.activityDetails[id] = activityResult
+//                        self.output.activityDescription = activityResult.description
+//                    }
+//                }
+//            }
+//            .store(in: &cancellables)
     }
 }
