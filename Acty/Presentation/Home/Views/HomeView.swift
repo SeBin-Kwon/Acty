@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NukeUI
 
 struct HomeView: View {
     
@@ -15,20 +16,23 @@ struct HomeView: View {
     
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading) {
+            LazyVStack() {
                 HStack {
                     Text("NEW 액티비티")
                         .font(.pretendard(.body2(.bold)))
+                        .padding(20)
+                    Spacer()
                 }
-                .padding(20)
                 ActivityCarouselListView(activities: viewModel.output.newActivityList) { activity in
                     ActivityBannerView(activity: activity)
                 }
                 .frame(height: 320)
-                filterRow
-                    .padding(20)
+                //                Text("추천 액티비티")
+                //                    .font(.pretendard(.body2(.bold)))
+                //                    .padding(20)
+                countryFilterRow
                 categoryFilterRow
-                    .padding(20)
+                activityListView
             }
         }
         .onAppear {
@@ -60,20 +64,14 @@ struct HomeView: View {
 
 extension HomeView {
     
-    private var activityBannerList: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            LazyHStack {
-                ForEach(viewModel.output.activityList, id: \.id) { activity in
-                    ActivityBannerView(activity: activity)
-                        .id(activity.id)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 20)
-                }
-            }
+    private var activityListView: some View {
+        ForEach(viewModel.output.activityList, id: \.id) { activity in
+            ActivityCell(activity: activity)
         }
+        .padding(.horizontal, 20)
     }
     
-    private var filterRow: some View {
+    private var countryFilterRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack {
                 ForEach(Country.allCases, id: \.rawValue) { country in
@@ -81,6 +79,8 @@ extension HomeView {
                 }
             }
         }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 5)
     }
     
     private var categoryFilterRow: some View {
@@ -91,6 +91,8 @@ extension HomeView {
                 }
             }
         }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 20)
     }
     
     private func countryFilterButton(_ country: Country) -> some View {
@@ -98,11 +100,11 @@ extension HomeView {
             
             Image(country.rawValue)
             Text(country.koreaName)
-                
+            
                 .foregroundColor(selectedCountry == country ? .accent : .primary)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
         .background(selectedCountry == country ? .accent.opacity(0.2) : .white)
         .overlay(
             RoundedRectangle(cornerRadius: 10)
@@ -118,17 +120,15 @@ extension HomeView {
     
     private func categoryFilterButton(_ category: Category) -> some View {
         Button(category.koreaName) {
-                withAnimation {
-                    selectedCategory = category
-                }
+            withAnimation {
+                selectedCategory = category
             }
-            .buttonStyle(.actySelected(selectedCategory == category))
+        }
+        .buttonStyle(.actySelected(selectedCategory == category))
     }
-    
-    
 }
 
 
-//#Preview {
-//    HomeView(viewModel: HomeViewModel(activityService: MockActivityService()))
-//}
+#Preview {
+    HomeView(viewModel: HomeViewModel(activityService: MockActivityService()))
+}
