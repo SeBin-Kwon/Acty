@@ -60,8 +60,8 @@ struct TabbarView: View {
             Text("Search Results: \(query)")
         case .categoryDetail(let category):
             Text("Category: \(category)")
-        case .activityFeed:
-            Text("Activity Feed")
+        case .activityDetails(let detailId):
+            DetailView(id: detailId)
         case .myProfile:
             Text("My Profile")
         case .editProfile:

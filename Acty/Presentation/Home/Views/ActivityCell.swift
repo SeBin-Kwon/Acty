@@ -42,12 +42,26 @@ struct ActivityCell: View {
                 }
                 .frame(height: 188)
                 .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
+                .allowsHitTesting(false)
+                
+                LinearGradient(
+                    colors: [
+                        Color.black.opacity(0.1),
+                        Color.black.opacity(0.3),
+                        Color.black.opacity(0.7)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .allowsHitTesting(true)
                 
                 // 오버레이 요소들
                 VStack {
                     HStack {
                         // 좋아요 버튼
-                        Button(action: {}) {
+                        Button {
+                            print("좋아요 버튼")
+                        } label: {
                             Image(systemName: "heart")
                                 .font(.system(size: 16))
                                 .foregroundColor(.white)
@@ -189,6 +203,8 @@ struct ActivityCell: View {
             .padding(.horizontal, 5)
             .padding(.bottom, 16)
             .offset(y: -10)
+            .allowsHitTesting(true)
+            
             Rectangle()
                 .frame(height: 1)
                 .foregroundStyle(.gray30)

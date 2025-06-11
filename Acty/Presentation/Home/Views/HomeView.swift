@@ -9,9 +9,10 @@ import SwiftUI
 
 struct HomeView: View {
     
+    @EnvironmentObject var navigationRouter: NavigationRouter
+    @StateObject var viewModel: HomeViewModel
     @State private var selectedCountry: Country? = nil
     @State private var selectedCategory: ActivityCategory? = nil
-    @StateObject var viewModel: HomeViewModel
     
     var body: some View {
         ScrollView {
@@ -63,8 +64,10 @@ extension HomeView {
     private var activityListView: some View {
         ForEach(viewModel.output.activityList, id: \.id) { activity in
             ActivityCell(activity: activity)
+                .onTapGesture {
+                    navigationRouter.navigate(to: .activityDetails(activityId: activity.id), in: .main)
+                }
         }
-        .allowsHitTesting(false)
         .padding(.horizontal, 20)
     }
     
@@ -136,7 +139,6 @@ extension HomeView {
     }
 }
 
-//
-//#Preview {
-//    HomeView(viewModel: HomeViewModel(activityService: MockActivityService()))
-//}
+#Preview {
+    HomeView(viewModel: HomeViewModel(activityService: MockActivityService()))
+}

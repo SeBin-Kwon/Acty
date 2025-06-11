@@ -22,7 +22,7 @@ enum Route: Hashable {
     case categoryDetail(category: String)
     
     // Activity
-    case activityFeed
+    case activityDetails(activityId: String)
     
     // Profile
     case myProfile, editProfile, settings
