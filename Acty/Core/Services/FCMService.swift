@@ -91,7 +91,6 @@ final class FCMService: NSObject, FCMServiceProtocol {
     }
 }
 
-// MARK: - MessagingDelegate
 extension FCMService: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         print("🔄 FCM 토큰 갱신됨")
@@ -105,7 +104,6 @@ extension FCMService: MessagingDelegate {
     }
 }
 
-// MARK: - UNUserNotificationCenterDelegate
 extension FCMService: UNUserNotificationCenterDelegate {
     // 앱이 포그라운드에 있을 때 알림 표시
     func userNotificationCenter(
@@ -155,7 +153,6 @@ extension FCMService: UNUserNotificationCenterDelegate {
     }
 }
 
-// MARK: - AppDelegate Methods
 extension FCMService {
     func didRegisterForRemoteNotifications(with deviceToken: Data) {
         let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
@@ -182,7 +179,6 @@ extension FCMService {
     }
 }
 
-// MARK: - Test Methods
 extension FCMService {
     // 로컬 알림 테스트
     func sendTestLocalNotification() {
