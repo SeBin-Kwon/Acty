@@ -12,10 +12,9 @@ struct DetailView: View {
     @State private var selectedDate: String? = nil
     @State private var selectedTime: (String, String)? = nil
     @State private var timeList = [ReservationTime]()
+    @State private var personCount = 1
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 4)
-//    private var isAllReserved: Bool {
-//        timeList.allSatisfy(\.isReserved)
-//    }
+    
     let id: String
     
     
@@ -33,6 +32,8 @@ struct DetailView: View {
                 Spacer()
             }
             .padding(20)
+            PersonCountView(count: $personCount, minCount: 1, maxCount: 8)
+                .padding(20)    
             reservationSection
             paymentButton
         }
@@ -124,11 +125,11 @@ extension DetailView {
     }
 }
 
-#Preview {
-    DetailView(
-           viewModel: DetailViewModel(
-               activityService: MockActivityService()
-           ),
-           id: "sample-activity-id"
-       )
-}
+//#Preview {
+//    DetailView(
+//           viewModel: DetailViewModel(
+//               activityService: MockActivityService()
+//           ),
+//           id: "sample-activity-id"
+//       )
+//}

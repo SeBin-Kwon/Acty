@@ -69,7 +69,7 @@ struct PersonCountView: View {
             // 제한 안내
             HStack {
                 Text("최소 \(minCount)명, 최대 \(maxCount)명")
-//                    .font(.pretendard(.caption(.regular)))
+                    .font(.pretendard(.caption1(.regular)))
                     .foregroundColor(.gray)
                 Spacer()
             }

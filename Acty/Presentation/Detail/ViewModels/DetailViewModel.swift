@@ -36,7 +36,7 @@ final class DetailViewModel: ViewModelType {
                 print("detail: \(id)")
                 Task {
                     let result = await self.activityService.fetchActivityDetails(id: id)
-//                    print("🤣 Detail: \(result)")
+                    print("🤣 Detail: \(result)")
                     await MainActor.run {
                         self.output.activityDetail = result
                     }

@@ -44,8 +44,10 @@ struct ActyApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     init() {
-        if let appKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_NATIVE_APP_KEY") as? String {
-            KakaoSDK.initSDK(appKey: appKey)
+        if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] != "1" {
+            if let appKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_NATIVE_APP_KEY") as? String {
+                KakaoSDK.initSDK(appKey: appKey)
+            }
         }
         
         ImagePipelineManager.configure(with: DIContainer.shared.tokenService)
