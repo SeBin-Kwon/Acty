@@ -60,6 +60,9 @@ struct ActyApp: App {
                     if (AuthApi.isKakaoTalkLoginUrl(url)) {
                         _ = AuthController.handleOpenUrl(url: url)
                     }
+                    if url.scheme == "acty-payment" {
+                        handlePaymentReturn(url: url)
+                    }
                 })
                 .environmentObject(diContainer)
                 .task {
@@ -74,6 +77,26 @@ struct ActyApp: App {
             print("✅ 알림 권한 허용됨")
         } else {
             print("❌ 알림 권한 거부됨")
+        }
+    }
+    
+    private func handlePaymentReturn(url: URL) {
+        print("결제 완료 후 앱으로 돌아옴: \(url)")
+        // 여기에 결제 결과 처리 로직 추가
+        
+        // URL에서 결제 결과 파라미터 추출
+        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        let queryItems = components?.queryItems
+        
+        // 예시: acty-payment://result?status=success&orderId=12345
+        if let status = queryItems?.first(where: { $0.name == "status" })?.value {
+            if status == "success" {
+                // 결제 성공 처리
+                print("결제 성공!")
+            } else {
+                // 결제 실패 처리
+                print("결제 실패!")
+            }
         }
     }
 }
