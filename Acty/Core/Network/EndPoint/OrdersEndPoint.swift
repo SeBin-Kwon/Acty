@@ -1,5 +1,5 @@
 //
-//  PaymentEndPoint.swift
+//  OrdersEndPoint.swift
 //  Acty
 //
 //  Created by Sebin Kwon on 6/11/25.
@@ -8,8 +8,8 @@
 import Foundation
 import Alamofire
 
-enum PaymentEndPoint: EndPoint {
-    case orders(PaymentRequestDTO)
+enum OrdersEndPoint: EndPoint {
+    case orders(OrdersRequestDTO)
     case ordersHistory
     
     var path: String {

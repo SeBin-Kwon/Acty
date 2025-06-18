@@ -1,5 +1,5 @@
 //
-//  PaymentResponseDTO.swift
+//  OrdersResponseDTO.swift
 //  Acty
 //
 //  Created by Sebin Kwon on 6/18/25.

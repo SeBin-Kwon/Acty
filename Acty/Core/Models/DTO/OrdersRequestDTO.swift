@@ -1,5 +1,5 @@
 //
-//  PaymentRequestDTO.swift
+//  OrdersRequestDTO.swift
 //  Acty
 //
 //  Created by Sebin Kwon on 6/11/25.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct PaymentRequestDTO {
+struct OrdersRequestDTO {
     let id: String
     let reservationItemName: String
     let reservationItemTime: String
