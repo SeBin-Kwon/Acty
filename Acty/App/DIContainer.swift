@@ -28,6 +28,8 @@ final class DIContainer: ObservableObject {
     let appleSignInService: SignInServiceProtocol
     let kakaoSignInService: SignInServiceProtocol
     let activityService: ActivityServiceProtocol
+    let paymentService: PaymentServiceProtocol
+    let orderService: OrderServiceProtocol
     
     private init() {
         self.keychainManager = KeychainManager.shared
@@ -37,6 +39,8 @@ final class DIContainer: ObservableObject {
         self.kakaoSignInService = KakaoSignInService()
         self.authService = AuthService(networkManager: networkManager, tokenService: tokenService)
         self.activityService = ActivityService(networkManager: networkManager)
+        self.paymentService = PaymentService()
+        self.orderService = OrderService(networkManager: networkManager)
     }
     
     func makeSignInViewModel() -> SignInViewModel {
@@ -57,5 +61,9 @@ final class DIContainer: ObservableObject {
     
     func makeDetailViewModel() -> DetailViewModel {
         return DetailViewModel(activityService: activityService)
+    }
+    
+    func makePaymentViewModel() -> PaymentViewModel {
+        return PaymentViewModel(paymentService: paymentService, orderService: orderService)
     }
 }

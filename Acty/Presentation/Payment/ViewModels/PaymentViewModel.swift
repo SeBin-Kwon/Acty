@@ -19,26 +19,24 @@ final class PaymentViewModel: ViewModelType {
     private let orderService: OrderServiceProtocol
     
     struct Input {
-        // 주문 정보
         var activityId: String = ""
-        var reservationItemName: String = ""
-        var reservationItemTime: String = ""
-        var participantCount: Int = 1
-        var totalPrice: Int = 0
+        var selectedDate: String = ""
+        var selectedTime: (String, String) = ("", "")
+        var participantCount = 1
+        var totalPrice = 0
+        var productName = ""
+        var buyerName: String = "권세빈"
         
-        // 구매자 정보
-        var buyerName: String = ""
-        
-        // 액션
         let paymentButtonTapped = PassthroughSubject<Void, Never>()
-        let paymentCompleted = PassthroughSubject<IamportResponse, Never>()
+        let paymentCompleted = PassthroughSubject<IamportResponse?, Never>()
     }
     
     struct Output {
         var isLoading = false
         var paymentSuccess = PassthroughSubject<PortonePaymentResponseDTO, Never>()
         var paymentFailed = PassthroughSubject<String, Never>()
-        var showPaymentView = PassthroughSubject<PortonePaymentRequestDTO, Never>()
+        var showingPaymentSheet = false
+        var payment: IamportPayment? = nil
     }
     
     init(paymentService: PaymentServiceProtocol, orderService: OrderServiceProtocol) {
@@ -48,6 +46,7 @@ final class PaymentViewModel: ViewModelType {
     }
     
     func transform() {
+        
         // 결제 버튼 탭 처리
         input.paymentButtonTapped
             .sink { [weak self] in
@@ -71,33 +70,46 @@ final class PaymentViewModel: ViewModelType {
         
         setLoading(true)
         
-        // 1. 서버에 주문 생성 요청
+        // 서버에 주문 생성 요청
         Task {
             do {
                 let createOrderRequest = OrdersRequestDTO(
                     id: input.activityId,
-                    reservationItemName: input.reservationItemName,
-                    reservationItemTime: input.reservationItemTime,
+                    reservationItemName: input.selectedDate,
+                    reservationItemTime: input.selectedTime.1,
                     participantCount: input.participantCount,
                     totalPrice: input.totalPrice
                 )
                 
                 let orderResponse = try await orderService.createOrder(request: createOrderRequest)
-                
-                // 2. 포트원 결제 요청 데이터 생성
+                print("서버 주문 생성 성공")
+                // 포트원 결제 요청 데이터 생성
                 let portoneRequest = PortonePaymentRequestDTO(
                     orderCode: orderResponse.orderCode,
                     merchantUid: orderResponse.orderCode, // order_code를 merchant_uid로 사용
-                    amount: orderResponse.totalPrice, // String으로 받음
-                    orderName: input.reservationItemName,
+                    amount: String(orderResponse.totalPrice),
+                    orderName: input.selectedDate,
                     buyerName: input.buyerName,
                     payMethod: "card",
                     pgProvider: "html5_inicis"
                 )
                 
+                let payment = IamportPayment(
+                    pg: PG.html5_inicis.makePgRawName(pgId: "INIpayTest"),
+                    merchant_uid: portoneRequest.merchantUid,
+                    amount: portoneRequest.amount).then {
+                        $0.pay_method = PayMethod.card.rawValue
+                        $0.name = input.productName
+                        $0.buyer_name = input.buyerName
+                        $0.app_scheme = "acty-payment"
+                    }
+                
+                print("포트원 결제 요청 데이터 생성 성공")
+                
                 await MainActor.run {
                     self.setLoading(false)
-                    self.output.showPaymentView.send(portoneRequest)
+                    self.output.showingPaymentSheet = true
+                    self.output.payment = payment
                 }
                 
             } catch {
@@ -109,8 +121,16 @@ final class PaymentViewModel: ViewModelType {
         }
     }
     
-    private func handlePaymentResult(_ response: IamportResponse) {
+    private func handlePaymentResult(_ response: IamportResponse?) {
+        output.showingPaymentSheet = false
+                
         setLoading(true)
+        
+        guard let response = response else {
+            setLoading(false)
+            output.paymentFailed.send("결제가 취소되었습니다.")
+            return
+        }
         
         let paymentResult = paymentService.processPaymentResult(response)
         
@@ -130,14 +150,15 @@ final class PaymentViewModel: ViewModelType {
     
     private func validateInput() -> Bool {
         guard !input.activityId.isEmpty,
-              !input.reservationItemName.isEmpty,
-              !input.reservationItemTime.isEmpty,
+              !input.selectedDate.isEmpty,
+              !input.selectedTime.1.isEmpty,
               !input.buyerName.isEmpty,
               input.participantCount > 0,
               input.totalPrice > 0 else {
+            print("결제 유효성 실패")
             return false
         }
-        
+        print("결제 유효성 성공")
         return true
     }
 }

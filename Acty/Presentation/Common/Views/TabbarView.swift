@@ -61,7 +61,7 @@ struct TabbarView: View {
         case .categoryDetail(let category):
             Text("Category: \(category)")
         case .activityDetails(let detailId):
-            DetailView(viewModel: diContainer.makeDetailViewModel(), id: detailId)
+            DetailView(viewModel: diContainer.makeDetailViewModel(), paymentViewModel: diContainer.makePaymentViewModel(), id: detailId)
         case .myProfile:
             Text("My Profile")
         case .editProfile:
