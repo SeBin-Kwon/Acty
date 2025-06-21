@@ -6,17 +6,26 @@
 //
 
 import SwiftUI
+import iamport_ios
+import WebKit
 
 struct DetailView: View {
     @StateObject var viewModel: DetailViewModel
-    @State private var selectedDate: String? = nil
-    @State private var selectedTime: (String, String)? = nil
+    @StateObject var paymentViewModel: PaymentViewModel
     @State private var timeList = [ReservationTime]()
-    @State private var personCount = 1
+    @State private var participantCount = 1
+    @State private var selectedDate = ""
+    @State private var selectedTime = ("", "")
+    @State private var showingAlert = false
+    @State private var alertTitle = ""
+    @State private var alertMessage = ""
+    private var totalPrice: Int {
+        participantCount * (viewModel.output.activityDetail?.price.final ?? 0)
+    }
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 4)
     
     let id: String
-    
+    private let userCode = "imp14511373"
     
     var body: some View {
         ScrollView {
@@ -32,13 +41,38 @@ struct DetailView: View {
                 Spacer()
             }
             .padding(20)
-            PersonCountView(count: $personCount, minCount: 1, maxCount: 8)
-                .padding(20)    
+            PersonCountView(count: $participantCount, minCount: 1, maxCount: viewModel.output.activityDetail?.restrictions.maxParticipants ?? 1)
+                .padding(20)
             reservationSection
             paymentButton
+            Text("\(totalPrice)원")
         }
         .onAppear {
             viewModel.input.onAppear.send(id)
+            paymentViewModel.input.totalPrice = viewModel.output.activityDetail?.price.final ?? 0
+        }
+        .onReceive(paymentViewModel.output.paymentFailed) { error in
+            alertTitle = "결제 실패"
+            alertMessage = error
+            showingAlert = true
+        }
+        .alert(alertTitle, isPresented: $showingAlert) {
+            Button("확인", role: .cancel) { }
+        } message: {
+            Text(alertMessage)
+        }
+        .fullScreenCover(isPresented: $paymentViewModel.output.showingPaymentSheet) {
+            
+            if let payment = paymentViewModel.output.payment {
+                IamportPaymentWebView(
+                    payment: payment,
+                    userCode: userCode,
+                    onPaymentResult: { response in
+                        paymentViewModel.input.paymentCompleted.send(response)
+                    }
+                )
+            }
+            
         }
     }
 }
@@ -51,29 +85,36 @@ extension DetailView {
             .foregroundStyle(.white)
             .padding(.horizontal, 20)
             .padding(.vertical, 10)
-            .background(selectedTime != nil ? .deepBlue : .gray60)
+            .background(selectedTime.1 != "" ? .deepBlue : .gray60)
             .clipShape(.rect(cornerRadius: 10))
             .wrapToButton {
                 print("결제")
+                paymentViewModel.input.activityId = id
+                paymentViewModel.input.selectedDate = selectedDate
+                paymentViewModel.input.selectedTime = selectedTime
+                paymentViewModel.input.participantCount = participantCount
+                paymentViewModel.input.totalPrice = totalPrice
+                paymentViewModel.input.productName = viewModel.output.activityDetail?.title ?? ""
+                paymentViewModel.input.paymentButtonTapped.send(())
             }
-            .disabled(selectedTime == nil)
+            .disabled(selectedTime == ("", ""))
     }
-
+    
     private func timeButtonView(items: [ReservationTime]) -> some View {
         LazyVGrid(columns: columns, spacing: 12) {
             ForEach(items, id: \.hashValue) { item in
                 Button("\(item.time)") {
                     print("d")
                     withAnimation {
-                        if selectedTime ?? ("", "") == (selectedDate, item.time) {
-                            selectedTime = nil
+                        if selectedTime == (selectedDate, item.time) {
+                            selectedTime = ("", "")
                         } else {
-                            selectedTime = (selectedDate ?? "", item.time)
+                            selectedTime = (selectedDate, item.time)
                         }
                         
                     }
                 }
-                .buttonStyle(.actySelected(selectedTime ?? ("", "") == (selectedDate, item.time), item.isReserved))
+                .buttonStyle(.actySelected(selectedTime == (selectedDate, item.time), item.isReserved))
                 .disabled(item.isReserved)
             }
         }
@@ -111,7 +152,7 @@ extension DetailView {
             print("d")
             withAnimation {
                 if selectedDate == item.date {
-                    selectedDate = nil
+                    selectedDate = ""
                     timeList = []
                 } else {
                     selectedDate = item.date
