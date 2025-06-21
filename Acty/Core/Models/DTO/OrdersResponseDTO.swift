@@ -10,9 +10,9 @@ import Foundation
 struct OrdersResponseDTO: Decodable {
     let id: String
     let orderCode: String
-    let totalPrice: String
-    let createdAt: Int
-    let updatedAt: Int
+    let totalPrice: Int
+    let createdAt: String
+    let updatedAt: String
     
     enum CodingKeys: String, CodingKey {
         case id = "order_id"
