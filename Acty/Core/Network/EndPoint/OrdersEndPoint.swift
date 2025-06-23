@@ -11,17 +11,21 @@ import Alamofire
 enum OrdersEndPoint: EndPoint {
     case orders(OrdersRequestDTO)
     case ordersHistory
+    case paymentValidation(String)
+    case paymentHistory(String)
     
     var path: String {
         switch self {
         case .orders, .ordersHistory: baseURL + "/orders"
+        case .paymentValidation: baseURL + "/payments/validation"
+        case .paymentHistory(let order): baseURL + "/payments/\(order)"
         }
     }
     
     var method: HTTPMethod {
         switch self {
-        case .orders: .post
-        case .ordersHistory: .get
+        case .orders, .paymentValidation: .post
+        case .ordersHistory, .paymentHistory: .get
         }
     }
     
@@ -35,13 +39,17 @@ enum OrdersEndPoint: EndPoint {
                     "total_price": order.totalPrice]
         case .ordersHistory:
             return nil
+        case .paymentValidation(let order):
+            return ["imp_uid": order]
+        case .paymentHistory(let order):
+            return ["order_code": order]
         }
     }
     
     var encoding: ParameterEncoding {
         switch self {
-        case .orders: JSONEncoding.default
-        case .ordersHistory: URLEncoding(destination: .queryString)
+        case .orders, .paymentValidation: JSONEncoding.default
+        case .ordersHistory, .paymentHistory: URLEncoding(destination: .queryString)
         }
     }
     
