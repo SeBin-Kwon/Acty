@@ -21,6 +21,7 @@ struct IamportPaymentWebView: UIViewControllerRepresentable {
         paymentVC.onPaymentResult = onPaymentResult
         
         let navController = UINavigationController(rootViewController: paymentVC)
+        navController.isNavigationBarHidden = true
         return navController
     }
     
@@ -60,7 +61,7 @@ class IamportPaymentWebViewController: UIViewController {
         view.addSubview(webView)
         webView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            webView.topAnchor.constraint(equalTo: view.topAnchor),
             webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
