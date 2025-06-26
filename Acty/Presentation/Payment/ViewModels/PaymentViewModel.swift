@@ -123,7 +123,7 @@ final class PaymentViewModel: ViewModelType {
     
     private func handlePaymentResult(_ response: IamportResponse?) {
         output.showingPaymentSheet = false
-                
+        
         setLoading(true)
         
         guard let response = response else {
@@ -137,11 +137,42 @@ final class PaymentViewModel: ViewModelType {
         if paymentResult.success {
             setLoading(false)
             output.paymentSuccess.send(paymentResult)
+            Task {
+                await validatePayment(impUid: paymentResult.impUid, merchantUid: paymentResult.merchantUid)
+            }
+            
         } else {
             setLoading(false)
             let errorMessage = paymentResult.errorMsg ?? "결제에 실패했습니다."
             output.paymentFailed.send(errorMessage)
         }
+    }
+    
+    private func validatePayment(impUid: String?, merchantUid: String?) async {
+        guard let impUid, let merchantUid else {
+            await MainActor.run {
+                self.setLoading(false)
+                self.output.paymentFailed.send("결제 정보가 올바르지 않습니다.")
+            }
+            return
+        }
+        do {
+            let validationResult = try await paymentService.validatePayment(
+                impUid: impUid,
+                orderCode: merchantUid
+            )
+            
+            await MainActor.run {
+                self.setLoading(false)
+                print("결제 검증 성공")
+            }
+        } catch {
+            await MainActor.run {
+                self.setLoading(false)
+                self.output.paymentFailed.send("결제 검증 중 오류: \(error.localizedDescription)")
+            }
+        }
+        
     }
     
     private func setLoading(_ isLoading: Bool) {
