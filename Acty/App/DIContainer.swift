@@ -39,7 +39,7 @@ final class DIContainer: ObservableObject {
         self.kakaoSignInService = KakaoSignInService()
         self.authService = AuthService(networkManager: networkManager, tokenService: tokenService)
         self.activityService = ActivityService(networkManager: networkManager)
-        self.paymentService = PaymentService()
+        self.paymentService = PaymentService(networkManager: networkManager)
         self.orderService = OrderService(networkManager: networkManager)
     }
     
