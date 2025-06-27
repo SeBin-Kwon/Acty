@@ -10,6 +10,7 @@ import iamport_ios
 import WebKit
 
 struct DetailView: View {
+    @EnvironmentObject var navigationRouter: NavigationRouter
     @StateObject var viewModel: DetailViewModel
     @StateObject var paymentViewModel: PaymentViewModel
     @State private var timeList = [ReservationTime]()
@@ -45,6 +46,9 @@ struct DetailView: View {
                 .padding(20)
             reservationSection
             paymentButton
+            Button("채팅") {
+                navigationRouter.navigate(to: .chat, in: .main)
+            }
             Text("\(totalPrice)원")
         }
         .onAppear {
