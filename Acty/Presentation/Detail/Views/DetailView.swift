@@ -30,26 +30,30 @@ struct DetailView: View {
     
     var body: some View {
         ScrollView {
-            HStack {
-                Text(viewModel.output.activityDetail?.title ?? "없음")
-                    .font(.paperLogy(.title1))
-                Spacer()
-            }
-            .padding(20)
-            HStack {
-                Text("액티비티 예약설정")
-                    .font(.pretendard(.body2(.bold)))
-                Spacer()
-            }
-            .padding(20)
-            PersonCountView(count: $participantCount, minCount: 1, maxCount: viewModel.output.activityDetail?.restrictions.maxParticipants ?? 1)
+            VStack {
+                HStack {
+                    Text(viewModel.output.activityDetail?.title ?? "없음")
+                        .font(.paperLogy(.title1))
+                    Spacer()
+                }
                 .padding(20)
-            reservationSection
-            paymentButton
-            Button("채팅") {
-                navigationRouter.navigate(to: .chat, in: .main)
+                HStack {
+                    Text("액티비티 예약설정")
+                        .font(.pretendard(.body2(.bold)))
+                    Spacer()
+                }
+                .padding(20)
+                PersonCountView(count: $participantCount, minCount: 1, maxCount: viewModel.output.activityDetail?.restrictions.maxParticipants ?? 1)
+                    .padding(20)
+                reservationSection
+                paymentButton
+                Button("채팅") {
+                    navigationRouter.navigate(to: .chat, in: .main)
+                }
+                
+                Text("\(totalPrice)원")
+                    .font(.paperLogy(.title1))
             }
-            Text("\(totalPrice)원")
         }
         .onAppear {
             viewModel.input.onAppear.send(id)
@@ -170,11 +174,13 @@ extension DetailView {
     }
 }
 
-//#Preview {
-//    DetailView(
-//           viewModel: DetailViewModel(
-//               activityService: MockActivityService()
-//           ),
-//           id: "sample-activity-id"
-//       )
-//}
+#Preview {
+    let diContainer = DIContainer.shared
+    DetailView(
+        viewModel: DetailViewModel(
+            activityService: MockActivityService()
+        ),
+        paymentViewModel: diContainer.makePaymentViewModel(), id: "sample-activity-id"
+    )
+    .environmentObject(diContainer)
+}
