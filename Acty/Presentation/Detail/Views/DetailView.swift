@@ -35,6 +35,7 @@ struct DetailView: View {
                     Text(viewModel.output.activityDetail?.title ?? "없음")
                         .font(.paperLogy(.title1))
                     Spacer()
+                    chatButton
                 }
                 .padding(20)
                 HStack {
@@ -47,9 +48,6 @@ struct DetailView: View {
                     .padding(20)
                 reservationSection
                 paymentButton
-                Button("채팅") {
-                    navigationRouter.navigate(to: .chat, in: .main)
-                }
                 
                 Text("\(totalPrice)원")
                     .font(.paperLogy(.title1))
@@ -86,6 +84,19 @@ struct DetailView: View {
 }
 
 extension DetailView {
+    
+    private var chatButton: some View {
+        Text("채팅")
+            .font(.pretendard(.body1(.bold)))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(.accent)
+            .clipShape(.rect(cornerRadius: 10))
+            .wrapToButton {
+                navigationRouter.navigate(to: .chat, in: .main)
+            }
+    }
     
     private var paymentButton: some View {
         Text("결제하기")
