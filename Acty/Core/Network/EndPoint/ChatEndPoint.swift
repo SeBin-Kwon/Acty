@@ -10,6 +10,7 @@ import Alamofire
 
 enum ChatEndPoint: EndPoint {
     case getChats
+    case createChats
     
     var path: String {
         switch self {
