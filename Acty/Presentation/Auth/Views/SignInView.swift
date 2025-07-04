@@ -18,11 +18,23 @@ struct SignInView: View {
         NavigationStack {
             VStack {
                 Text("로그인")
+                    .font(.paperLogy(.body1))
                 TextField("아이디", text: $viewModel.input.email)
+                    .padding(10)
+                    .cornerRadius(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(.accent, lineWidth: 1)
+                    )
+                    .keyboardType(.emailAddress)
                 SecureField("비밀번호", text: $viewModel.input.password)
-                Button("로그인") {
-                    viewModel.input.signInTapped.send(.email)
-                }
+                    .padding(10)
+                    .cornerRadius(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(.accent, lineWidth: 1)
+                    )
+                loginButton
                 appleButton
                 kakaoButton
                 Button("회원가입") {
@@ -36,6 +48,19 @@ struct SignInView: View {
                 navigateToHome = true
             }
         }
+    }
+    
+    private var loginButton: some View {
+        Text("로그인")
+            .font(.pretendard(.title(.bold)))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+            .background(.deepBlue)
+            .clipShape(.rect(cornerRadius: 10))
+            .wrapToButton {
+                viewModel.input.signInTapped.send(.email)
+            }
     }
     
     private var kakaoButton: some View {
@@ -71,8 +96,9 @@ struct SignInView: View {
 }
 
 
-//#if DEBUG
-//#Preview {
-//    SignInView()
-//}
-//#endif
+#if DEBUG
+#Preview {
+    let diContainer = DIContainer.shared
+    SignInView(viewModel: diContainer.makeSignInViewModel())
+}
+#endif
