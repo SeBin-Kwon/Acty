@@ -18,6 +18,13 @@ struct SignUpView: View {
             Text("email")
             HStack {
                 TextField("이메일을 입력해주세요.", text: $viewModel.input.email)
+                    .padding(10)
+                    .cornerRadius(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(.accent, lineWidth: 1)
+                    )
+                    .keyboardType(.emailAddress)
                 Button {
                     print("sd")
                 } label: {
@@ -27,8 +34,20 @@ struct SignUpView: View {
             }
             Text("password")
             TextField("비밀번호를 입력해주세요.", text: $viewModel.input.password)
+                .padding(10)
+                .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(.accent, lineWidth: 1)
+                )
             Text("nickname")
             TextField("닉네임을 입력해주세요.", text: $viewModel.input.nickname)
+                .padding(10)
+                .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(.accent, lineWidth: 1)
+                )
             Button {
                 viewModel.input.signUpButtonTapped.send(())
             } label: {
