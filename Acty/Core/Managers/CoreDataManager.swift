@@ -45,8 +45,7 @@ final class ChatDataManager: ChatDataManagerProtocol {
             try context.save()
         }
     }
-    
-    // MARK: - 메시지 관련 메소드
+
     
     /// 여러 메시지를 한번에 저장
     func saveMessages(_ messages: [ChatMessageDTO], for roomId: String) throws {
@@ -115,8 +114,6 @@ final class ChatDataManager: ChatDataManagerProtocol {
         try saveContext()
     }
     
-    // MARK: - 채팅방 관련 메소드
-    
     /// 모든 채팅방 조회
     func getChatRooms() throws -> [ChatRoomResponseDTO] {
         let fetchRequest: NSFetchRequest<ChatRoomEntity> = ChatRoomEntity.fetchRequest()
@@ -153,11 +150,4 @@ final class ChatDataManager: ChatDataManagerProtocol {
     }
 }
 
-struct ChatMessageDTO: Codable {
-    let content: String
-    let files: [ChatFiles]
-}
 
-struct ChatFiles: Codable {
-    let url: String
-}
