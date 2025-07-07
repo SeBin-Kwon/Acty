@@ -17,8 +17,13 @@ struct SignInView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                Text("로그인")
-                    .font(.paperLogy(.body1))
+                HStack {
+                    Text("로그인")
+                        .font(.paperLogy(.body1))
+                        .foregroundStyle(.deepBlue)
+                    Spacer()
+                }
+                .padding(.vertical, 20)
                 TextField("아이디", text: $viewModel.input.email)
                     .padding(10)
                     .cornerRadius(10)
@@ -34,12 +39,14 @@ struct SignInView: View {
                         RoundedRectangle(cornerRadius: 10)
                             .stroke(.accent, lineWidth: 1)
                     )
+                    .padding(.bottom, 20)
                 loginButton
                 appleButton
                 kakaoButton
                 Button("회원가입") {
                     navigationRouter.navigate(to: .signUp, in: .auth)
                }
+                .padding(.top, 20)
             }
             .padding()
         }
@@ -54,8 +61,9 @@ struct SignInView: View {
         Text("로그인")
             .font(.pretendard(.title(.bold)))
             .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, 20)
-            .padding(.vertical, 10)
+            .padding(.vertical, 15)
             .background(.deepBlue)
             .clipShape(.rect(cornerRadius: 10))
             .wrapToButton {
@@ -67,7 +75,10 @@ struct SignInView: View {
         Button {
             viewModel.input.signInTapped.send(.kakao)
         } label: {
-            Text("카카오톡 로그인")
+            Image("kakao_login_medium_wide")
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
         }
     }
     
@@ -86,7 +97,7 @@ struct SignInView: View {
                 }
             }
         )
-        .frame(width : UIScreen.main.bounds.width * 0.9, height:50)
+        .frame(maxWidth: .infinity, maxHeight:55)
         .onTapGesture {
             viewModel.input.signInTapped.send(.apple)
         }
