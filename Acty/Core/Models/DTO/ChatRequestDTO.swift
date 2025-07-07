@@ -1,5 +1,5 @@
 //
-//  ChatMessageDTO.swift
+//  ChatRequestDTO.swift
 //  Acty
 //
 //  Created by Sebin Kwon on 7/6/25.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ChatMessageDTO: Codable {
+struct ChatRequestDTO: Codable {
     let content: String
     let files: [ChatFiles]
 }
@@ -15,3 +15,5 @@ struct ChatMessageDTO: Codable {
 struct ChatFiles: Codable {
     let url: String
 }
+
+
