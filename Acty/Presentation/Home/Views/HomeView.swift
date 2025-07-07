@@ -62,11 +62,15 @@ struct HomeView: View {
 extension HomeView {
     
     private var activityListView: some View {
-        ForEach(viewModel.output.activityList, id: \.id) { activity in
+        ForEach(Array(viewModel.output.activityList.enumerated()), id: \.offset) { index, activity in
             ActivityCell(activity: activity)
                 .onTapGesture {
-//                    viewModel.input.activityDetail.send(activity.id)
                     navigationRouter.navigate(to: .activityDetails(detailId: activity.id), in: .main)
+                }
+                .onAppear {
+                    if index == viewModel.output.activityList.count - 3 {
+                        viewModel.input.loadData.send(())
+                    }
                 }
         }
         .padding(.horizontal, 20)
@@ -138,6 +142,6 @@ extension HomeView {
     }
 }
 
-#Preview {
-    HomeView(viewModel: HomeViewModel(activityService: MockActivityService()))
-}
+//#Preview {
+//    HomeView(viewModel: HomeViewModel(activityService: MockActivityService()))
+//}

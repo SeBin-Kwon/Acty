@@ -15,9 +15,13 @@ final class HomeViewModel: ViewModelType {
     var cancellables = Set<AnyCancellable>()
     private let activityService: ActivityServiceProtocol
     
+    private var currentFilters: (country: String, category: String) = ("", "")
+    private var nextCursor = ""
+    
     struct Input {
         var onAppear = PassthroughSubject<Void, Never>()
         var filterButtonTapped = PassthroughSubject<(Country?, ActivityCategory?), Never>()
+        var loadData = PassthroughSubject<Void, Never>()
 //        var activityDetail = PassthroughSubject<String, Never>()
     }
     
@@ -37,33 +41,26 @@ final class HomeViewModel: ViewModelType {
         input.onAppear
             .sink { [weak self] _ in
                 guard let self else { return }
-                let dto = ActivityRequestDTO(country: "", category: "", limit: 5, next: "")
-                Task {
-                    let activityResult = await self.activityService.fetchActivities(dto: dto)
-                    let newActivityResult = await self.activityService.fetchNewActivities(dto: dto)
-                    await MainActor.run {
-//                        print("😀 newActivityList: \(newActivityResult)")
-//                        print("🤣 activityList: \(activityResult)")
-                        self.output.newActivityList = newActivityResult
-                        self.output.activityList = activityResult
-                    }
-                }
+                let dto = ActivityRequestDTO(country: "", category: "", limit: 10, next: "")
+                fetchActivityData(isOnAppear: true, dto: dto)
+                
             }
             .store(in: &cancellables)
         
         input.filterButtonTapped
             .sink { [weak self] (country, category) in
                 guard let self else { return }
-                
-                let dto = ActivityRequestDTO(country: country?.koreaName ?? "", category: category?.koreaName ?? "", limit: 5, next: "")
-                
-                Task {
-                    let activityResult = await self.activityService.fetchActivities(dto: dto)
-                    await MainActor.run {
-//                        print("🤣 activityList: \(activityResult)")
-                        self.output.activityList = activityResult
-                    }
-                }
+                let dto = ActivityRequestDTO(country: country?.koreaName ?? "", category: category?.koreaName ?? "", limit: 10, next: "")
+                fetchActivityData(isOnAppear: false, dto: dto)
+                currentFilters = (country?.koreaName ?? "", category?.koreaName ?? "")
+            }
+            .store(in: &cancellables)
+        
+        input.loadData
+            .sink { [weak self] in
+                guard let self else { return }
+                let dto = ActivityRequestDTO(country: currentFilters.country, category: currentFilters.category, limit: 10, next: nextCursor)
+                fetchActivityData(isOnAppear: false, dto: dto)
             }
             .store(in: &cancellables)
         
@@ -80,5 +77,36 @@ final class HomeViewModel: ViewModelType {
 //                }
 //            }
 //            .store(in: &cancellables)
+    }
+    
+    private func fetchActivityData(isOnAppear: Bool, dto: ActivityRequestDTO) {
+        if isOnAppear {
+            Task {
+                let activityResult = await self.activityService.fetchActivities(dto: dto)
+                let newActivityResult = await self.activityService.fetchNewActivities(dto: dto)
+                await MainActor.run {
+                    self.output.newActivityList = newActivityResult
+                    self.output.activityList = activityResult.activities
+                    nextCursor = activityResult.nextCursor ?? ""
+                    print(activityResult)
+                }
+            }
+        } else {
+            if dto.next.isEmpty {
+                Task {
+                    let activityResult = await self.activityService.fetchActivities(dto: dto)
+                    await MainActor.run {
+                        self.output.activityList = activityResult.activities
+                    }
+                }
+            } else {
+                Task {
+                    let activityResult = await self.activityService.fetchActivities(dto: dto)
+                    await MainActor.run {
+                        self.output.activityList.append(contentsOf: activityResult.activities)
+                    }
+                }
+            }
+        }
     }
 }
