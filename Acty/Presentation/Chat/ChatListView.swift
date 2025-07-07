@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ChatListView: View {
+    @EnvironmentObject var navigationRouter: NavigationRouter
+    
     var body: some View {
         ScrollView {
             LazyVStack() {
@@ -15,6 +17,9 @@ struct ChatListView: View {
                     Text("채팅방")
                         .font(.paperLogy(.title1))
                         .padding(20)
+                        .wrapToButton {
+                            navigationRouter.navigate(to: .chat(roomId: "123"), in: .main)
+                        }
                     Spacer()
                 }
             }
@@ -22,6 +27,6 @@ struct ChatListView: View {
     }
 }
 
-#Preview {
-    ChatListView()
-}
+//#Preview {
+//    ChatListView()
+//}
