@@ -19,10 +19,10 @@ public class ChatRoomEntity: NSManagedObject {
     @NSManaged public var messages: NSSet?
     
     // Participants 배열 처리
-    var participants: [ParticipantDTO] {
+    var participants: [SenderDTO] {
         get {
             guard let data = participantsData,
-                  let participants = try? JSONDecoder().decode([ParticipantDTO].self, from: data) else {
+                  let participants = try? JSONDecoder().decode([SenderDTO].self, from: data) else {
                 return []
             }
             return participants
@@ -60,16 +60,16 @@ extension ChatRoomEntity {
     func toDTO() -> ChatRoomResponseDTO {
         let formatter = ISO8601DateFormatter()
         
-        var lastChat: LastChatDTO? = nil
+        var lastChat: ChatResponseDTO? = nil
         if let lastMessage = lastMessage,
            let lastMessageTime = lastMessageTime {
-            lastChat = LastChatDTO(
+            lastChat = ChatResponseDTO(
                 chatId: "",
                 roomId: roomId,
                 content: lastMessage,
                 createdAt: formatter.string(from: lastMessageTime),
                 updatedAt: formatter.string(from: lastMessageTime),
-                sender: participants.first ?? ParticipantDTO(userId: "", nick: "", profileImage: nil, introduction: nil),
+                sender: participants.first ?? SenderDTO(userId: "", nick: "", name: nil, profileImage: nil, introduction: nil, hashTags: nil),
                 files: nil
             )
         }
@@ -120,46 +120,46 @@ extension ChatMessageEntity {
     }
     
     // DTO로 변환
-//    func toDTO() -> ChatMessageDTO {
-//        let sender = SenderDTO(
-//            userId: senderId,
-//            nick: senderNick,
-//            name: senderName,
-//            introduction: senderIntroduction,
-//            profileImage: senderProfileImage,
-//            hashTags: nil
-//        )
-//        
-//        let formatter = ISO8601DateFormatter()
-//        
-//        return ChatMessageDTO(
-//            chatId: chatId,
-//            roomId: roomId,
-//            content: content,
-//            createdAt: formatter.string(from: createdAt),
-//            updatedAt: formatter.string(from: updatedAt),
-//            sender: sender,
-//            files: files.isEmpty ? nil : files
-//        )
-//    }
+    func toDTO() -> ChatResponseDTO {
+        let sender = SenderDTO(
+            userId: senderId,
+            nick: senderNick,
+            name: senderName,
+            profileImage: senderProfileImage,
+            introduction: senderIntroduction,
+            hashTags: nil
+        )
+        
+        let formatter = ISO8601DateFormatter()
+        
+        return ChatResponseDTO(
+            chatId: chatId,
+            roomId: roomId,
+            content: content,
+            createdAt: formatter.string(from: createdAt),
+            updatedAt: formatter.string(from: updatedAt),
+            sender: sender,
+            files: files.isEmpty ? nil : files
+        )
+    }
     
     // DTO에서 생성
-//    static func fromDTO(_ dto: ChatMessageDTO, context: NSManagedObjectContext) -> ChatMessageEntity {
-//        let entity = ChatMessageEntity(context: context)
-//        let formatter = ISO8601DateFormatter()
-//        
-//        entity.chatId = dto.chatId
-//        entity.roomId = dto.roomId
-//        entity.content = dto.content
-//        entity.createdAt = formatter.date(from: dto.createdAt) ?? Date()
-//        entity.updatedAt = formatter.date(from: dto.updatedAt) ?? Date()
-//        entity.senderId = dto.sender.userId
-//        entity.senderNick = dto.sender.nick
-//        entity.senderName = dto.sender.name
-//        entity.senderProfileImage = dto.sender.profileImage
-//        entity.senderIntroduction = dto.sender.introduction
-//        entity.files = dto.files ?? []
-//        
-//        return entity
-//    }
+    static func fromDTO(_ dto: ChatResponseDTO, context: NSManagedObjectContext) -> ChatMessageEntity {
+        let entity = ChatMessageEntity(context: context)
+        let formatter = ISO8601DateFormatter()
+        
+        entity.chatId = dto.chatId
+        entity.roomId = dto.roomId
+        entity.content = dto.content
+        entity.createdAt = formatter.date(from: dto.createdAt) ?? Date()
+        entity.updatedAt = formatter.date(from: dto.updatedAt) ?? Date()
+        entity.senderId = dto.sender.userId
+        entity.senderNick = dto.sender.nick
+        entity.senderName = dto.sender.name
+        entity.senderProfileImage = dto.sender.profileImage
+        entity.senderIntroduction = dto.sender.introduction
+        entity.files = dto.files ?? []
+        
+        return entity
+    }
 }

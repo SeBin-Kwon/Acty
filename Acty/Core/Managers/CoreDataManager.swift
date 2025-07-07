@@ -10,13 +10,13 @@ import CoreData
 import Combine
 
 protocol ChatDataManagerProtocol {
-    func saveMessages(_ messages: [ChatMessageDTO], for roomId: String) throws
-//    func getMessages(for roomId: String) throws -> [ChatMessageDTO]
+    func saveMessages(_ messages: [ChatResponseDTO], for roomId: String) throws
+    func getMessages(for roomId: String) throws -> [ChatResponseDTO]
     func getLastMessageDate(for roomId: String) throws -> Date?
-    func saveMessage(_ message: ChatMessageDTO) throws
+    func saveMessage(_ message: ChatResponseDTO) throws
     func deleteAllMessages(for roomId: String) throws
-//    func getChatRooms() throws -> [ChatRoomDTO]
-//    func saveChatRoom(_ room: ChatRoomDTO) throws
+    func getChatRooms() throws -> [ChatRoomResponseDTO]
+    func saveChatRoom(_ room: ChatRoomResponseDTO) throws
 }
 
 final class ChatDataManager: ChatDataManagerProtocol {
@@ -25,7 +25,6 @@ final class ChatDataManager: ChatDataManagerProtocol {
     
     private init() {}
     
-    // MARK: - Core Data Stack
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "ChatDataModel") // .xcdatamodeld 파일명
         container.loadPersistentStores { _, error in
@@ -48,7 +47,7 @@ final class ChatDataManager: ChatDataManagerProtocol {
 
     
     /// 여러 메시지를 한번에 저장
-    func saveMessages(_ messages: [ChatMessageDTO], for roomId: String) throws {
+    func saveMessages(_ messages: [ChatResponseDTO], for roomId: String) throws {
         for message in messages {
             // 이미 존재하는 메시지인지 확인
             let fetchRequest: NSFetchRequest<ChatMessageEntity> = ChatMessageEntity.fetchRequest()
@@ -66,14 +65,14 @@ final class ChatDataManager: ChatDataManagerProtocol {
     }
     
     /// 특정 채팅방의 모든 메시지 조회
-//    func getMessages(for roomId: String) throws -> [ChatMessageDTO] {
-//        let fetchRequest: NSFetchRequest<ChatMessageEntity> = ChatMessageEntity.fetchRequest()
-//        fetchRequest.predicate = NSPredicate(format: "roomId == %@", roomId)
-//        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: true)]
-//        
-//        let entities = try context.fetch(fetchRequest)
-////        return entities.map { $0.toDTO() }
-//    }
+    func getMessages(for roomId: String) throws -> [ChatResponseDTO] {
+        let fetchRequest: NSFetchRequest<ChatMessageEntity> = ChatMessageEntity.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "roomId == %@", roomId)
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: true)]
+        
+        let entities = try context.fetch(fetchRequest)
+        return entities.map { $0.toDTO() }
+    }
     
     /// 특정 채팅방의 가장 최근 메시지 날짜 조회
     func getLastMessageDate(for roomId: String) throws -> Date? {
@@ -87,7 +86,7 @@ final class ChatDataManager: ChatDataManagerProtocol {
     }
     
     /// 단일 메시지 저장
-    func saveMessage(_ message: ChatMessageDTO) throws {
+    func saveMessage(_ message: ChatResponseDTO) throws {
         // 중복 체크
         let fetchRequest: NSFetchRequest<ChatMessageEntity> = ChatMessageEntity.fetchRequest()
 //        fetchRequest.predicate = NSPredicate(format: "chatId == %@", message.chatId)
