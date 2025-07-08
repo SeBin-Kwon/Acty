@@ -10,7 +10,7 @@ import Foundation
 protocol ActivityServiceProtocol {
     func fetchActivities(dto: ActivityRequestDTO) async -> ActivityList
     func fetchNewActivities(dto: ActivityRequestDTO) async -> [Activity]
-    func fetchActivityDetails(id: String) async -> ActivityDetail
+    func fetchActivityDetails(id: String) async throws -> ActivityDetail
 }
 
 final class ActivityService: ActivityServiceProtocol {
@@ -20,16 +20,10 @@ final class ActivityService: ActivityServiceProtocol {
         self.networkManager = networkManager
     }
     
-    func fetchActivityDetails(id: String) async -> ActivityDetail {
-        do {
-            let result: ActivityDetailResponseDTO = try await networkManager.fetchResults(api: ActivityEndPoint.activityDetail(id))
-            print("액티비티 Detail fetch 성공")
-            return result.toEntity()
-        } catch {
-            print("액티비티 Detail fetch 실패")
-            print(error)
-            fatalError()
-        }
+    func fetchActivityDetails(id: String) async throws -> ActivityDetail {
+        let result: ActivityDetailResponseDTO = try await networkManager.fetchResults(api: ActivityEndPoint.activityDetail(id))
+        print("액티비티 Detail fetch 성공")
+        return result.toEntity()
     }
     
     func fetchActivities(dto: ActivityRequestDTO) async -> ActivityList {

@@ -35,7 +35,7 @@ final class DetailViewModel: ViewModelType {
                 guard let self else { return }
                 print("detail: \(id)")
                 Task {
-                    let result = await self.activityService.fetchActivityDetails(id: id)
+                    let result = try await self.activityService.fetchActivityDetails(id: id)
                     print("🤣 Detail: \(result)")
                     await MainActor.run {
                         self.output.activityDetail = result

@@ -90,7 +90,7 @@ struct CreatorDTO: Decodable {
     let userId: String
     let nick: String
     let profileImage: String?
-    let introduction: String
+    let introduction: String?
     
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
@@ -176,7 +176,7 @@ extension CreatorDTO {
             userId: userId,
             nickname: nick,
             profileImage: profileImage ?? "",
-            introduction: introduction
+            introduction: introduction ?? ""
         )
     }
 }
