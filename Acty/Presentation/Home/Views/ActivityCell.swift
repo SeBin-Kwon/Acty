@@ -63,7 +63,7 @@ struct ActivityCell: View {
                         Button {
                             print("좋아요 버튼")
                         } label: {
-                            Image(systemName: "heart")
+                            Image(systemName: activity.isKeep ? "heart.fill" : "heart")
                                 .font(.system(size: 16))
                                 .foregroundColor(.white)
                                 .frame(width: 40, height: 40)
@@ -71,10 +71,10 @@ struct ActivityCell: View {
                         
                         Spacer()
                         
-                        // 스위스 인터라켄 태그
+                        // 나라
                         HStack(spacing: 4) {
                             Text("✈️")
-                            Text("스위스 인터라켄")
+                            Text(activity.country)
                                 .font(.caption)
                                 .fontWeight(.medium)
                         }
@@ -93,19 +93,22 @@ struct ActivityCell: View {
                         Spacer()
                         
                         // 광고 버튼
-                        Button(action: {}) {
-                            HStack(spacing: 4) {
-                                Image(systemName: "info.circle")
-                                    .font(.system(size: 12))
-                                Text("광고")
-                                    .font(.caption)
+                        if activity.isAdvertisement {
+                            Button(action: {}) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "info.circle")
+                                        .font(.system(size: 12))
+                                    Text("광고")
+                                        .font(.caption)
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.white.opacity(0.3))
+                                .clipShape(Capsule())
                             }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.white.opacity(0.3))
-                            .clipShape(Capsule())
                         }
+                        
                     }
                     .padding(.horizontal, 16)
                     .padding(.bottom, 16)
@@ -114,36 +117,31 @@ struct ActivityCell: View {
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .frame(height: 188)
             
-            HStack(spacing: 6) {
-                // 반짝이는 별 아이콘
-                Image(systemName: "sparkles")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white)
+            if !activity.tags.isEmpty {
                 
-                // NEW 텍스트
-                Text("NEW")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.white)
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white)
+                    Text(activity.tags.first!)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule()
+                        .fill(.thinMaterial)
+                        .opacity(0.5)
+                )
+                .overlay(
+                    Capsule()
+                        .stroke(.white, lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                .offset(y: -25)
                 
-                // 액티비티 오픈 텍스트
-                Text("액티비티 오픈!")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.white)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .background(
-                Capsule()
-                    .fill(.thinMaterial)
-                    .opacity(0.5)
-            )
-            .overlay(
-                Capsule()
-                    .stroke(.white, lineWidth: 1)
-            )
-            .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
-            .offset(y: -25)
-            
             // 컨텐츠 섹션
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
@@ -225,7 +223,7 @@ struct ActivityCell: View {
         price: Price(original: 50000, final: 35000),
         tags: ["인기", "할인"],
         pointReward: 350,
-        isAdvertisement: false,
+        isAdvertisement: true,
         isKeep: false,
         keepCount: 245
     ))
