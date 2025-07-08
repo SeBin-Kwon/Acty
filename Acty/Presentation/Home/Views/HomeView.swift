@@ -30,6 +30,9 @@ struct HomeView: View {
                 countryFilterRow
                 categoryFilterRow
                 activityListView
+                if viewModel.output.isLoading {
+                    loadingView
+                }
             }
         }
         .onAppear {
@@ -60,6 +63,17 @@ struct HomeView: View {
 }
 
 extension HomeView {
+    
+    private var loadingView: some View {
+        HStack {
+            ProgressView()
+                .scaleEffect(0.8)
+            Text("로딩 중...")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding()
+    }
     
     private var activityListView: some View {
         ForEach(Array(viewModel.output.activityList.enumerated()), id: \.offset) { index, activity in

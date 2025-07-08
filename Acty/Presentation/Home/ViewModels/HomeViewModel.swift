@@ -28,6 +28,7 @@ final class HomeViewModel: ViewModelType {
     struct Output {
         var newActivityList = [Activity]()
         var activityList = [Activity]()
+        var isLoading = false
 //        var activityDescription = ""
 //        var activityDetails = [String: ActivityDetail]()
     }
@@ -43,7 +44,6 @@ final class HomeViewModel: ViewModelType {
                 guard let self else { return }
                 let dto = ActivityRequestDTO(country: "", category: "", limit: 10, next: "")
                 fetchActivityData(isOnAppear: true, dto: dto)
-                
             }
             .store(in: &cancellables)
         
@@ -51,6 +51,8 @@ final class HomeViewModel: ViewModelType {
             .sink { [weak self] (country, category) in
                 guard let self else { return }
                 let dto = ActivityRequestDTO(country: country?.koreaName ?? "", category: category?.koreaName ?? "", limit: 10, next: "")
+                nextCursor = ""
+                output.activityList = []
                 fetchActivityData(isOnAppear: false, dto: dto)
                 currentFilters = (country?.koreaName ?? "", category?.koreaName ?? "")
             }
@@ -60,7 +62,7 @@ final class HomeViewModel: ViewModelType {
             .sink { [weak self] in
                 guard let self else { return }
                 let dto = ActivityRequestDTO(country: currentFilters.country, category: currentFilters.category, limit: 10, next: nextCursor)
-                fetchActivityData(isOnAppear: false, dto: dto)
+                pagenationData(dto: dto)
             }
             .store(in: &cancellables)
         
@@ -80,33 +82,36 @@ final class HomeViewModel: ViewModelType {
     }
     
     private func fetchActivityData(isOnAppear: Bool, dto: ActivityRequestDTO) {
-        if isOnAppear {
-            Task {
-                let activityResult = await self.activityService.fetchActivities(dto: dto)
+        guard !output.isLoading else { return }
+        
+        Task {
+            await MainActor.run {
+                output.isLoading = true
+            }
+            if isOnAppear {
                 let newActivityResult = await self.activityService.fetchNewActivities(dto: dto)
                 await MainActor.run {
-                    self.output.newActivityList = newActivityResult
-                    self.output.activityList = activityResult.activities
-                    nextCursor = activityResult.nextCursor ?? ""
-                    print(activityResult)
+                    output.newActivityList = newActivityResult
                 }
             }
+            let activityResult = await self.activityService.fetchActivities(dto: dto)
+            await MainActor.run {
+                
+                nextCursor = activityResult.nextCursor ?? ""
+                output.activityList.append(contentsOf: activityResult.activities)
+                print(activityResult)
+                output.isLoading = false
+            }
+            
+        }
+        
+    }
+    
+    private func pagenationData(dto: ActivityRequestDTO) {
+        if dto.next.isEmpty {
+            print("마지막 페이지")
         } else {
-            if dto.next.isEmpty {
-                Task {
-                    let activityResult = await self.activityService.fetchActivities(dto: dto)
-                    await MainActor.run {
-                        self.output.activityList = activityResult.activities
-                    }
-                }
-            } else {
-                Task {
-                    let activityResult = await self.activityService.fetchActivities(dto: dto)
-                    await MainActor.run {
-                        self.output.activityList.append(contentsOf: activityResult.activities)
-                    }
-                }
-            }
+            fetchActivityData(isOnAppear: false, dto: dto)
         }
     }
 }
