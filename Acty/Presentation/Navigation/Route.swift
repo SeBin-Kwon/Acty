@@ -16,7 +16,7 @@ enum Route: Hashable {
     case postDetail(postId: String)
     case userProfile(userId: String)
     case chatList
-    case chat(roomId: String)
+    case chat(userId: String)
     
     // Search
     case searchMain

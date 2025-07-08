@@ -14,15 +14,17 @@ enum MainTab: String, CaseIterable {
     
     var icon: String {
         switch self {
-        case .home: return "house"
-        case .search: return "magnifyingglass"
-        case .favorite: return "heart"
-        case .profile: return "person"
+        case .home: return "Home_Empty"
+        case .search: return "Search"
+        case .favorite: return "Keep_Empty"
+        case .profile: return "Profile_Empty"
         }
     }
     
     func icon(isSelected: Bool) -> String {
-        if self == .search || !isSelected { return icon }
-        return "\(icon).fill"
+        switch self {
+        case .home, .favorite, .profile: icon.replacingOccurrences(of: "_Empty", with: isSelected ? "_Fill" : "_Empty")
+        case .search: isSelected ? "\(icon)_Fill" : icon
+        }
     }
 }

@@ -18,7 +18,7 @@ struct ChatListView: View {
                         .font(.paperLogy(.title1))
                         .padding(20)
                         .wrapToButton {
-                            navigationRouter.navigate(to: .chat(roomId: "123"), in: .main)
+                            navigationRouter.navigate(to: .chat(userId: "123"), in: .main)
                         }
                     Spacer()
                 }

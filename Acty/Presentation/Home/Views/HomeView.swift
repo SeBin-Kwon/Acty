@@ -41,8 +41,8 @@ struct HomeView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Text("SESAC ACTIVITY")
-                    .font(.paperLogy(.caption1))
+                Text("액티")
+                    .font(.paperLogy(.body1))
                     .foregroundStyle(.accent)
             }
             ToolbarItemGroup(placement: .navigationBarTrailing) {

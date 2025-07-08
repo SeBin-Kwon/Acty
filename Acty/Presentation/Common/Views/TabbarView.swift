@@ -24,7 +24,8 @@ struct TabbarView: View {
                         }
                 }
                 .tabItem {
-                    Label(tab.title, systemImage: tab.icon(isSelected: navigationRouter.selectedTab == tab))
+                    Image(tab.icon(isSelected: navigationRouter.selectedTab == tab))
+                        .opacity(navigationRouter.selectedTab == tab ? 1 : 0.5)
                 }
                 .tag(tab)
             }
@@ -39,7 +40,7 @@ struct TabbarView: View {
         case .search:
             Text("Search")
         case .favorite:
-            Text("Favorite")
+            ChatListView()
         case .profile:
             Text("ProfileView")
         }
@@ -64,8 +65,8 @@ struct TabbarView: View {
             DetailView(viewModel: diContainer.makeDetailViewModel(), paymentViewModel: diContainer.makePaymentViewModel(), id: detailId)
         case .chatList:
             ChatListView()
-        case .chat(let roomId):
-            ChatView()
+        case .chat(let userId):
+            ChatView(user: userId)
         case .myProfile:
             Text("My Profile")
         case .editProfile:
