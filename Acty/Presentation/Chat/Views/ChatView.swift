@@ -8,7 +8,9 @@
 import SwiftUI
 
 struct ChatView: View {
-    let user: String
+    let userId: String
+    @StateObject var viewModel: ChatViewModel
+    
     @State private var messageText = ""
     @State private var messages: [ChatMessage] = [
         ChatMessage(id: "1", text: "안녕하세요! 반가워요 😊", isFromCurrentUser: false, timestamp: Date().addingTimeInterval(-3600)),
@@ -18,6 +20,7 @@ struct ChatView: View {
         ChatMessage(id: "5", text: "좋은 생각이에요! 함께 가실래요?", isFromCurrentUser: false, timestamp: Date().addingTimeInterval(-3200)),
     ]
     
+
     var body: some View {
         VStack(spacing: 0) {
             // 채팅 메시지 리스트
@@ -46,6 +49,9 @@ struct ChatView: View {
         .navigationTitle("닉네임")
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(.systemGroupedBackground))
+        .onAppear {
+            viewModel.input.onAppear.send(())
+        }
     }
     
     private func sendMessage() {
@@ -153,5 +159,6 @@ struct ChatMessageRow: View {
 }
 
 #Preview {
-    ChatView(user: "test")
+    let diContainer = DIContainer.shared
+    ChatView(userId: "test", viewModel: diContainer.makeChatViewModel(id: "est"))
 }

@@ -14,13 +14,14 @@ final class DetailViewModel: ViewModelType {
     @Published var output = Output()
     var cancellables = Set<AnyCancellable>()
     private let activityService: ActivityServiceProtocol
-    
+    var userId = ""
     struct Input {
         var onAppear = PassthroughSubject<String, Never>()
     }
     
     struct Output {
         var activityDetail: ActivityDetail? = nil
+//        var userId = ""
     }
     
     init(activityService: ActivityServiceProtocol) {
@@ -37,6 +38,7 @@ final class DetailViewModel: ViewModelType {
                 Task {
                     let result = try await self.activityService.fetchActivityDetails(id: id)
                     print("🤣 Detail: \(result)")
+                    self.userId = result.creator.userId
                     await MainActor.run {
                         self.output.activityDetail = result
                     }

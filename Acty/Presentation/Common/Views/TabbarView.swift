@@ -66,7 +66,7 @@ struct TabbarView: View {
         case .chatList:
             ChatListView()
         case .chat(let userId):
-            ChatView(user: userId)
+            ChatView(userId: userId, viewModel: diContainer.makeChatViewModel(id: userId))
         case .myProfile:
             Text("My Profile")
         case .editProfile:

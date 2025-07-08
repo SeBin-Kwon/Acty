@@ -66,4 +66,8 @@ final class DIContainer: ObservableObject {
     func makePaymentViewModel() -> PaymentViewModel {
         return PaymentViewModel(paymentService: paymentService, orderService: orderService)
     }
+    
+    func makeChatViewModel(id: String) -> ChatViewModel {
+        return ChatViewModel(chatService: ChatService(networkManager: networkManager), userId: id)
+    }
 }

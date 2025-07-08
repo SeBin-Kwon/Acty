@@ -13,6 +13,7 @@ struct DetailView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @StateObject var viewModel: DetailViewModel
     @StateObject var paymentViewModel: PaymentViewModel
+//    @StateObject var chatViewModel: ChatViewModel
     @State private var timeList = [ReservationTime]()
     @State private var participantCount = 1
     @State private var selectedDate = ""
@@ -115,7 +116,7 @@ extension DetailView {
             .background(.accent)
             .clipShape(.rect(cornerRadius: 10))
             .wrapToButton {
-                navigationRouter.navigate(to: .chat(userId: "dd"), in: .main)
+                navigationRouter.navigate(to: .chat(userId: viewModel.userId), in: .main)
             }
     }
     
