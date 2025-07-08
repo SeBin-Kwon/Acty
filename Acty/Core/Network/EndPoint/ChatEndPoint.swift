@@ -30,7 +30,8 @@ enum ChatEndPoint: EndPoint {
     
     var parameters: Parameters? {
         switch self {
-        case .getChats, .createChats: nil
+        case .getChats: nil
+        case .createChats(let id): ["opponent_id": id]
         case .sendChat(let id): ["room_id": id]
         }
     }
