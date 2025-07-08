@@ -38,12 +38,15 @@ struct DetailView: View {
                     chatButton
                 }
                 .padding(20)
+                countryText
+                description
                 HStack {
                     Text("액티비티 예약설정")
                         .font(.pretendard(.body2(.bold)))
                     Spacer()
                 }
-                .padding(20)
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
                 PersonCountView(count: $participantCount, minCount: 1, maxCount: viewModel.output.activityDetail?.restrictions.maxParticipants ?? 1)
                     .padding(20)
                 reservationSection
@@ -84,6 +87,24 @@ struct DetailView: View {
 }
 
 extension DetailView {
+    
+    private var countryText: some View {
+        HStack {
+            Text(viewModel.output.activityDetail?.country ?? "")
+            Text(viewModel.output.activityDetail?.category ?? "")
+            Spacer()
+        }
+        .font(.pretendard(.body1(.bold)))
+        .foregroundStyle(.gray60)
+        .padding(.horizontal, 20)
+    }
+    
+    private var description: some View {
+        Text(viewModel.output.activityDetail?.description ?? "")
+            .font(.pretendard(.caption1(.regular)))
+            .padding(.horizontal, 20)
+            .foregroundStyle(.gray60)
+    }
     
     private var chatButton: some View {
         Text("채팅")
