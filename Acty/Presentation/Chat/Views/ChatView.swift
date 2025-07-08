@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ChatView: View {
+    let user: String
     @State private var messageText = ""
     @State private var messages: [ChatMessage] = [
         ChatMessage(id: "1", text: "안녕하세요! 반가워요 😊", isFromCurrentUser: false, timestamp: Date().addingTimeInterval(-3600)),
@@ -30,7 +31,7 @@ struct ChatView: View {
                             .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                     }
                 }
-                .listStyle(.plain) // 기본 List 스타일 제거
+                .listStyle(.plain)
                 .scrollContentBackground(.hidden)
                 .onAppear {
                     scrollToBottom(proxy: proxy)
@@ -40,10 +41,9 @@ struct ChatView: View {
                 }
             }
             
-            // 메시지 입력 영역
             ChatInputView(messageText: $messageText, onSend: sendMessage)
         }
-        .navigationTitle("채팅")
+        .navigationTitle("닉네임")
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(.systemGroupedBackground))
     }
@@ -153,5 +153,5 @@ struct ChatMessageRow: View {
 }
 
 #Preview {
-    ChatView()
+    ChatView(user: "test")
 }

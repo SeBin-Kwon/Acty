@@ -115,7 +115,7 @@ extension DetailView {
             .background(.accent)
             .clipShape(.rect(cornerRadius: 10))
             .wrapToButton {
-                navigationRouter.navigate(to: .chat(roomId: "dd"), in: .main)
+                navigationRouter.navigate(to: .chat(userId: "dd"), in: .main)
             }
     }
     
