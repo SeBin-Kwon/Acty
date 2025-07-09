@@ -11,20 +11,23 @@ import Alamofire
 enum ChatEndPoint: EndPoint {
     case getChats
     case createChats(String)
-    case sendChat(String)
+    case sendChat(String, ChatRequestDTO)
+    case getChatHistory(String, String)
+    case uploadChatFiles(String, [String])
     
     var path: String {
         switch self {
         case .getChats: baseURL + "/chats"
         case .createChats: baseURL + "/chats"
-        case .sendChat(let id): baseURL + "/chats" + id
+        case .sendChat(let id, _), .getChatHistory(let id, _): baseURL + "/chats/" + id
+        case .uploadChatFiles(let id, _): baseURL + "/chats/" + id + "/files"
         }
     }
     
     var method: HTTPMethod {
         switch self {
-        case .getChats: .get
-        case .createChats, .sendChat: .post
+        case .getChats, .getChatHistory: .get
+        case .createChats, .sendChat, .uploadChatFiles: .post
         }
     }
     
@@ -32,15 +35,17 @@ enum ChatEndPoint: EndPoint {
         switch self {
         case .getChats: nil
         case .createChats(let id): ["opponent_id": id]
-        case .sendChat(let id): ["room_id": id]
+        case .sendChat(_, let message): ["content": message.content, "files": message.files]
+        case .getChatHistory(let id, let date): ["room_id": id, "next": date]
+        case .uploadChatFiles(let id, let files): ["room_id": id, "files": files]
         }
     }
     
     var encoding: ParameterEncoding {
         switch self {
-        case .getChats:
+        case .getChats, .getChatHistory:
             return URLEncoding(destination: .queryString)
-        case .createChats, .sendChat:
+        case .createChats, .sendChat, .uploadChatFiles:
             return JSONEncoding.default
         }
     }
