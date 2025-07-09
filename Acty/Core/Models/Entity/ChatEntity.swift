@@ -16,7 +16,6 @@ public class ChatRoomEntity: NSManagedObject {
     @NSManaged public var participantsData: Data?
     @NSManaged public var lastMessage: String?
     @NSManaged public var lastMessageTime: Date?
-    @NSManaged public var messages: NSSet?
     
     // Participants 배열 처리
     var participants: [SenderDTO] {
@@ -95,7 +94,6 @@ public class ChatMessageEntity: NSManagedObject {
     @NSManaged public var senderNick: String
     @NSManaged public var senderName: String?
     @NSManaged public var senderProfileImage: String?
-    @NSManaged public var senderIntroduction: String?
     @NSManaged public var filesData: Data?
     @NSManaged public var chatRoom: ChatRoomEntity?
     
@@ -126,7 +124,7 @@ extension ChatMessageEntity {
             nick: senderNick,
             name: senderName,
             profileImage: senderProfileImage,
-            introduction: senderIntroduction,
+            introduction: nil,
             hashTags: nil
         )
         
@@ -157,7 +155,6 @@ extension ChatMessageEntity {
         entity.senderNick = dto.sender.nick
         entity.senderName = dto.sender.name
         entity.senderProfileImage = dto.sender.profileImage
-        entity.senderIntroduction = dto.sender.introduction
         entity.files = dto.files ?? []
         
         return entity
