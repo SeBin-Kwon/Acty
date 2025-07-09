@@ -9,7 +9,7 @@ import Foundation
 import CoreData
 import Combine
 
-protocol ChatDataManagerProtocol {
+protocol CoreDataManagerProtocol {
     func saveMessages(_ messages: [ChatResponseDTO], for roomId: String) throws
     func getMessages(for roomId: String) throws -> [ChatResponseDTO]
     func getLastMessageDate(for roomId: String) throws -> Date?
@@ -19,9 +19,9 @@ protocol ChatDataManagerProtocol {
     func saveChatRoom(_ room: ChatRoomResponseDTO) throws
 }
 
-final class ChatDataManager: ChatDataManagerProtocol {
+final class CoreDataManager: CoreDataManagerProtocol {
     
-    static let shared = ChatDataManager()
+    static let shared = CoreDataManager()
     
     private init() {}
     
