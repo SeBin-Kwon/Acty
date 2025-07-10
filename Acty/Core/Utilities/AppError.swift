@@ -32,6 +32,8 @@ enum AppError: Error {
     
     // MARK: - 키체인 오류
     case keychainError(KeychainManager.KeychainError)
+    
+    case chatError
 }
 
 
@@ -86,6 +88,8 @@ extension AppError: LocalizedError {
             case .unknown:
                 return "키체인 접근 중 알 수 없는 오류가 발생했습니다."
             }
+        case .chatError:
+            return "채팅을 보낼 수 없습니다."
         }
     }
 }

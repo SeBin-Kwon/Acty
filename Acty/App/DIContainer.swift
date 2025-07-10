@@ -30,6 +30,9 @@ final class DIContainer: ObservableObject {
     let activityService: ActivityServiceProtocol
     let paymentService: PaymentServiceProtocol
     let orderService: OrderServiceProtocol
+    let chatService: ChatServiceProtocol
+    let chatRepository: ChatRepositoryProtocol
+    let coreDataManaager: CoreDataManagerProtocol
     
     private init() {
         self.keychainManager = KeychainManager.shared
@@ -41,6 +44,9 @@ final class DIContainer: ObservableObject {
         self.activityService = ActivityService(networkManager: networkManager)
         self.paymentService = PaymentService(networkManager: networkManager)
         self.orderService = OrderService(networkManager: networkManager)
+        self.chatService = ChatService(networkManager: networkManager)
+        self.coreDataManaager = CoreDataManager.shared
+        self.chatRepository = ChatRepository(chatService: chatService, coreDataManager: coreDataManaager)
     }
     
     func makeSignInViewModel() -> SignInViewModel {
@@ -68,6 +74,6 @@ final class DIContainer: ObservableObject {
     }
     
     func makeChatViewModel(id: String) -> ChatViewModel {
-        return ChatViewModel(chatService: ChatService(networkManager: networkManager), userId: id)
+        return ChatViewModel(chatService: chatService, chatRepository: chatRepository, userId: id)
     }
 }
