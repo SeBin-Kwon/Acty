@@ -76,4 +76,8 @@ final class DIContainer: ObservableObject {
     func makeChatViewModel(id: String) -> ChatViewModel {
         return ChatViewModel(chatService: chatService, chatRepository: chatRepository, userId: id)
     }
+    
+    func makeChatListViewModel() -> ChatListViewModel {
+        return ChatListViewModel(chatService: chatService, chatRepository: chatRepository)
+    }
 }

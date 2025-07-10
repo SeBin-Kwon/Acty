@@ -40,7 +40,7 @@ struct TabbarView: View {
         case .search:
             Text("Search")
         case .favorite:
-            ChatListView()
+            ChatListView(viewModel: diContainer.makeChatListViewModel())
         case .profile:
             Text("ProfileView")
         }
@@ -64,7 +64,7 @@ struct TabbarView: View {
         case .activityDetails(let detailId):
             DetailView(viewModel: diContainer.makeDetailViewModel(), paymentViewModel: diContainer.makePaymentViewModel(), id: detailId)
         case .chatList:
-            ChatListView()
+            ChatListView(viewModel: diContainer.makeChatListViewModel())
         case .chat(let userId):
             ChatView(userId: userId, viewModel: diContainer.makeChatViewModel(id: userId))
         case .myProfile:

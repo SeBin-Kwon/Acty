@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ChatListView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
+    @StateObject var viewModel: ChatListViewModel
     
     var body: some View {
         ScrollView {
