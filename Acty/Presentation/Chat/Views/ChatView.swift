@@ -12,88 +12,79 @@ struct ChatView: View {
     @StateObject var viewModel: ChatViewModel
     
     @State private var messageText = ""
-    @State private var messages: [ChatMessage] = [
-        ChatMessage(id: "1", text: "안녕하세요! 반가워요 😊", isFromCurrentUser: false, timestamp: Date().addingTimeInterval(-3600)),
-        ChatMessage(id: "2", text: "안녕하세요! 잘 지내시나요?", isFromCurrentUser: true, timestamp: Date().addingTimeInterval(-3500)),
-        ChatMessage(id: "3", text: "네, 잘 지내고 있어요. 오늘 날씨가 정말 좋네요!", isFromCurrentUser: false, timestamp: Date().addingTimeInterval(-3400)),
-        ChatMessage(id: "4", text: "정말요? 저도 산책하러 나가고 싶어지네요", isFromCurrentUser: true, timestamp: Date().addingTimeInterval(-3300)),
-        ChatMessage(id: "5", text: "좋은 생각이에요! 함께 가실래요?", isFromCurrentUser: false, timestamp: Date().addingTimeInterval(-3200)),
-    ]
     
-
+    
     var body: some View {
         VStack(spacing: 0) {
-            // 채팅 메시지 리스트
-            ScrollViewReader { proxy in
-                List {
-                    ForEach(messages) { message in
-                        ChatMessageRow(message: message)
-                            .id(message.id)
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(Color.clear)
-                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+            if viewModel.output.isLoading.value {
+                ProgressView("채팅방 준비 중...")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollViewReader { proxy in
+                    List {
+                        ForEach(viewModel.output.messages, id: \.chatId) { message in
+                            ChatMessageRow(message: message, currentUserId: userId)
+                                .id(message.chatId)
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
+                                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                        }
+                    }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .onChange(of: viewModel.output.messages) { messages in
+                        scrollToBottom(proxy: proxy, messages: messages)
                     }
                 }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
-                .onAppear {
-                    scrollToBottom(proxy: proxy)
-                }
-                .onChange(of: messages.count) { _ in
-                    scrollToBottom(proxy: proxy)
-                }
+                ChatInputView(
+                    messageText: $messageText,
+                    onSend: sendMessage
+                )
             }
-            
-            ChatInputView(messageText: $messageText, onSend: sendMessage)
         }
-        .navigationTitle("닉네임")
+        .navigationTitle(viewModel.output.chatUserNickname ?? "채팅")
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(.systemGroupedBackground))
         .onAppear {
             viewModel.input.onAppear.send(())
         }
+        .onReceive(viewModel.output.errorMessage) { errorMessage in
+            print("Error: \(errorMessage)")
+        }
     }
     
     private func sendMessage() {
-        guard !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        let content = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !content.isEmpty else { return }
         
-        let newMessage = ChatMessage(
-            id: UUID().uuidString,
-            text: messageText,
-            isFromCurrentUser: true,
-            timestamp: Date()
-        )
-        
-        messages.append(newMessage)
+        viewModel.input.sendMessage.send(content)
         messageText = ""
     }
     
-    private func scrollToBottom(proxy: ScrollViewProxy) {
+    private func scrollToBottom(proxy: ScrollViewProxy, messages: [ChatResponseDTO]) {
         if let lastMessage = messages.last {
             withAnimation(.easeOut(duration: 0.3)) {
-                proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                proxy.scrollTo(lastMessage.chatId, anchor: .bottom)
             }
         }
     }
 }
 
-struct ChatMessage: Identifiable, Equatable {
-    let id: String
-    let text: String
-    let isFromCurrentUser: Bool
-    let timestamp: Date
-}
-
 struct ChatMessageRow: View {
-    let message: ChatMessage
+    let message: ChatResponseDTO
+    let currentUserId: String
+    
+    private var isFromCurrentUser: Bool {
+        message.sender.userId != currentUserId
+    }
     
     var body: some View {
         HStack {
-            if message.isFromCurrentUser {
+            if isFromCurrentUser {
                 Spacer(minLength: 50)
                 
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text(message.text)
+                    Text(message.content ?? "")
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)
                         .background(.deepBlue)
@@ -107,7 +98,7 @@ struct ChatMessageRow: View {
                             )
                         )
                     
-                    Text(timeString(from: message.timestamp))
+                    Text(message.displayTime)
                         .font(.caption2)
                         .foregroundColor(.secondary)
                         .padding(.trailing, 4)
@@ -115,16 +106,24 @@ struct ChatMessageRow: View {
             } else {
                 HStack(alignment: .top, spacing: 8) {
                     // 프로필 이미지
-                    Circle()
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(width: 32, height: 32)
-                        .overlay(
-                            Text("😊")
-                                .font(.system(size: 16))
-                        )
+                    AsyncImage(url: URL(string: message.sender.profileImage ?? "")) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Circle()
+                            .fill(Color.gray.opacity(0.3))
+                            .overlay(
+                                Text(String(message.sender.nick.prefix(1)))
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.white)
+                            )
+                    }
+                    .frame(width: 32, height: 32)
+                    .clipShape(Circle())
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(message.text)
+                        Text(message.content ?? "")
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
                             .background(Color(.systemBackground))
@@ -139,7 +138,7 @@ struct ChatMessageRow: View {
                             )
                             .shadow(color: .black.opacity(0.05), radius: 1, x: 0, y: 1)
                         
-                        Text(timeString(from: message.timestamp))
+                        Text(message.displayTime)
                             .font(.caption2)
                             .foregroundColor(.secondary)
                             .padding(.leading, 4)
@@ -150,15 +149,9 @@ struct ChatMessageRow: View {
             }
         }
     }
-    
-    private func timeString(from date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: date)
-    }
 }
 
 #Preview {
     let diContainer = DIContainer.shared
-    ChatView(userId: "test", viewModel: diContainer.makeChatViewModel(id: "est"))
+    ChatView(userId: "test", viewModel: diContainer.makeChatViewModel(id: "test"))
 }
