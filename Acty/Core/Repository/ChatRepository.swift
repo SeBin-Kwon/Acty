@@ -44,10 +44,28 @@ final class ChatRepository: ChatRepositoryProtocol {
         
         // 1. 마지막 메시지 날짜를 cursor로 사용
         let lastMessageDate = try? coreDataManager.getLastMessageDate(for: roomId)
-        let cursor = lastMessageDate?.ISO8601Format()
+//        let cursor = lastMessageDate?.ISO8601Format()
+        
+        let cursor: String?
+        if let lastDate = lastMessageDate {
+            // 0.001초(1밀리초) 추가하여 해당 메시지 이후 메시지만 조회
+            let offsetDate = lastDate.addingTimeInterval(0.001)
+            
+            // 밀리초 포함 ISO8601 형식으로 변환
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            cursor = formatter.string(from: offsetDate)
+
+        } else {
+            cursor = nil
+            print("📅 첫 번째 로드 - cursor 없음")
+        }
+
         
         // 2. 서버에서 최신 메시지 가져오기
         let newMessages = await chatService.getMessages(roomId: roomId, date: cursor)
+        
+        print("📨 서버에서 받은 메시지: \(newMessages.count)개")
         
         // 3. 새 메시지가 있으면 로컬에 저장
         if !newMessages.isEmpty {

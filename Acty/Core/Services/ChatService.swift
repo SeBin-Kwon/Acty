@@ -52,6 +52,7 @@ final class ChatService: ChatServiceProtocol {
             let result: ChatMessagesResponseDTO = try await networkManager.fetchResults(
                 api: ChatEndPoint.getChatHistory(roomId, date ?? "")
             )
+            print(result)
             print("메시지 조회 성공: \(result.data.count)개")
             return result.data
         } catch {

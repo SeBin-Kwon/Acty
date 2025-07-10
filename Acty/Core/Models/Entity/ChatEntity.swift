@@ -36,6 +36,7 @@ extension ChatMessageEntity {
         )
         
         let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
         return ChatResponseDTO(
             chatId: chatId ?? "",
@@ -56,8 +57,8 @@ extension ChatMessageEntity {
         entity.chatId = dto.chatId
         entity.roomId = dto.roomId
         entity.content = dto.content
-        entity.createdAt = formatter.date(from: dto.createdAt) ?? Date()
-        entity.updatedAt = formatter.date(from: dto.updatedAt) ?? Date()
+        entity.createdAt = parseServerDateWithMilliseconds(dto.createdAt)
+        entity.updatedAt = parseServerDateWithMilliseconds(dto.updatedAt)
         entity.senderId = dto.sender.userId
         entity.senderNick = dto.sender.nick
         entity.senderName = dto.sender.name
@@ -65,6 +66,18 @@ extension ChatMessageEntity {
         entity.files = dto.files ?? []
         
         return entity
+    }
+    
+    static func parseServerDateWithMilliseconds(_ dateString: String) -> Date {
+        
+        // ISO8601DateFormatter로 밀리초 포함 파싱
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        if let date = formatter.date(from: dateString) {
+            return date
+        }
+        return Date()
     }
 }
 
