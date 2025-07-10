@@ -97,6 +97,25 @@ extension ChatRoomEntity {
         }
     }
     
+    var lastChat: ChatResponseDTO? {
+        get {
+            guard let data = lastChatData,
+                  let lastChat = try? JSONDecoder().decode(ChatResponseDTO.self, from: data) else {
+                return nil
+            }
+            return lastChat
+        }
+        set {
+            if let newValue = newValue {
+                lastChatData = try? JSONEncoder().encode(newValue)
+                print("💾 lastChat 저장: \(newValue.content ?? "nil")")
+            } else {
+                lastChatData = nil
+                print("🗑️ lastChat 삭제")
+            }
+        }
+    }
+    
     // ChatRoomResponseDTO에서 엔티티 생성
     static func fromDTO(_ dto: ChatRoomResponseDTO, context: NSManagedObjectContext) -> ChatRoomEntity {
         let entity = ChatRoomEntity(context: context)
@@ -106,11 +125,7 @@ extension ChatRoomEntity {
         entity.createdAt = formatter.date(from: dto.createdAt) ?? Date()
         entity.updatedAt = formatter.date(from: dto.updatedAt) ?? Date()
         entity.participants = dto.participants
-        entity.lastMessage = dto.lastChat?.content
-        
-        if let lastChatTime = dto.lastChat?.createdAt {
-            entity.lastMessageTime = formatter.date(from: lastChatTime)
-        }
+        entity.lastChat = dto.lastChat
         
         return entity
     }
@@ -118,20 +133,6 @@ extension ChatRoomEntity {
     // 엔티티를 DTO로 변환
     func toDTO() -> ChatRoomResponseDTO {
         let formatter = ISO8601DateFormatter()
-        
-        var lastChat: ChatResponseDTO? = nil
-        if let lastMessage = lastMessage,
-           let lastMessageTime = lastMessageTime {
-            lastChat = ChatResponseDTO(
-                chatId: "",
-                roomId: roomId ?? "",
-                content: lastMessage,
-                createdAt: formatter.string(from: lastMessageTime),
-                updatedAt: formatter.string(from: lastMessageTime),
-                sender: participants.first ?? SenderDTO(userId: "", nick: "", name: nil, profileImage: nil, introduction: nil, hashTags: nil),
-                files: nil
-            )
-        }
         
         return ChatRoomResponseDTO(
             roomId: roomId ?? "",
