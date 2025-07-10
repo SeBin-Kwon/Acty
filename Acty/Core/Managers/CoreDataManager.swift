@@ -51,13 +51,13 @@ final class CoreDataManager: CoreDataManagerProtocol {
         for message in messages {
             // 이미 존재하는 메시지인지 확인
             let fetchRequest: NSFetchRequest<ChatMessageEntity> = ChatMessageEntity.fetchRequest()
-//            fetchRequest.predicate = NSPredicate(format: "chatId == %@", message.chatId)
+            fetchRequest.predicate = NSPredicate(format: "chatId == %@", message.chatId)
             
             let existingMessages = try context.fetch(fetchRequest)
             
             if existingMessages.isEmpty {
                 // 새로운 메시지만 저장
-//                _ = ChatMessageEntity.fromDTO(message, context: context)
+                _ = ChatMessageEntity.fromDTO(message, context: context)
             }
         }
         
@@ -89,12 +89,12 @@ final class CoreDataManager: CoreDataManagerProtocol {
     func saveMessage(_ message: ChatResponseDTO) throws {
         // 중복 체크
         let fetchRequest: NSFetchRequest<ChatMessageEntity> = ChatMessageEntity.fetchRequest()
-//        fetchRequest.predicate = NSPredicate(format: "chatId == %@", message.chatId)
+        fetchRequest.predicate = NSPredicate(format: "chatId == %@", message.chatId)
         
         let existingMessages = try context.fetch(fetchRequest)
         
         if existingMessages.isEmpty {
-//            _ = ChatMessageEntity.fromDTO(message, context: context)
+            _ = ChatMessageEntity.fromDTO(message, context: context)
             try saveContext()
         }
     }
