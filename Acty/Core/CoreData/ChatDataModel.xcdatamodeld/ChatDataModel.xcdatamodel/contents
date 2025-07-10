@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="24E263" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
-    <entity name="ChatMessageEntity" representedClassName="ChatMessageEntity" syncable="YES">
+    <entity name="ChatMessageEntity" representedClassName="ChatMessageEntity" syncable="YES" codeGenerationType="class">
         <attribute name="chatId" attributeType="String"/>
         <attribute name="content" optional="YES" attributeType="String"/>
         <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
@@ -13,13 +13,13 @@
         <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="chatRoom" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ChatRoomEntity"/>
     </entity>
-    <entity name="ChatRoomEntity" representedClassName="ChatRoomEntity" syncable="YES">
+    <entity name="ChatRoomEntity" representedClassName="ChatRoomEntity" syncable="YES" codeGenerationType="class">
         <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="lastMessage" optional="YES" attributeType="String"/>
         <attribute name="lastMessageTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="participantsData" optional="YES" attributeType="Binary"/>
         <attribute name="roomId" attributeType="String"/>
-        <attribute name="updateAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="messages" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ChatMessageEntity"/>
     </entity>
 </model>

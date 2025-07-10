@@ -8,14 +8,67 @@
 import Foundation
 import CoreData
 
-@objc(ChatRoomEntity)
-public class ChatRoomEntity: NSManagedObject {
-    @NSManaged public var roomId: String
-    @NSManaged public var createdAt: Date
-    @NSManaged public var updatedAt: Date
-    @NSManaged public var participantsData: Data?
-    @NSManaged public var lastMessage: String?
-    @NSManaged public var lastMessageTime: Date?
+extension ChatMessageEntity {
+    
+    // Files 배열 처리
+    var files: [String] {
+        get {
+            guard let data = filesData,
+                  let files = try? JSONDecoder().decode([String].self, from: data) else {
+                return []
+            }
+            return files
+        }
+        set {
+            filesData = try? JSONEncoder().encode(newValue)
+        }
+    }
+    
+    // DTO로 변환
+    func toDTO() -> ChatResponseDTO {
+        let sender = SenderDTO(
+            userId: senderId ?? "",
+            nick: senderNick ?? "",
+            name: senderName,
+            profileImage: senderProfileImage,
+            introduction: nil,
+            hashTags: nil
+        )
+        
+        let formatter = ISO8601DateFormatter()
+        
+        return ChatResponseDTO(
+            chatId: chatId ?? "",
+            roomId: roomId ?? "",
+            content: content,
+            createdAt: formatter.string(from: createdAt ?? Date()),
+            updatedAt: formatter.string(from: updatedAt ?? Date()),
+            sender: sender,
+            files: files.isEmpty ? nil : files
+        )
+    }
+    
+    // DTO에서 생성
+    static func fromDTO(_ dto: ChatResponseDTO, context: NSManagedObjectContext) -> ChatMessageEntity {
+        let entity = ChatMessageEntity(context: context)
+        let formatter = ISO8601DateFormatter()
+        
+        entity.chatId = dto.chatId
+        entity.roomId = dto.roomId
+        entity.content = dto.content
+        entity.createdAt = formatter.date(from: dto.createdAt) ?? Date()
+        entity.updatedAt = formatter.date(from: dto.updatedAt) ?? Date()
+        entity.senderId = dto.sender.userId
+        entity.senderNick = dto.sender.nick
+        entity.senderName = dto.sender.name
+        entity.senderProfileImage = dto.sender.profileImage
+        entity.files = dto.files ?? []
+        
+        return entity
+    }
+}
+
+extension ChatRoomEntity {
     
     // Participants 배열 처리
     var participants: [SenderDTO] {
@@ -29,12 +82,6 @@ public class ChatRoomEntity: NSManagedObject {
         set {
             participantsData = try? JSONEncoder().encode(newValue)
         }
-    }
-}
-
-extension ChatRoomEntity {
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<ChatRoomEntity> {
-        return NSFetchRequest<ChatRoomEntity>(entityName: "ChatRoomEntity")
     }
     
     // ChatRoomResponseDTO에서 엔티티 생성
@@ -64,7 +111,7 @@ extension ChatRoomEntity {
            let lastMessageTime = lastMessageTime {
             lastChat = ChatResponseDTO(
                 chatId: "",
-                roomId: roomId,
+                roomId: roomId ?? "",
                 content: lastMessage,
                 createdAt: formatter.string(from: lastMessageTime),
                 updatedAt: formatter.string(from: lastMessageTime),
@@ -74,89 +121,11 @@ extension ChatRoomEntity {
         }
         
         return ChatRoomResponseDTO(
-            roomId: roomId,
-            createdAt: formatter.string(from: createdAt),
-            updatedAt: formatter.string(from: updatedAt),
+            roomId: roomId ?? "",
+            createdAt: formatter.string(from: createdAt ?? Date()),
+            updatedAt: formatter.string(from: updatedAt ?? Date()),
             participants: participants,
             lastChat: lastChat
         )
-    }
-}
-
-@objc(ChatMessageEntity)
-public class ChatMessageEntity: NSManagedObject {
-    @NSManaged public var chatId: String
-    @NSManaged public var roomId: String
-    @NSManaged public var content: String?
-    @NSManaged public var createdAt: Date
-    @NSManaged public var updatedAt: Date
-    @NSManaged public var senderId: String
-    @NSManaged public var senderNick: String
-    @NSManaged public var senderName: String?
-    @NSManaged public var senderProfileImage: String?
-    @NSManaged public var filesData: Data?
-    @NSManaged public var chatRoom: ChatRoomEntity?
-    
-    // Files 배열 처리
-    var files: [String] {
-        get {
-            guard let data = filesData,
-                  let files = try? JSONDecoder().decode([String].self, from: data) else {
-                return []
-            }
-            return files
-        }
-        set {
-            filesData = try? JSONEncoder().encode(newValue)
-        }
-    }
-}
-
-extension ChatMessageEntity {
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<ChatMessageEntity> {
-        return NSFetchRequest<ChatMessageEntity>(entityName: "ChatMessageEntity")
-    }
-    
-    // DTO로 변환
-    func toDTO() -> ChatResponseDTO {
-        let sender = SenderDTO(
-            userId: senderId,
-            nick: senderNick,
-            name: senderName,
-            profileImage: senderProfileImage,
-            introduction: nil,
-            hashTags: nil
-        )
-        
-        let formatter = ISO8601DateFormatter()
-        
-        return ChatResponseDTO(
-            chatId: chatId,
-            roomId: roomId,
-            content: content,
-            createdAt: formatter.string(from: createdAt),
-            updatedAt: formatter.string(from: updatedAt),
-            sender: sender,
-            files: files.isEmpty ? nil : files
-        )
-    }
-    
-    // DTO에서 생성
-    static func fromDTO(_ dto: ChatResponseDTO, context: NSManagedObjectContext) -> ChatMessageEntity {
-        let entity = ChatMessageEntity(context: context)
-        let formatter = ISO8601DateFormatter()
-        
-        entity.chatId = dto.chatId
-        entity.roomId = dto.roomId
-        entity.content = dto.content
-        entity.createdAt = formatter.date(from: dto.createdAt) ?? Date()
-        entity.updatedAt = formatter.date(from: dto.updatedAt) ?? Date()
-        entity.senderId = dto.sender.userId
-        entity.senderNick = dto.sender.nick
-        entity.senderName = dto.sender.name
-        entity.senderProfileImage = dto.sender.profileImage
-        entity.files = dto.files ?? []
-        
-        return entity
     }
 }
