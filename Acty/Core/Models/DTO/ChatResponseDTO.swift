@@ -57,3 +57,11 @@ extension ChatResponseDTO {
     }
 
 }
+
+extension SenderDTO {
+    func fullImageURL(baseURL: String = BASE_URL) -> String? {
+        guard let profileImage = profileImage else { return nil }
+        print(baseURL + profileImage)
+        return baseURL + profileImage
+    }
+}

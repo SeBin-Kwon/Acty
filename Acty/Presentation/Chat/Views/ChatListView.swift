@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NukeUI
 
 struct ChatListView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
@@ -14,16 +15,20 @@ struct ChatListView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // 채팅방 목록
+                HStack {
+                    Text("채팅")
+                        .font(.paperLogy(.body1))
+                        .foregroundStyle(.accent)
+                    Spacer()
+                }
+                .padding(20)
                 chatRoomsListView
             }
-            .navigationTitle("채팅")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    newChatButton
-                }
-            }
+//            .toolbar {
+//                ToolbarItem(placement: .navigationBarTrailing) {
+//                    newChatButton
+//                }
+//            }
             .onAppear {
                 viewModel.input.onAppear.send(())
             }
@@ -74,23 +79,7 @@ struct ChatListView: View {
                 Text("새로운 채팅을 시작해보세요!")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-            }
-            
-            Button {
-                // 새 채팅 시작 액션
-                viewModel.input.newChatButtonTapped.send(())
-            } label: {
-                HStack {
-                    Image(systemName: "plus.message")
-                    Text("새 채팅 시작")
-                }
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundColor(.white)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 12)
-                .background(.deepBlue)
-                .clipShape(Capsule())
+                    .padding(.bottom, 50)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -130,9 +119,9 @@ struct ChatRoomRow: View {
                         
                         Spacer()
                         
-//                        Text(formattedTime)
-//                            .font(.caption)
-//                            .foregroundColor(.secondary)
+                        Text(formattedTime)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                     
                     HStack {
@@ -148,7 +137,7 @@ struct ChatRoomRow: View {
                 
                 Spacer(minLength: 0)
             }
-            .padding(.vertical, 8)
+            .padding(8)
             .background(Color(.systemBackground))
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
@@ -162,18 +151,31 @@ struct ChatRoomRow: View {
             if let participant = chatRoom.opponentUser,
                let profileImageURL = participant.profileImage,
                !profileImageURL.isEmpty {
-                AsyncImage(url: URL(string: profileImageURL)) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Circle()
-                        .fill(Color.gray.opacity(0.3))
-                        .overlay(
-                            Text(String(participant.nick.prefix(1)))
-                                .font(.system(size: 20, weight: .medium))
-                                .foregroundColor(.white)
-                        )
+                
+                LazyImage(url: URL(string: participant.fullImageURL() ?? "")) { state in
+                    if let image = state.image {
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } else if state.error != nil {
+                        // 에러 시 이니셜 표시
+                        Circle()
+                            .fill(Color.gray.opacity(0.3))
+                            .overlay(
+                                Text(String(participant.nick.prefix(1)))
+                                    .font(.system(size: 20, weight: .medium))
+                                    .foregroundColor(.white)
+                            )
+                    } else {
+                        // 로딩 중
+                        Circle()
+                            .fill(Color.gray.opacity(0.2))
+                            .overlay(
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .gray))
+                                    .scaleEffect(0.6)
+                            )
+                    }
                 }
             } else {
                 Circle()
@@ -204,35 +206,48 @@ struct ChatRoomRow: View {
         return "메시지가 없습니다"
     }
     
-//    private var formattedTime: String {
-//        guard let lastChatTime = chatRoom.lastChat?.createdAt else {
-//            return ""
-//        }
-//        
-//        let formatter = ISO8601DateFormatter()
-//        guard let date = formatter.date(from: lastChatTime) else {
-//            return ""
-//        }
-//        
-//        let now = Date()
-//        let calendar = Calendar.current
-//        
-//        if calendar.isToday(date) {
-//            let timeFormatter = DateFormatter()
-//            timeFormatter.timeStyle = .short
-//            return timeFormatter.string(from: date)
-//        } else if calendar.isYesterday(date) {
-//            return "어제"
-//        } else {
-//            let dateFormatter = DateFormatter()
-//            dateFormatter.dateFormat = "M/d"
-//            return dateFormatter.string(from: date)
-//        }
-//    }
+    private var formattedTime: String {
+        guard let lastChatTime = chatRoom.lastChat?.createdAt else { return "lastChatTime 없음" }
+        
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        guard let date = formatter.date(from: lastChatTime) else { return "포멧 실패" }
+        
+        let now = Date()
+        
+        if Calendar.current.isDate(date, inSameDayAs: now) {
+            return DateFormatter.localizedString(from: date, dateStyle: .none, timeStyle: .short)
+        } else if let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: now),
+                  Calendar.current.isDate(date, inSameDayAs: yesterday) {
+            return "어제"
+        } else {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "M/d"
+            return formatter.string(from: date)
+        }
+    }
 }
 
-//#Preview {
-//    let diContainer = DIContainer.shared
-//    ChatListView(viewModel: diContainer.makeChatListViewModel())
-//        .environmentObject(NavigationRouter())
-//}
+#Preview {
+    struct PreviewChatListView: View {
+        var body: some View {
+            NavigationView {
+                List {
+                    Text("채팅")
+                        .font(.paperLogy(.body1))
+                        .foregroundStyle(.deepBlue)
+                    ForEach(ChatRoomResponseDTO.mockData, id: \.roomId) { chatRoom in
+                        ChatRoomRow(chatRoom: chatRoom) {
+                            print("채팅방 탭: \(chatRoom.roomId)")
+                        }
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                    }
+                }
+                .listStyle(.plain)
+            }
+        }
+    }
+    
+    return PreviewChatListView()
+}
