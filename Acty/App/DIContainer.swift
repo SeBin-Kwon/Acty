@@ -20,6 +20,7 @@ import Foundation
 
 final class DIContainer: ObservableObject {
     static let shared = DIContainer()
+    private lazy var _currentUser: UserDTO? = authService.getCurrentUser()
     
     let keychainManager: KeychainManager
     let networkManager: NetworkManager
@@ -86,11 +87,10 @@ final class DIContainer: ObservableObject {
 
 extension DIContainer {
     var currentUser: UserDTO? {
-            return authService.getCurrentUser()
+            return _currentUser
         }
         
     var currentUserId: String? {
-//        return authService.getCurrentUserId()
-        return "682ee1270b936fc97467e179"
+        return _currentUser?.id
     }
 }

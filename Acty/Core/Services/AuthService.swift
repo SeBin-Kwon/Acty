@@ -22,7 +22,7 @@ final class AuthService: AuthServiceProtocol {
     private let tokenService: TokenServiceProtocol
     private let userDefaults = UserDefaults.standard
     private let currentUserKey = "current_user"
-    
+    private var cachedUser: UserDTO?
     var isAuthenticated = PassthroughSubject<Bool, Never>()
     
     init(networkManager: NetworkManager, tokenService: TokenServiceProtocol) {
@@ -52,6 +52,7 @@ final class AuthService: AuthServiceProtocol {
         try tokenService.saveTokens(accessToken: result.accessToken, refreshToken: result.refreshToken)
         
         print("AuthRepository: 토큰 저장 완료")
+        cachedUser = result
         saveCurrentUser(result)
         await MainActor.run {
             isAuthenticated.send(true)
@@ -115,6 +116,11 @@ final class AuthService: AuthServiceProtocol {
     
     // MARK: - 현재 유저 조회
     func getCurrentUser() -> UserDTO? {
+        
+        if let cachedUser = cachedUser {
+            return cachedUser
+        }
+        
         guard let userData = userDefaults.data(forKey: currentUserKey) else {
             print("⚠️ 저장된 현재 유저 정보 없음")
             return nil
@@ -122,6 +128,7 @@ final class AuthService: AuthServiceProtocol {
         
         do {
             let user = try JSONDecoder().decode(UserDTO.self, from: userData)
+            cachedUser = user
             print("👤 현재 유저 정보 조회: \(user.nick)(\(user.id))")
             return user
         } catch {
