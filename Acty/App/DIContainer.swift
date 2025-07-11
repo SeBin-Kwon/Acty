@@ -33,6 +33,7 @@ final class DIContainer: ObservableObject {
     let chatService: ChatServiceProtocol
     let chatRepository: ChatRepositoryProtocol
     let coreDataManaager: CoreDataManagerProtocol
+    let socketIOChatService: SocketIOChatServiceProtocol
     
     private init() {
         self.keychainManager = KeychainManager.shared
@@ -46,7 +47,8 @@ final class DIContainer: ObservableObject {
         self.orderService = OrderService(networkManager: networkManager)
         self.chatService = ChatService(networkManager: networkManager)
         self.coreDataManaager = CoreDataManager.shared
-        self.chatRepository = ChatRepository(chatService: chatService, coreDataManager: coreDataManaager)
+        self.socketIOChatService = SocketIOChatService(tokenService: tokenService)
+        self.chatRepository = ChatRepository(chatService: chatService, coreDataManager: coreDataManaager, socketIOChatService: socketIOChatService)
     }
     
     func makeSignInViewModel() -> SignInViewModel {
@@ -74,7 +76,7 @@ final class DIContainer: ObservableObject {
     }
     
     func makeChatViewModel(id: String) -> ChatViewModel {
-        return ChatViewModel(chatService: chatService, chatRepository: chatRepository, userId: id)
+        return ChatViewModel(chatService: chatService, chatRepository: chatRepository, socketIOChatService: socketIOChatService, userId: id)
     }
     
     func makeChatListViewModel() -> ChatListViewModel {
