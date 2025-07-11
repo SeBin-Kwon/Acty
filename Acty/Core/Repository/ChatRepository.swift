@@ -6,8 +6,10 @@
 //
 
 import Foundation
+import Combine
 
 protocol ChatRepositoryProtocol {
+    var realtimeMessageReceived: PassthroughSubject<ChatResponseDTO, Never> { get }
     func getLocalMessages(roomId: String) -> [ChatResponseDTO]
     func syncMessagesFromServer(roomId: String) async throws
     func sendMessage(_ message: ChatRequestDTO, roomId: String) async throws -> ChatResponseDTO
@@ -21,9 +23,40 @@ final class ChatRepository: ChatRepositoryProtocol {
     private let chatService: ChatServiceProtocol
     private let coreDataManager: CoreDataManagerProtocol
     
-    init(chatService: ChatServiceProtocol, coreDataManager: CoreDataManagerProtocol) {
+    let realtimeMessageReceived = PassthroughSubject<ChatResponseDTO, Never>()
+    private let socketIOChatService: SocketIOChatServiceProtocol
+    private var cancellables = Set<AnyCancellable>()
+    
+    
+    init(chatService: ChatServiceProtocol, coreDataManager: CoreDataManagerProtocol, socketIOChatService: SocketIOChatServiceProtocol) {
         self.chatService = chatService
         self.coreDataManager = coreDataManager
+        self.socketIOChatService = socketIOChatService
+        setupSocketMessageReceiving()
+    }
+    
+    private func setupSocketMessageReceiving() {
+           // Socket.IO에서 메시지 수신 시 처리
+       socketIOChatService.messageReceived
+           .sink { [weak self] message in
+               self?.handleRealtimeMessage(message)
+           }
+           .store(in: &cancellables)
+   }
+    
+    private func handleRealtimeMessage(_ message: ChatResponseDTO) {
+        print("🔥 Socket.IO 메시지 수신: \(message.content ?? "nil")")
+        
+        // 1. DB에 저장
+        do {
+            try coreDataManager.saveMessage(message)
+            print("💾 실시간 메시지 DB 저장 완료")
+        } catch {
+            print("❌ 실시간 메시지 저장 실패: \(error)")
+        }
+        
+        // 2. UI로 전달 (ChatViewModel에서 처리)
+        realtimeMessageReceived.send(message)
     }
     
     // MARK: - 로컬 메시지 조회

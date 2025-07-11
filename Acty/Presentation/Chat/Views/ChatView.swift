@@ -42,14 +42,21 @@ struct ChatView: View {
                 )
             }
         }
-        .navigationTitle(viewModel.output.chatUserNickname ?? "채팅")
+        .navigationTitle(viewModel.output.chatUserNickname ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(.systemGroupedBackground))
         .onAppear {
             viewModel.input.onAppear.send(())
         }
+        .onDisappear {
+            print("📱 ChatView onDisappear - Socket.IO 연결 해제")
+            viewModel.input.onDisappear.send(())
+        }
         .onReceive(viewModel.output.errorMessage) { errorMessage in
             print("Error: \(errorMessage)")
+        }
+        .onReceive(viewModel.output.socketConnectionState) { state in
+            print("🔗 Socket.IO 상태 UI 업데이트: \(state)")
         }
     }
     

@@ -15,11 +15,13 @@ final class ChatViewModel: ViewModelType {
     var cancellables = Set<AnyCancellable>()
     private let chatService: ChatServiceProtocol
     private let chatRepository: ChatRepositoryProtocol
+    private let socketIOChatService: SocketIOChatServiceProtocol
     let userId: String
     private var roomId: String?
     
     struct Input {
         var onAppear = PassthroughSubject<Void, Never>()
+        var onDisappear = PassthroughSubject<Void, Never>()
         var sendMessage = PassthroughSubject<String, Never>()
         var loadMoreMessages = PassthroughSubject<Void, Never>()
     }
@@ -30,13 +32,16 @@ final class ChatViewModel: ViewModelType {
         var isLoading = CurrentValueSubject<Bool, Never>(false)
         var errorMessage = PassthroughSubject<String, Never>()
         var chatRoomCreated = PassthroughSubject<String, Never>()
+        var socketConnectionState = CurrentValueSubject<SocketConnectionState, Never>(.disconnected)
     }
     
-    init(chatService: ChatServiceProtocol, chatRepository: ChatRepositoryProtocol, userId: String) {
+    init(chatService: ChatServiceProtocol, chatRepository: ChatRepositoryProtocol, socketIOChatService: SocketIOChatServiceProtocol,userId: String) {
         self.chatService = chatService
         self.chatRepository = chatRepository
+        self.socketIOChatService = socketIOChatService
         self.userId = userId
         transform()
+        setupRealtimeBinding()
     }
     
     func transform() {
@@ -46,10 +51,17 @@ final class ChatViewModel: ViewModelType {
             }
             .store(in: &cancellables)
         
+        input.onDisappear
+           .sink { [weak self] _ in
+               self?.disconnectSocket()
+           }
+           .store(in: &cancellables)
+        
         output.chatRoomCreated
             .sink { [weak self] roomId in
                 self?.roomId = roomId
                 self?.loadMessages()
+                self?.connectSocket(roomId: roomId)
             }
             .store(in: &cancellables)
         
@@ -58,6 +70,47 @@ final class ChatViewModel: ViewModelType {
                 self?.sendMessage(content: content)
             }
             .store(in: &cancellables)
+    }
+    
+    private func setupRealtimeBinding() {
+        // Socket.IO 연결 상태 바인딩
+        socketIOChatService.connectionState
+            .sink { [weak self] state in
+                self?.output.socketConnectionState.send(state)
+                print("🔗 Socket.IO 상태: \(state)")
+            }
+            .store(in: &cancellables)
+        
+        // 실시간 메시지 수신
+        chatRepository.realtimeMessageReceived
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] message in
+                self?.handleRealtimeMessage(message)
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func handleRealtimeMessage(_ message: ChatResponseDTO) {
+        print("🔥 실시간 메시지 UI 처리: \(message.content ?? "nil")")
+        
+        // 중복 메시지 체크
+        if !output.messages.contains(where: { $0.chatId == message.chatId }) {
+            output.messages.append(message)
+            print("✅ 새 메시지 UI 추가됨")
+        } else {
+            print("⚠️ 중복 메시지 무시됨")
+        }
+    }
+    
+    // MARK: - Socket.IO 관리
+    private func connectSocket(roomId: String) {
+        print("🔗 Socket.IO 연결 시작 - roomId: \(roomId)")
+        socketIOChatService.connect(roomId: roomId)
+    }
+    
+    private func disconnectSocket() {
+        print("🔗 Socket.IO 연결 해제")
+        socketIOChatService.disconnect()
     }
     
     private func createOrGetChatRoom() {
