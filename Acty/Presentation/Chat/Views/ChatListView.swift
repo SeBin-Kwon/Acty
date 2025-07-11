@@ -213,12 +213,9 @@ struct ChatRoomRow: View {
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         guard let date = formatter.date(from: lastChatTime) else { return "포멧 실패" }
         
-        let now = Date()
-        
-        if Calendar.current.isDate(date, inSameDayAs: now) {
+        if Calendar.current.isDateInToday(date) {
             return DateFormatter.localizedString(from: date, dateStyle: .none, timeStyle: .short)
-        } else if let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: now),
-                  Calendar.current.isDate(date, inSameDayAs: yesterday) {
+        } else if Calendar.current.isDateInYesterday(date) {
             return "어제"
         } else {
             let formatter = DateFormatter()
