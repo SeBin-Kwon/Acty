@@ -24,6 +24,8 @@ final class ChatViewModel: ViewModelType {
         var onDisappear = PassthroughSubject<Void, Never>()
         var sendMessage = PassthroughSubject<String, Never>()
         var loadMoreMessages = PassthroughSubject<Void, Never>()
+        var onForeground = PassthroughSubject<Void, Never>()
+        var onBackground = PassthroughSubject<Void, Never>()
     }
     
     struct Output {
@@ -70,6 +72,23 @@ final class ChatViewModel: ViewModelType {
                 self?.sendMessage(content: content)
             }
             .store(in: &cancellables)
+        
+        input.onForeground
+            .sink { [weak self] _ in
+                if let roomId = self?.roomId {
+                    print("📱 포그라운드 복귀 - Socket.IO 재연결")
+                    self?.connectSocket(roomId: roomId)
+                }
+            }
+            .store(in: &cancellables)
+        
+        input.onBackground
+            .sink { [weak self] _ in
+                print("📱 백그라운드 진입 - Socket.IO 해제")
+                self?.disconnectSocket()
+            }
+            .store(in: &cancellables)
+
     }
     
     private func setupRealtimeBinding() {
@@ -184,11 +203,6 @@ final class ChatViewModel: ViewModelType {
             do {
                 _ = try await chatRepository.sendMessage(message, roomId: roomId)
                 print("메시지 전송 완료")
-//                await MainActor.run {
-//                    if !self.output.messages.contains(where: { $0.chatId == sentMessage.chatId }) {
-//                        self.output.messages.append(sentMessage)
-//                    }
-//                }
                 
             } catch {
                 await MainActor.run {

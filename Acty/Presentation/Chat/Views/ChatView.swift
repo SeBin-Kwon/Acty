@@ -58,6 +58,14 @@ struct ChatView: View {
         .onReceive(viewModel.output.socketConnectionState) { state in
             print("🔗 Socket.IO 상태 UI 업데이트: \(state)")
         }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            print("📱 ChatView - 포그라운드 진입")
+            viewModel.input.onForeground.send(())
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
+            print("📱 ChatView - 백그라운드 진입")
+            viewModel.input.onBackground.send(())
+        }
     }
     
     private func sendMessage() {
