@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AE20D8D32E2097DE00826304 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = AE20D8D22E2097DE00826304 /* SocketIO */; };
 		AE22A8022DFA956C003C9A88 /* iamport-ios in Frameworks */ = {isa = PBXBuildFile; productRef = AE22A8012DFA956C003C9A88 /* iamport-ios */; };
 		AE22A8072DFC7827003C9A88 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = AE22A8062DFC7827003C9A88 /* FirebaseCore */; };
 		AE22A8092DFC7827003C9A88 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = AE22A8082DFC7827003C9A88 /* FirebaseMessaging */; };
@@ -57,6 +58,7 @@
 				AE22A8072DFC7827003C9A88 /* FirebaseCore in Frameworks */,
 				AEDA9D072DDA020D009BE206 /* KakaoSDK in Frameworks */,
 				AE6DBCDB2DF461B8006D3A74 /* NukeUI in Frameworks */,
+				AE20D8D32E2097DE00826304 /* SocketIO in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -108,6 +110,7 @@
 				AE22A8012DFA956C003C9A88 /* iamport-ios */,
 				AE22A8062DFC7827003C9A88 /* FirebaseCore */,
 				AE22A8082DFC7827003C9A88 /* FirebaseMessaging */,
+				AE20D8D22E2097DE00826304 /* SocketIO */,
 			);
 			productName = Acty;
 			productReference = AEFAE3A42DCF3CB700CFE05C /* Acty.app */;
@@ -143,6 +146,7 @@
 				AE6DBCD72DF461B7006D3A74 /* XCRemoteSwiftPackageReference "Nuke" */,
 				AE22A8002DFA956C003C9A88 /* XCRemoteSwiftPackageReference "iamport-ios" */,
 				AE22A8052DFC7827003C9A88 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				AE20D8D12E2097DE00826304 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AEFAE3A52DCF3CB700CFE05C /* Products */;
@@ -400,6 +404,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		AE20D8D12E2097DE00826304 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/socketio/socket.io-client-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 16.1.1;
+			};
+		};
 		AE22A8002DFA956C003C9A88 /* XCRemoteSwiftPackageReference "iamport-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/iamport/iamport-ios.git";
@@ -443,6 +455,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		AE20D8D22E2097DE00826304 /* SocketIO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AE20D8D12E2097DE00826304 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */;
+			productName = SocketIO;
+		};
 		AE22A8012DFA956C003C9A88 /* iamport-ios */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = AE22A8002DFA956C003C9A88 /* XCRemoteSwiftPackageReference "iamport-ios" */;
