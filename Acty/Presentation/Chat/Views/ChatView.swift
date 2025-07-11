@@ -23,6 +23,14 @@ struct ChatView: View {
                 ScrollViewReader { proxy in
                     List {
                         ForEach(Array(viewModel.output.messages.enumerated()), id: \.element.chatId) { index, message in
+                            
+                            if shouldShowDateSeparator(for: message, at: index, in: viewModel.output.messages) {
+                                                                DateSeparatorView(date: message.createdAtDate)
+                                                                    .listRowSeparator(.hidden)
+                                                                    .listRowBackground(Color.clear)
+                                                                    .listRowInsets(EdgeInsets())
+                                                            }
+                            
                             ChatMessageRow(message: message, currentUserId: DIContainer.shared.currentUserId ?? "", shouldShowTime: shouldShowTime(for: message, at: index, in: viewModel.output.messages))
                                 .id(message.chatId)
                                 .listRowSeparator(.hidden)
@@ -84,6 +92,18 @@ struct ChatView: View {
         }
     }
     
+    private func shouldShowDateSeparator(for message: ChatResponseDTO, at index: Int, in messages: [ChatResponseDTO]) -> Bool {
+        // 첫 번째 메시지는 항상 날짜 표시
+        guard index > 0 else { return true }
+        
+        let previousMessage = messages[index - 1]
+        let currentDate = Calendar.current.startOfDay(for: message.createdAtDate)
+        let previousDate = Calendar.current.startOfDay(for: previousMessage.createdAtDate)
+        
+        // 이전 메시지와 다른 날짜면 구분선 표시
+        return currentDate != previousDate
+    }
+    
     // 시간 표시 여부 결정 (같은 분의 마지막 메시지에만 표시)
     private func shouldShowTime(for message: ChatResponseDTO, at index: Int, in messages: [ChatResponseDTO]) -> Bool {
         // 마지막 메시지는 항상 시간 표시
@@ -99,6 +119,41 @@ struct ChatView: View {
         return currentMinute != nextMinute
     }
 
+}
+
+struct DateSeparatorView: View {
+    let date: Date
+    
+    var body: some View {
+        HStack {
+            VStack {
+                Divider()
+            }
+            
+            Text(formattedDate)
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color(.systemGray6))
+                .clipShape(Capsule())
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+            
+            VStack {
+                Divider()
+            }
+        }
+        .padding(.vertical, 16)
+        .padding(.horizontal, 20)
+    }
+    
+    private var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "yyyy년 M월 d일 EEEE"
+        return formatter.string(from: date)
+    }
 }
 
 struct ChatMessageRow: View {
