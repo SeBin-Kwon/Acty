@@ -59,30 +59,40 @@ struct ActivityCell: View {
                 // 오버레이 요소들
                 VStack {
                     HStack {
-                        // 좋아요 버튼
-                        Button {
-                            print("좋아요 버튼")
-                        } label: {
-                            Image(systemName: activity.isKeep ? "heart.fill" : "heart")
-                                .font(.system(size: 16))
-                                .foregroundColor(.white)
-                                .frame(width: 40, height: 40)
-                        }
-                        
-                        Spacer()
-                        
                         // 나라
                         HStack(spacing: 4) {
-                            Text("✈️")
+//                            Image(systemName: "location.fill")
+                            Image("Location")
+                                .resizable()
+                                .renderingMode(.template)
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 20, height: 20)
+                                .foregroundColor(.white)
+                                
+                                
                             Text(activity.country)
                                 .font(.caption)
                                 .fontWeight(.medium)
+                                .padding(.trailing, 4)
                         }
                         .foregroundColor(.white)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .background(Color.white.opacity(0.3))
+                        .background(Color.white.opacity(0.25))
                         .clipShape(Capsule())
+                        // 좋아요 버튼
+//                        Button {
+//                            print("좋아요 버튼")
+//                        } label: {
+//                            Image(systemName: activity.isKeep ? "heart.fill" : "heart")
+//                                .font(.system(size: 16))
+//                                .foregroundColor(.white)
+//                                .frame(width: 40, height: 40)
+//                        }
+//                        
+                        Spacer()
+                        
+                        
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 16)
@@ -104,7 +114,7 @@ struct ActivityCell: View {
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(Color.white.opacity(0.3))
+                                .background(Color.white.opacity(0.25))
                                 .clipShape(Capsule())
                             }
                         }
@@ -116,14 +126,12 @@ struct ActivityCell: View {
             }
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .frame(height: 188)
-            
-            if !activity.tags.isEmpty {
                 
                 HStack(spacing: 6) {
                     Image(systemName: "sparkles")
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.white)
-                    Text(activity.tags.first!)
+                    Text(activity.tags.first ?? "")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white)
                 }
@@ -140,8 +148,8 @@ struct ActivityCell: View {
                 )
                 .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                 .offset(y: -25)
-                
-            }
+                .opacity(activity.tags.isEmpty ? 0 : 1)
+            
             // 컨텐츠 섹션
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
