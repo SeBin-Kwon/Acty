@@ -78,6 +78,17 @@ final class DIContainer: ObservableObject {
     }
     
     func makeChatListViewModel() -> ChatListViewModel {
-        return ChatListViewModel(chatService: chatService, chatRepository: chatRepository)
+        return ChatListViewModel(chatRepository: chatRepository)
+    }
+}
+
+extension DIContainer {
+    var currentUser: UserDTO? {
+            return authService.getCurrentUser()
+        }
+        
+    var currentUserId: String? {
+//        return authService.getCurrentUserId()
+        return "682ee1270b936fc97467e179"
     }
 }

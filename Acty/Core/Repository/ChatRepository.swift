@@ -92,7 +92,6 @@ final class ChatRepository: ChatRepositoryProtocol {
         return sentMessage
     }
     
-    // MARK: - 채팅방 생성/조회
     func createOrGetChatRoom(opponentId: String) async throws -> ChatRoomResponseDTO {
         print("채팅방 생성/조회 시작 - opponentId: \(opponentId)")
         
@@ -104,31 +103,38 @@ final class ChatRepository: ChatRepositoryProtocol {
         // 2. 채팅방 정보를 로컬에 저장
         try coreDataManager.saveChatRoom(chatRoom)
         print("채팅방 생성/조회 완료 - roomId: \(chatRoom.roomId)")
+        print("   - participants: \(chatRoom.participants.map { "\($0.nick)(\($0.userId))" })")
+        print("   - createdAt: \(chatRoom.createdAt)")
         
         return chatRoom
     }
     
-    // MARK: - 채팅방 목록 조회
     func getChatRoomsList() async throws -> [ChatRoomResponseDTO] {
-        print("채팅방 목록 조회 시작")
-        
-        // 1. 먼저 로컬 채팅방 목록 조회
-        let _ = try coreDataManager.getChatRooms()
-        
-        // 2. 서버에서 최신 채팅방 목록 가져오기
-        let serverChatRooms = await chatService.getChatRooms()
-        
-        // 3. 서버 데이터를 로컬에 저장
-        for chatRoom in serverChatRooms {
-            try coreDataManager.saveChatRoom(chatRoom)
+            print("채팅방 목록 조회 시작")
+            
+        do {
+            // 1. 서버에서 최신 채팅방 목록 가져오기
+            let serverChatRooms = await chatService.getChatRooms()
+            print("📨 서버에서 받은 채팅방: \(serverChatRooms.count)개")
+            
+            // 2. 서버 데이터를 로컬에 저장
+            for chatRoom in serverChatRooms {
+                try coreDataManager.saveChatRoom(chatRoom)
+            }
+            
+            // 3. 🎯 서버 데이터를 그대로 반환
+            print("채팅방 목록 조회 완료: \(serverChatRooms.count)개")
+            return serverChatRooms
+            
+        } catch {
+            print("서버 요청 실패, 로컬 데이터 사용: \(error)")
+            
+            // 서버 실패 시에만 로컬 데이터 반환
+            let localChatRooms = try coreDataManager.getChatRooms()
+            return localChatRooms
         }
-        
-        // 4. 최신 로컬 데이터 반환
-        let updatedChatRooms = try coreDataManager.getChatRooms()
-        print("채팅방 목록 조회 완료: \(updatedChatRooms.count)개")
-        
-        return updatedChatRooms
     }
+
     
     func deleteAllMessages(roomId: String) async throws {
         try coreDataManager.deleteAllMessages(for: roomId)

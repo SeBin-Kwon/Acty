@@ -23,3 +23,9 @@ struct ChatRoomResponseDTO: Codable {
         case createdAt, updatedAt, participants, lastChat
     }
 }
+
+extension ChatRoomResponseDTO {
+    var opponentUser: SenderDTO? {
+        return participants.first { $0.userId != DIContainer.shared.currentUserId }
+        }
+}

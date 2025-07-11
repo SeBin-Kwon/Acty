@@ -42,16 +42,10 @@ struct SenderDTO: Codable, Equatable {
 }
 
 extension ChatResponseDTO {
-    /// 현재 사용자가 보낸 메시지인지 확인
-//    func isFromCurrentUser() -> Bool {
-//        // 실제로는 TokenService나 UserDefaults에서 현재 사용자 ID를 가져와야 함
-//        let currentUserId = getCurrentUserId()
-//        return sender.userId == currentUserId
-//    }
-//    
     /// 메시지 시간을 Date로 변환
     var createdAtDate: Date {
         let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return formatter.date(from: createdAt) ?? Date()
     }
     

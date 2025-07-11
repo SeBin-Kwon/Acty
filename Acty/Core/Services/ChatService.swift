@@ -37,9 +37,9 @@ final class ChatService: ChatServiceProtocol {
     // MARK: - 채팅방 목록 조회
     func getChatRooms() async -> [ChatRoomResponseDTO] {
         do {
-            let result: [ChatRoomResponseDTO] = try await networkManager.fetchResults(api: ChatEndPoint.getChats)
-            print("채팅방 목록 조회 성공: \(result.count)개")
-            return result
+            let result: ChatRoomListResponseDTO = try await networkManager.fetchResults(api: ChatEndPoint.getChats)
+            print("채팅방 목록 조회 성공: \(result.data.count)개")
+            return result.data
         } catch {
             print("채팅방 목록 조회 실패: \(error)")
             return []

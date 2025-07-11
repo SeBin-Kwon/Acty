@@ -113,14 +113,19 @@ final class CoreDataManager: CoreDataManagerProtocol {
         try saveContext()
     }
     
-    /// 모든 채팅방 조회
     func getChatRooms() throws -> [ChatRoomResponseDTO] {
         let fetchRequest: NSFetchRequest<ChatRoomEntity> = ChatRoomEntity.fetchRequest()
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "lastMessageTime", ascending: false)]
+        
+        // 🔧 서버에서 이미 정렬되어 오므로 updatedAt 기준 정렬만
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "updatedAt", ascending: false)]
         
         let entities = try context.fetch(fetchRequest)
-        return entities.map { $0.toDTO() }
+        let dtos = entities.map { $0.toDTO() }
+        
+        print("📋 채팅방 목록 조회 완료: \(dtos.count)개")
+        return dtos
     }
+
     
     /// 채팅방 저장 또는 업데이트
     func saveChatRoom(_ room: ChatRoomResponseDTO) throws {
@@ -135,11 +140,7 @@ final class CoreDataManager: CoreDataManagerProtocol {
             let formatter = ISO8601DateFormatter()
             existing.updatedAt = formatter.date(from: room.updatedAt) ?? Date()
             existing.participants = room.participants
-            existing.lastMessage = room.lastChat?.content
-            
-            if let lastChatTime = room.lastChat?.createdAt {
-                existing.lastMessageTime = formatter.date(from: lastChatTime)
-            }
+            existing.lastChat = room.lastChat
         } else {
             // 새로운 채팅방 생성
             _ = ChatRoomEntity.fromDTO(room, context: context)

@@ -111,7 +111,7 @@ extension ChatRoomEntity {
                 print("💾 lastChat 저장: \(newValue.content ?? "nil")")
             } else {
                 lastChatData = nil
-                print("🗑️ lastChat 삭제")
+                print("🗑️ lastChat nil")
             }
         }
     }

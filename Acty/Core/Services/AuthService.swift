@@ -13,11 +13,15 @@ protocol AuthServiceProtocol {
     func checkAuthenticationStatus() async -> Bool
     func signOut() async throws
     var isAuthenticated: PassthroughSubject<Bool, Never> { get set }
+    func getCurrentUser() -> UserDTO?
+    func getCurrentUserId() -> String?
 }
 
 final class AuthService: AuthServiceProtocol {
     private let networkManager: NetworkManager
     private let tokenService: TokenServiceProtocol
+    private let userDefaults = UserDefaults.standard
+    private let currentUserKey = "current_user"
     
     var isAuthenticated = PassthroughSubject<Bool, Never>()
     
@@ -48,7 +52,7 @@ final class AuthService: AuthServiceProtocol {
         try tokenService.saveTokens(accessToken: result.accessToken, refreshToken: result.refreshToken)
         
         print("AuthRepository: 토큰 저장 완료")
-        
+        saveCurrentUser(result)
         await MainActor.run {
             isAuthenticated.send(true)
         }
@@ -65,7 +69,6 @@ final class AuthService: AuthServiceProtocol {
             print(#function, "액세스 토큰 발견: \(accessToken.prefix(10))...")
             
             let _: ProfileGetDTO = try await networkManager.fetchResults(api: AuthEndPoint.myProfileGet)
-            
             isAuthenticated.send(true)
             return true
         } catch {
@@ -95,6 +98,49 @@ final class AuthService: AuthServiceProtocol {
         print("로그아웃 완료")
     }
     
+    private func saveCurrentUser(_ user: UserDTO) {
+        do {
+            let userData = try JSONEncoder().encode(user)
+            userDefaults.set(userData, forKey: currentUserKey)
+            
+            print("👤 현재 유저 정보 저장 완료:")
+            print("   - userId: \(user.id)")
+            print("   - nick: \(user.nick)")
+            print("   - email: \(user.email)")
+            
+        } catch {
+            print("❌ 현재 유저 저장 실패: \(error)")
+        }
+    }
+    
+    // MARK: - 현재 유저 조회
+    func getCurrentUser() -> UserDTO? {
+        guard let userData = userDefaults.data(forKey: currentUserKey) else {
+            print("⚠️ 저장된 현재 유저 정보 없음")
+            return nil
+        }
+        
+        do {
+            let user = try JSONDecoder().decode(UserDTO.self, from: userData)
+            print("👤 현재 유저 정보 조회: \(user.nick)(\(user.id))")
+            return user
+        } catch {
+            print("❌ 현재 유저 정보 디코딩 실패: \(error)")
+            return nil
+        }
+    }
+    
+    func getCurrentUserId() -> String? {
+        let userId = getCurrentUser()?.id
+        print("👤 현재 유저 ID: \(userId ?? "nil")")
+        return userId
+    }
+    
+    
+    private func clearCurrentUser() {
+        userDefaults.removeObject(forKey: currentUserKey)
+        print("👤 현재 유저 정보 삭제 완료")
+    }
 }
 
 struct ProfileGetDTO: Decodable {
