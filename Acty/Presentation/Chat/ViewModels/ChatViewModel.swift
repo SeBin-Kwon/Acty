@@ -69,15 +69,17 @@ final class ChatViewModel: ViewModelType {
                 
                 await MainActor.run {
                     if let chatRoom = result {
-                        // 채팅방 정보 설정
-                        self.output.chatUserNickname = chatRoom.participants.first?.nick
+                        print("📱 채팅방 생성 결과:")
+                        print("   - 요청한 상대방 userId: \(self.userId)")
+                        print("   - participants: \(chatRoom.participants.map { "\($0.nick)(\($0.userId))" })")
+                        if let opponent = chatRoom.participants.first(where: { $0.userId == userId }) {
+                            print("✅ 상대방 발견: \(opponent.nick)")
+                            
+                            self.output.chatUserNickname = opponent.nick
+                            self.output.chatRoomCreated.send(chatRoom.roomId)
+                            self.output.isLoading.send(false)
+                        }
                         
-                        // 채팅방 생성 완료 이벤트 발생
-                        self.output.chatRoomCreated.send(chatRoom.roomId)
-                        self.output.isLoading.send(false)
-                        
-                        print("채팅방 생성 결과@@@@@")
-                        print(chatRoom)
                     } else {
                         self.output.errorMessage.send("채팅방 생성에 실패했습니다.")
                         self.output.isLoading.send(false)
@@ -85,6 +87,7 @@ final class ChatViewModel: ViewModelType {
                 }
             }
         }
+
     }
     
     private func loadMessages() {
@@ -103,6 +106,8 @@ final class ChatViewModel: ViewModelType {
                 
                 await MainActor.run {
                     self.output.messages = updatedMessages
+                    print("채팅방메시지들~~@@@@@@@~~~~")
+                    print(self.output.messages)
                     self.output.isLoading.send(false)
                 }
             } catch {

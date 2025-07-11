@@ -23,7 +23,7 @@ struct ChatView: View {
                 ScrollViewReader { proxy in
                     List {
                         ForEach(viewModel.output.messages, id: \.chatId) { message in
-                            ChatMessageRow(message: message, currentUserId: userId)
+                            ChatMessageRow(message: message, currentUserId: DIContainer.shared.currentUserId ?? "")
                                 .id(message.chatId)
                                 .listRowSeparator(.hidden)
                                 .listRowBackground(Color.clear)
@@ -75,8 +75,12 @@ struct ChatMessageRow: View {
     let currentUserId: String
     
     private var isFromCurrentUser: Bool {
-        message.sender.userId != currentUserId
-    }
+            let result = message.sender.userId == currentUserId
+            print("💬 메시지 발신자 확인:")
+            print("   - 메시지 발신자: \(message.sender.nick) (\(message.sender.userId))")
+            print("   - 현재 사용자: \(currentUserId)")
+            return result
+        }
     
     var body: some View {
         HStack {
