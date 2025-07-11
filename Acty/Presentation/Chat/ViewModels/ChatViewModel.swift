@@ -182,11 +182,13 @@ final class ChatViewModel: ViewModelType {
         
         Task {
             do {
-                let sentMessage = try await chatRepository.sendMessage(message, roomId: roomId)
-                
-                await MainActor.run {
-                    self.output.messages.append(sentMessage)
-                }
+                _ = try await chatRepository.sendMessage(message, roomId: roomId)
+                print("메시지 전송 완료")
+//                await MainActor.run {
+//                    if !self.output.messages.contains(where: { $0.chatId == sentMessage.chatId }) {
+//                        self.output.messages.append(sentMessage)
+//                    }
+//                }
                 
             } catch {
                 await MainActor.run {
