@@ -22,8 +22,8 @@ struct ChatView: View {
             } else {
                 ScrollViewReader { proxy in
                     List {
-                        ForEach(viewModel.output.messages, id: \.chatId) { message in
-                            ChatMessageRow(message: message, currentUserId: DIContainer.shared.currentUserId ?? "")
+                        ForEach(Array(viewModel.output.messages.enumerated()), id: \.element.chatId) { index, message in
+                            ChatMessageRow(message: message, currentUserId: DIContainer.shared.currentUserId ?? "", shouldShowTime: shouldShowTime(for: message, at: index, in: viewModel.output.messages))
                                 .id(message.chatId)
                                 .listRowSeparator(.hidden)
                                 .listRowBackground(Color.clear)
@@ -75,11 +75,28 @@ struct ChatView: View {
             }
         }
     }
+    
+    // 시간 표시 여부 결정 (같은 분의 마지막 메시지에만 표시)
+    private func shouldShowTime(for message: ChatResponseDTO, at index: Int, in messages: [ChatResponseDTO]) -> Bool {
+        // 마지막 메시지는 항상 시간 표시
+        guard index < messages.count - 1 else { return true }
+        
+        let nextMessage = messages[index + 1]
+        
+        // 다음 메시지와 같은 분(HH:mm)인지 확인
+        let currentMinute = message.displayTime
+        let nextMinute = nextMessage.displayTime
+        
+        // 다음 메시지와 다른 분이면 시간 표시, 같은 분이면 시간 숨김
+        return currentMinute != nextMinute
+    }
+
 }
 
 struct ChatMessageRow: View {
     let message: ChatResponseDTO
     let currentUserId: String
+    let shouldShowTime: Bool
     
     private var isFromCurrentUser: Bool {
             let result = message.sender.userId == currentUserId
@@ -108,11 +125,12 @@ struct ChatMessageRow: View {
                                 topTrailingRadius: 18
                             )
                         )
-                    
-                    Text(message.displayTime)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                        .padding(.trailing, 4)
+                    if shouldShowTime {
+                        Text(message.displayTime)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .padding(.trailing, 4)
+                    }
                 }
             } else {
                 HStack(alignment: .top, spacing: 8) {
@@ -148,11 +166,12 @@ struct ChatMessageRow: View {
                                 )
                             )
                             .shadow(color: .black.opacity(0.05), radius: 1, x: 0, y: 1)
-                        
-                        Text(message.displayTime)
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                            .padding(.leading, 4)
+                        if shouldShowTime {
+                            Text(message.displayTime)
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                                .padding(.leading, 4)
+                        }
                     }
                 }
                 
