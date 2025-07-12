@@ -63,11 +63,7 @@ struct ActivityCell: View {
                         HStack(spacing: 4) {
 //                            Image(systemName: "location.fill")
                             Image("Location")
-                                .resizable()
-                                .renderingMode(.template)
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 20, height: 20)
-                                .foregroundColor(.white)
+                                .iconStyle()
                                 
                                 
                             Text(activity.country)
@@ -106,8 +102,9 @@ struct ActivityCell: View {
                         if activity.isAdvertisement {
                             Button(action: {}) {
                                 HStack(spacing: 4) {
-                                    Image(systemName: "info.circle")
-                                        .font(.system(size: 12))
+                                    Image("Info")
+                                        .iconStyle()
+                                        
                                     Text("광고")
                                         .font(.caption)
                                 }
@@ -161,19 +158,17 @@ struct ActivityCell: View {
                     
                     HStack(spacing: 16) {
                         HStack(spacing: 4) {
-                            Image(systemName: "heart.fill")
-                                .foregroundColor(.pink)
-                                .font(.caption)
+                            Image("Like_Fill")
+                                .iconStyle(color: .rosy)
                             Text("\(activity.keepCount)개")
                                 .font(.caption)
                                 .fontWeight(.semibold)
                         }
                         
                         HStack(spacing: 4) {
-                            Image(systemName: "person.2.fill")
-                                .foregroundColor(.blue)
-                                .font(.caption)
-                            Text("\(activity.pointReward)개")
+                            Image("Point")
+                                .iconStyle(color: .deepBlue)
+                            Text("\(activity.pointReward)P")
                                 .font(.caption)
                                 .fontWeight(.semibold)
                         }
@@ -192,24 +187,28 @@ struct ActivityCell: View {
 //                }
                 
                 // 가격
-                HStack(alignment: .bottom) {
+                HStack(alignment: .bottom, spacing: 8) {
+                    // 원가 (취소선) + 할인율
                     
-                    // 가격 정보
-                    HStack(spacing: 2) {
-                        Text(activity.formattedFinalPrice)
-                            .font(.title3)
-                            .fontWeight(.bold)
-                        
+                    if activity.hasDiscount {
+                        Text(activity.formattedOriginalPrice)
+                            .font(.pretendard(.body1(.bold)))
+                            .foregroundColor(.gray)
+                            .strikethrough(true, color: .gray)
+                    }
+                    Text(activity.formattedFinalPrice)
+                        .font(.pretendard(.body1(.bold)))
+                        .fontWeight(.bold)
+                    if activity.hasDiscount {
                         Text("\(activity.discountPercentage)%")
-                            .font(.caption)
-                            .fontWeight(.semibold)
+                            .font(.pretendard(.body1(.bold)))
                             .foregroundColor(.blue)
                     }
                 }
             }
             .padding(.horizontal, 5)
             .padding(.bottom, 16)
-            .offset(y: -10)
+            .offset(y: -20)
             .allowsHitTesting(true)
             
             Rectangle()
