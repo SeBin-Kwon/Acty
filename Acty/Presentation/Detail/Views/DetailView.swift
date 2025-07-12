@@ -165,22 +165,6 @@ extension DetailView {
         )
     }
     
-    private var contentHeader: some View {
-        VStack(spacing: 16) {
-            HStack {
-                Text(viewModel.output.activityDetail?.title ?? "겨울 새싹 스키 원정대")
-                    .font(.paperLogy(.title1))
-                    .foregroundStyle(.gray90)
-                Spacer()
-                chatButton
-            }
-            
-            countryText
-            description
-        }
-        .padding(.horizontal, 20)
-    }
-    
     private var imageIndicators: some View {
         VStack(spacing: 8) {
             ForEach(0..<min(imageUrls.count, 5), id: \.self) { index in
@@ -224,6 +208,30 @@ extension DetailView {
         }
     }
     
+    private var contentHeader: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Text(viewModel.output.activityDetail?.title ?? "겨울 새싹 스키 원정대")
+                    .font(.paperLogy(.title1))
+                    .foregroundStyle(.gray90)
+                Spacer()
+                chatButton
+            }
+            
+            countryText
+            description
+            HStack(spacing: 2) {
+                Image("Buy")
+                    .iconStyle(color: .gray45)
+                Text("누적 구매 \(viewModel.output.activityDetail?.totalOrderCount ?? 0)회")
+                    .font(.pretendard(.body3(.medium)))
+                    .foregroundStyle(.gray45)
+                Spacer()
+            }
+        }
+        .padding(.horizontal, 20)
+    }
+    
     private var countryText: some View {
         HStack(spacing: 12) {
             HStack(spacing: 4) {
@@ -250,6 +258,11 @@ extension DetailView {
     
     private var contentBody: some View {
         VStack(spacing: 20) {
+            
+            if let activityDetail = viewModel.output.activityDetail {
+                        ActivityDetailInfoView(activityDetail: activityDetail)
+                    }
+            
             HStack {
                 Text("액티비티 예약설정")
                     .font(.pretendard(.body2(.bold)))
@@ -263,9 +276,8 @@ extension DetailView {
                 maxCount: viewModel.output.activityDetail?.restrictions.maxParticipants ?? 1
             )
             .padding(.horizontal, 20)
-            
             reservationSection
-            
+
             VStack(spacing: 16) {
                 Text("\(totalPrice)원")
                     .font(.paperLogy(.title1))
