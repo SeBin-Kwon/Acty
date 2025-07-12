@@ -53,7 +53,7 @@ struct ActivityBannerView: View {
                 // 상단 카테고리 태그
                 HStack {
                     Text(activity.category)
-                        .font(.caption)
+                        .font(.pretendard(.caption2(.medium)))
                         .fontWeight(.medium)
                         .foregroundColor(.white)
                         .padding(.horizontal, 12)
@@ -84,9 +84,12 @@ struct ActivityBannerView: View {
                     
                     // 가격
                     HStack {
-                        Image(systemName: "wonsign.circle.fill")
+                        Image("Won")
+                            .resizable()
+                            .renderingMode(.template)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 25, height: 25)
                             .foregroundColor(.white)
-                            .font(.title3)
                         Text(String(activity.formattedFinalPrice))
                             .font(.title3)
                             .fontWeight(.bold)
@@ -116,7 +119,7 @@ struct ActivityBannerView: View {
             .padding(20)
         }
         .frame(width: 300, height: 300)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: 25))
         .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 5)
     }
 }

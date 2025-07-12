@@ -159,8 +159,15 @@ private extension ActivityCarouselListView {
         )
         
         let section = NSCollectionLayoutSection(group: group)
-//        section.interGroupSpacing = 20  카드 간격
-        section.orthogonalScrollingBehavior = .groupPagingCentered // 중앙 정렬 + 페이징
+//        section.interGroupSpacing = 0
+        section.orthogonalScrollingBehavior = .groupPagingCentered
+        
+//        section.contentInsets = NSDirectionalEdgeInsets(
+//                top: 0,
+//                leading: 20,
+//                bottom: 0,
+//                trailing: 20
+//            )
         
         // 실시간 스케일 + 투명도 애니메이션
         section.visibleItemsInvalidationHandler = { items, offset, environment in
@@ -173,7 +180,7 @@ private extension ActivityCarouselListView {
                 let normalizedDistance = min(distanceFromCenter / maxDistance, 1.0)
                 
                 // 스케일 효과 (중앙: 1.0, 양쪽: 0.8)
-                let minScale: CGFloat = 0.8
+                let minScale: CGFloat = 0.85
                 let scale = 1.0 - (normalizedDistance * (1.0 - minScale))
                 item.transform = CGAffineTransform(scaleX: scale, y: scale)
                 
@@ -181,6 +188,12 @@ private extension ActivityCarouselListView {
                 let minAlpha: CGFloat = 0.6
                 let alpha = 1.0 - (normalizedDistance * (1.0 - minAlpha))
                 item.alpha = alpha
+                
+                let spacingOffset: CGFloat = -10
+                let xOffset = normalizedDistance * spacingOffset * (itemCenterX < containerWidth / 2 ? -1 : 1)
+                
+                item.transform = CGAffineTransform(scaleX: scale, y: scale)
+                           .translatedBy(x: xOffset, y: 0)
             }
         }
         

@@ -24,12 +24,14 @@ struct HomeView: View {
                         }
                 }
                 .padding(.top, 10)
+                .padding(.bottom, -20)
                 .frame(height: 320)
                 HStack {
                     Text("액티비티 둘러보기")
                         .font(.paperLogy(.body1))
                         .foregroundStyle(.accent)
-                        .padding(20)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
                     Spacer()
                 }
                 countryFilterRow
@@ -102,8 +104,8 @@ extension HomeView {
                     countryFilterButton(country)
                 }
             }
+            .padding(.horizontal, 20)
         }
-        .padding(.horizontal, 20)
         .padding(.vertical, 5)
     }
     
@@ -114,8 +116,8 @@ extension HomeView {
                     categoryFilterButton(category)
                 }
             }
+            .padding(.horizontal, 20)
         }
-        .padding(.horizontal, 20)
         .padding(.bottom, 15)
     }
     

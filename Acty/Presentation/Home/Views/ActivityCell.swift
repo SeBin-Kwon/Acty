@@ -61,7 +61,6 @@ struct ActivityCell: View {
                     HStack {
                         // 나라
                         HStack(spacing: 4) {
-//                            Image(systemName: "location.fill")
                             Image("Location")
                                 .iconStyle()
                                 
