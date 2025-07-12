@@ -8,12 +8,12 @@
 import SwiftUI
 import iamport_ios
 import WebKit
+import NukeUI
 
 struct DetailView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @StateObject var viewModel: DetailViewModel
     @StateObject var paymentViewModel: PaymentViewModel
-//    @StateObject var chatViewModel: ChatViewModel
     @State private var timeList = [ReservationTime]()
     @State private var participantCount = 1
     @State private var selectedDate = ""
@@ -21,6 +21,8 @@ struct DetailView: View {
     @State private var showingAlert = false
     @State private var alertTitle = ""
     @State private var alertMessage = ""
+    @State private var currentImageIndex = 0
+    
     private var totalPrice: Int {
         participantCount * (viewModel.output.activityDetail?.price.final ?? 0)
     }
@@ -28,35 +30,61 @@ struct DetailView: View {
     
     let id: String
     private let userCode = "imp14511373"
+    private var imageUrls: [String] {
+        guard let detail = viewModel.output.activityDetail else { return [] }
+        return detail.thumbnails
+            .filter { thumbnail in
+                let lowercased = thumbnail.lowercased()
+                return lowercased.hasSuffix(".jpg") ||
+                lowercased.hasSuffix(".jpeg") ||
+                lowercased.hasSuffix(".png") ||
+                lowercased.hasSuffix(".webp")
+            }
+            .map { BASE_URL + $0 }
+    }
     
     var body: some View {
         ScrollView {
             VStack {
-                HStack {
-                    Text(viewModel.output.activityDetail?.title ?? "없음")
-                        .font(.paperLogy(.title1))
-                    Spacer()
-                    chatButton
+                ZStack {
+                    backgroundImageView
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Spacer()
+                            imageIndicators
+                                .padding(.trailing, 20)
+                                .padding(.bottom, 50)
+                        }
+                    }
                 }
-                .padding(20)
-                countryText
-                description
-                HStack {
-                    Text("액티비티 예약설정")
-                        .font(.pretendard(.body2(.bold)))
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
-                PersonCountView(count: $participantCount, minCount: 1, maxCount: viewModel.output.activityDetail?.restrictions.maxParticipants ?? 1)
-                    .padding(20)
-                reservationSection
-                paymentButton
-                
-                Text("\(totalPrice)원")
-                    .font(.paperLogy(.title1))
+                .frame(height: UIScreen.main.bounds.height * 0.5)
+                contentHeader
+                contentBody
             }
         }
+        .ignoresSafeArea(edges: .top)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    navigationRouter.navigateBack(in: .main)
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 20))
+                        .foregroundColor(.white)
+                }
+            }
+        }
+        .gesture(
+            DragGesture()
+                .onEnded { value in
+                    if value.translation.width > 50 && abs(value.translation.height) < 50 {
+                        navigationRouter.navigateBack(in: .main)
+                    }
+                }
+        )
         .onAppear {
             viewModel.input.onAppear.send(id)
             paymentViewModel.input.totalPrice = viewModel.output.activityDetail?.price.final ?? 0
@@ -89,21 +117,170 @@ struct DetailView: View {
 
 extension DetailView {
     
+    private var backgroundImageView: some View {
+        TabView(selection: $currentImageIndex) {
+            if imageUrls.isEmpty {
+                // 이미지가 아예 없을 때 기본 배경
+                Rectangle()
+                    .fill(.accent)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .tag(0)
+            } else {
+                ForEach(0..<imageUrls.count, id: \.self) { index in
+                    LazyImage(url: URL(string: imageUrls[index])) { state in
+                        if let image = state.image {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .clipped()
+                        } else {
+                            Rectangle()
+                                .fill(Color.accent)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .overlay(
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                )
+                        }
+                    }
+                    .tag(index)
+                }
+            }
+        }
+        .frame(height: UIScreen.main.bounds.height * 0.5)
+        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+        .overlay(
+            // 그라데이션 오버레이
+            LinearGradient(
+                colors: [
+                    Color.clear,
+                    Color.white.opacity(0.1),
+                    Color.white.opacity(0.3),
+                    Color.white
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+    }
+    
+    private var contentHeader: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Text(viewModel.output.activityDetail?.title ?? "겨울 새싹 스키 원정대")
+                    .font(.paperLogy(.title1))
+                    .foregroundStyle(.gray90)
+                Spacer()
+                chatButton
+            }
+            
+            countryText
+            description
+        }
+        .padding(.horizontal, 20)
+    }
+    
+    private var imageIndicators: some View {
+        VStack(spacing: 8) {
+            ForEach(0..<min(imageUrls.count, 5), id: \.self) { index in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        currentImageIndex = index
+                    }
+                } label: {
+                    LazyImage(url: URL(string: imageUrls[index])) { state in
+                        if let image = state.image {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } else {
+                            // 이미지 로딩 중이거나 없을 때 색상 표시
+                            Rectangle()
+                                .fill(.deepBlue)
+                        }
+                    }
+                    .frame(width: 50, height: 50)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(
+                                currentImageIndex == index ? Color.white : Color.clear,
+                                lineWidth: 2
+                            )
+                    )
+                    .scaleEffect(currentImageIndex == index ? 1.1 : 1.0)
+                }
+            }
+            
+            if imageUrls.isEmpty {
+                ForEach(0..<3, id: \.self) { index in
+                    Rectangle()
+                        .fill(.deepBlue)
+                        .frame(width: 50, height: 50)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+            }
+        }
+    }
+    
     private var countryText: some View {
-        HStack {
-            Text(viewModel.output.activityDetail?.country ?? "")
-            Text(viewModel.output.activityDetail?.category ?? "")
+        HStack(spacing: 12) {
+            HStack(spacing: 4) {
+                Text(viewModel.output.activityDetail?.country ?? "")
+                Text(viewModel.output.activityDetail?.category ?? "")
+            }
+            .foregroundStyle(.gray60)
+            HStack(spacing: 2) {
+                Image("Point")
+                    .iconStyle(color: .deepBlue)
+                Text("\(viewModel.output.activityDetail?.pointReward ?? 0)P")
+            }
+            .foregroundStyle(.gray90)
+            HStack(spacing: 2) {
+                Image("Like_Fill")
+                    .iconStyle(color: .rosy)
+                Text("\(viewModel.output.activityDetail?.keepCount ?? 0)개")
+            }
+            .foregroundStyle(.gray90)
             Spacer()
         }
         .font(.pretendard(.body1(.bold)))
-        .foregroundStyle(.gray60)
-        .padding(.horizontal, 20)
+    }
+    
+    private var contentBody: some View {
+        VStack(spacing: 20) {
+            HStack {
+                Text("액티비티 예약설정")
+                    .font(.pretendard(.body2(.bold)))
+                Spacer()
+            }
+            .padding(.horizontal, 20)
+            
+            PersonCountView(
+                count: $participantCount,
+                minCount: 1,
+                maxCount: viewModel.output.activityDetail?.restrictions.maxParticipants ?? 1
+            )
+            .padding(.horizontal, 20)
+            
+            reservationSection
+            
+            VStack(spacing: 16) {
+                Text("\(totalPrice)원")
+                    .font(.paperLogy(.title1))
+                    .foregroundColor(.primary)
+                
+                paymentButton
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 30)
+        }
     }
     
     private var description: some View {
         Text(viewModel.output.activityDetail?.description ?? "")
             .font(.pretendard(.caption1(.regular)))
-            .padding(.horizontal, 20)
             .foregroundStyle(.gray60)
     }
     
@@ -180,8 +357,8 @@ extension DetailView {
                         dateButton(item)
                     }
                 }
+                .padding(.horizontal, 20)
             }
-            .padding(.horizontal, 20)
             .padding(.bottom, 20)
         }
     }

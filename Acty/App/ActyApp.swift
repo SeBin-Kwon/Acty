@@ -62,11 +62,13 @@ struct ActyApp: App {
         }
         
         ImagePipelineManager.configure(with: DIContainer.shared.tokenService)
+        configureNavigationBarAppearance()
     }
     
     var body: some Scene {
         WindowGroup {
             RootView()
+                .preferredColorScheme(.light)
                 .onOpenURL(perform: { url in
                     if (AuthApi.isKakaoTalkLoginUrl(url)) {
                         _ = AuthController.handleOpenUrl(url: url)
@@ -81,6 +83,30 @@ struct ActyApp: App {
                 }
         }
     }
+    
+    private func configureNavigationBarAppearance() {
+        // 표준 appearance (스크롤 시 보이는 배경)
+        let standardAppearance = UINavigationBarAppearance()
+        standardAppearance.configureWithOpaqueBackground()
+        
+        // 스크롤 엣지 appearance (맨 위에 있을 때 투명)
+        let scrollEdgeAppearance = UINavigationBarAppearance()
+        scrollEdgeAppearance.configureWithTransparentBackground()
+        
+        let blueChevron = UIImage(systemName: "chevron.left")?.withTintColor(UIColor.accent, renderingMode: .alwaysOriginal)
+        
+        [standardAppearance, scrollEdgeAppearance].forEach { appearance in
+            appearance.setBackIndicatorImage(blueChevron, transitionMaskImage: blueChevron)
+            appearance.backButtonAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.clear]
+            appearance.backButtonAppearance.highlighted.titleTextAttributes = [.foregroundColor: UIColor.clear]
+        }
+        
+        // 각각 다른 appearance 적용
+        UINavigationBar.appearance().standardAppearance = standardAppearance
+        UINavigationBar.appearance().compactAppearance = standardAppearance
+        UINavigationBar.appearance().scrollEdgeAppearance = scrollEdgeAppearance
+    }
+
     
     private func requestNotificationPermission() async {
         let granted = await FCMService.shared.requestNotificationPermission()
