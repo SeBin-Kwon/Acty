@@ -15,6 +15,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         
+        if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+            print("🎬 프리뷰 모드 - Firebase 초기화 건너뜀")
+            return true
+        }
+        
         print("🚀 앱 시작 - Firebase 설정 중...")
         FirebaseApp.configure()
         
@@ -28,11 +33,17 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     
     // APNs 등록 성공
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+            return
+        }
         FCMService.shared.didRegisterForRemoteNotifications(with: deviceToken)
     }
     
     // APNs 등록 실패
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+            return
+        }
         FCMService.shared.didFailToRegisterForRemoteNotifications(with: error)
     }
 }

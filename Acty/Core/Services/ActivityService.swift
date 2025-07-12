@@ -59,12 +59,7 @@ class MockActivityService: ActivityServiceProtocol {
             title: "세상 패러글라이딩 2기",
             country: "스위스",
             category: "익스트림",
-            thumbnails: [
-                "/data/activities/paragliding_1.jpeg",
-                "/data/activities/paragliding_2.jpeg",
-                "/data/activities/paragliding_3.jpeg",
-                "/data/activities/paragliding_4.jpeg"
-            ],
+            thumbnails: [],
             geolocation: Geolocation(
                 longitude: 127.049914,
                 latitude: 37.654215
@@ -140,7 +135,7 @@ class MockActivityService: ActivityServiceProtocol {
             creator: Creator(
                 userId: "6826cd67e5c54c8fdd914662",
                 nickname: "스카이마스터",
-                profileImage: "/data/profiles/creator_profile.jpeg",
+                profileImage: "",
                 introduction: "10년 경력의 패러글라이딩 전문가입니다. 안전하고 즐거운 하늘 여행을 약속드려요! ✈️"
             ),
             createdAt: "2025-06-07T08:21:16.119Z",
@@ -154,10 +149,7 @@ class MockActivityService: ActivityServiceProtocol {
                 title: "아르헨티나에서 서울 맛보기",
                 country: "아르헨티나",
                 category: "투어",
-                thumbnails: [
-                    "/data/activities/argentina_1.jpeg",
-                    "/data/activities/argentina_2.jpeg"
-                ],
+                thumbnails: [],
                 geolocation: Geolocation(
                     longitude: -58.3816,
                     latitude: -34.6037
@@ -202,7 +194,7 @@ class MockActivityService: ActivityServiceProtocol {
                 creator: Creator(
                     userId: "6826cd67e5c54c8fdd914663",
                     nickname: "아르헨맛집",
-                    profileImage: "/data/profiles/argentina_creator.jpeg",
+                    profileImage: "",
                     introduction: "아르헨티나 거주 5년차, 현지 맛집 전문가입니다 🇦🇷"
                 ),
                 createdAt: "2025-06-07T08:21:16.119Z",
@@ -214,11 +206,7 @@ class MockActivityService: ActivityServiceProtocol {
                 title: "제주도 해녀 체험",
                 country: "한국",
                 category: "문화체험",
-                thumbnails: [
-                    "/data/activities/jeju_1.jpeg",
-                    "/data/activities/jeju_2.jpeg",
-                    "/data/activities/jeju_3.jpeg"
-                ],
+                thumbnails: [],
                 geolocation: Geolocation(
                     longitude: 126.5312,
                     latitude: 33.4996
@@ -267,7 +255,7 @@ class MockActivityService: ActivityServiceProtocol {
                 creator: Creator(
                     userId: "6826cd67e5c54c8fdd914664",
                     nickname: "해녀할머니",
-                    profileImage: "/data/profiles/haenyeo_creator.jpeg",
+                    profileImage: "",
                     introduction: "50년 경력의 제주 해녀입니다. 바다의 지혜를 전해드려요 🌊"
                 ),
                 createdAt: "2025-06-07T08:21:16.119Z",
@@ -289,7 +277,7 @@ class MockActivityService: ActivityServiceProtocol {
                 title: "한강 피크닉 패키지",
                 country: "대한민국",
                 category: "관광",
-                thumbnails: ["/data/activities/6842398-sd_640_360_30fps_1747149175575.mp4", "/data/activities/niklas-ohlrogge-niamoh-de-tc2Cts4aXCw_1747149046143.jpg"],
+                thumbnails: [],
                 geolocation: Geolocation(longitude: 126.9356, latitude: 37.5219),
                 price: Price(original: 50000, final: 35000),
                 tags: ["인기", "할인"],
@@ -303,7 +291,7 @@ class MockActivityService: ActivityServiceProtocol {
                 title: "N서울타워 스카이 라운지",
                 country: "대한민국",
                 category: "관광",
-                thumbnails: ["/data/activities/nseoultower_1.jpg"],
+                thumbnails: [],
                 geolocation: Geolocation(longitude: 126.9883, latitude: 37.5512),
                 price: Price(original: 25000, final: 25000),
                 tags: ["베스트"],
@@ -317,7 +305,7 @@ class MockActivityService: ActivityServiceProtocol {
                 title: "경복궁 야간 특별 관람",
                 country: "대한민국",
                 category: "문화",
-                thumbnails: ["/data/activities/gyeongbok_night_1.jpg"],
+                thumbnails: [],
                 geolocation: Geolocation(longitude: 126.9770, latitude: 37.5796),
                 price: Price(original: 15000, final: 12000),
                 tags: ["한정", "야간"],
@@ -331,7 +319,7 @@ class MockActivityService: ActivityServiceProtocol {
                 title: "홍대 거리 푸드 투어",
                 country: "대한민국",
                 category: "음식",
-                thumbnails: ["/data/activities/hongdae_food_1.jpg"],
+                thumbnails: [],
                 geolocation: Geolocation(longitude: 126.9250, latitude: 37.5563),
                 price: Price(original: 45000, final: 39000),
                 tags: ["맛집", "신상"],
@@ -345,7 +333,7 @@ class MockActivityService: ActivityServiceProtocol {
                 title: "강남 스카이 바 체험",
                 country: "대한민국",
                 category: "엔터테인먼트",
-                thumbnails: ["/data/activities/gangnam_skybar_1.jpg"],
+                thumbnails: [],
                 geolocation: Geolocation(longitude: 127.0276, latitude: 37.4979),
                 price: Price(original: 80000, final: 64000),
                 tags: ["프리미엄", "20% 할인"],
@@ -359,7 +347,7 @@ class MockActivityService: ActivityServiceProtocol {
                 title: "부산 해운대 서핑 레슨",
                 country: "대한민국",
                 category: "스포츠",
-                thumbnails: ["/data/activities/busan_surfing_1.jpg"],
+                thumbnails: [],
                 geolocation: Geolocation(longitude: 129.1603, latitude: 35.1584),
                 price: Price(original: 60000, final: 48000),
                 tags: ["체험", "초보환영"],
@@ -380,7 +368,7 @@ class MockActivityService: ActivityServiceProtocol {
             title: "한강 피크닉 패키지",
             country: "대한민국",
             category: "관광",
-            thumbnails: ["/data/activities/6842398-sd_640_360_30fps_1747149175575.mp4", "/data/activities/niklas-ohlrogge-niamoh-de-tc2Cts4aXCw_1747149046143.jpg"],
+            thumbnails: [],
             geolocation: Geolocation(longitude: 126.9356, latitude: 37.5219),
             price: Price(original: 50000, final: 35000),
             tags: ["인기", "할인"],
@@ -394,7 +382,7 @@ class MockActivityService: ActivityServiceProtocol {
             title: "N서울타워 스카이 라운지",
             country: "대한민국",
             category: "관광",
-            thumbnails: ["/data/activities/nseoultower_1.jpg"],
+            thumbnails: [],
             geolocation: Geolocation(longitude: 126.9883, latitude: 37.5512),
             price: Price(original: 25000, final: 25000),
             tags: ["베스트"],
@@ -408,7 +396,7 @@ class MockActivityService: ActivityServiceProtocol {
             title: "경복궁 야간 특별 관람",
             country: "대한민국",
             category: "문화",
-            thumbnails: ["/data/activities/gyeongbok_night_1.jpg"],
+            thumbnails: [],
             geolocation: Geolocation(longitude: 126.9770, latitude: 37.5796),
             price: Price(original: 15000, final: 12000),
             tags: ["한정", "야간"],
@@ -422,7 +410,7 @@ class MockActivityService: ActivityServiceProtocol {
             title: "홍대 거리 푸드 투어",
             country: "대한민국",
             category: "음식",
-            thumbnails: ["/data/activities/hongdae_food_1.jpg"],
+            thumbnails: [],
             geolocation: Geolocation(longitude: 126.9250, latitude: 37.5563),
             price: Price(original: 45000, final: 39000),
             tags: ["맛집", "신상"],
@@ -436,7 +424,7 @@ class MockActivityService: ActivityServiceProtocol {
             title: "강남 스카이 바 체험",
             country: "대한민국",
             category: "엔터테인먼트",
-            thumbnails: ["/data/activities/gangnam_skybar_1.jpg"],
+            thumbnails: [],
             geolocation: Geolocation(longitude: 127.0276, latitude: 37.4979),
             price: Price(original: 80000, final: 64000),
             tags: ["프리미엄", "20% 할인"],
@@ -450,7 +438,7 @@ class MockActivityService: ActivityServiceProtocol {
             title: "부산 해운대 서핑 레슨",
             country: "대한민국",
             category: "스포츠",
-            thumbnails: ["/data/activities/busan_surfing_1.jpg"],
+            thumbnails: [],
             geolocation: Geolocation(longitude: 129.1603, latitude: 35.1584),
             price: Price(original: 60000, final: 48000),
             tags: ["체험", "초보환영"],
