@@ -22,7 +22,7 @@ struct ActySelectButtonStyle: ButtonStyle {
             if isDisabled {
                 return .gray.opacity(0.5)
             } else {
-                return isSelected ? .accent : .black
+                return isSelected ? .accent : .gray75
             }
         }()
         let backgroundColor: Color = {
@@ -41,7 +41,7 @@ struct ActySelectButtonStyle: ButtonStyle {
         }()
         
         configuration.label
-            .font(.pretendard(.body2(weight)))
+            .font(.pretendard(.body3(weight)))
             .foregroundStyle(textColor)
             .padding(.horizontal, 17)
             .frame(height: 28)

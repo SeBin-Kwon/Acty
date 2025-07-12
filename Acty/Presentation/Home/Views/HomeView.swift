@@ -17,16 +17,21 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             LazyVStack() {
+                ActivityCarouselListView(activities: viewModel.output.newActivityList) { activity in
+                    ActivityBannerView(activity: activity)
+                        .onTapGesture {
+                            navigationRouter.navigate(to: .activityDetails(detailId: activity.id), in: .main)
+                        }
+                }
+                .padding(.top, 10)
+                .frame(height: 320)
                 HStack {
-                    Text("NEW 액티비티")
-                        .font(.pretendard(.body2(.bold)))
+                    Text("액티비티 둘러보기")
+                        .font(.paperLogy(.body1))
+                        .foregroundStyle(.accent)
                         .padding(20)
                     Spacer()
                 }
-                ActivityCarouselListView(activities: viewModel.output.newActivityList) { activity in
-                    ActivityBannerView(activity: activity)
-                }
-                .frame(height: 320)
                 countryFilterRow
                 categoryFilterRow
                 activityListView
@@ -111,23 +116,24 @@ extension HomeView {
             }
         }
         .padding(.horizontal, 20)
-        .padding(.bottom, 20)
+        .padding(.bottom, 15)
     }
     
     private func countryFilterButton(_ country: Country) -> some View {
         HStack(spacing: 12) {
             Image(country.rawValue)
             Text(country.koreaName)
-                .foregroundColor(selectedCountry == country ? .accent : .primary)
+                .font(.pretendard(.body3(selectedCountry == country ? .bold : .medium)))
+                .foregroundColor(selectedCountry == country ? .accent : .gray75)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(selectedCountry == country ? .accent.opacity(0.2) : .white)
         .overlay(
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: 12)
                 .stroke(selectedCountry == country ? .accent : Color.gray.opacity(0.3), lineWidth: 2)
         )
-        .clipShape(.rect(cornerRadius: 10))
+        .clipShape(.rect(cornerRadius: 12))
         .wrapToButton {
             withAnimation {
                 if selectedCountry == country {
@@ -142,7 +148,6 @@ extension HomeView {
     
     private func categoryFilterButton(_ category: ActivityCategory) -> some View {
         Button(category.koreaName) {
-            print("d")
             withAnimation {
                 if selectedCategory == category {
                     selectedCategory = nil
@@ -156,6 +161,6 @@ extension HomeView {
     }
 }
 
-//#Preview {
-//    HomeView(viewModel: HomeViewModel(activityService: MockActivityService()))
-//}
+#Preview {
+    HomeView(viewModel: HomeViewModel(activityService: MockActivityService()))
+}

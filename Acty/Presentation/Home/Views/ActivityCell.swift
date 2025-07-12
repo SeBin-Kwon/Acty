@@ -148,7 +148,7 @@ struct ActivityCell: View {
                 .opacity(activity.tags.isEmpty ? 0 : 1)
             
             // 컨텐츠 섹션
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text(activity.title)
                         .font(.headline)
@@ -207,14 +207,13 @@ struct ActivityCell: View {
                 }
             }
             .padding(.horizontal, 5)
-            .padding(.bottom, 16)
             .offset(y: -20)
             .allowsHitTesting(true)
             
             Rectangle()
                 .frame(height: 1)
                 .foregroundStyle(.gray30)
-                .padding(.bottom, 20)
+                .padding(.bottom, 25)
         }
     }
 }
