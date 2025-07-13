@@ -38,7 +38,7 @@ struct TabbarView: View {
         case .home:
             HomeView(viewModel: diContainer.makeHomeViewModel())
         case .search:
-            Text("Search")
+            SearchView(viewModel: diContainer.makeSearchViewModel())
         case .favorite:
             ChatListView(viewModel: diContainer.makeChatListViewModel())
         case .profile:
@@ -55,12 +55,8 @@ struct TabbarView: View {
             Text("Post Detail: \(postId)")
         case .userProfile(let userId):
             Text("User Profile: \(userId)")
-        case .searchMain:
-            Text("Search Main")
-        case .searchResults(let query):
-            Text("Search Results: \(query)")
-        case .categoryDetail(let category):
-            Text("Category: \(category)")
+        case .search:
+            SearchView(viewModel: diContainer.makeSearchViewModel())
         case .activityDetails(let detailId):
             DetailView(viewModel: diContainer.makeDetailViewModel(), paymentViewModel: diContainer.makePaymentViewModel(), id: detailId)
         case .chatList:

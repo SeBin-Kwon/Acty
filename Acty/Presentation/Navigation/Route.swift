@@ -19,9 +19,7 @@ enum Route: Hashable {
     case chat(userId: String)
     
     // Search
-    case searchMain
-    case searchResults(query: String)
-    case categoryDetail(category: String)
+    case search
     
     // Activity
     case activityDetails(detailId: String)

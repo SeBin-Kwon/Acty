@@ -83,6 +83,10 @@ final class DIContainer: ObservableObject {
     func makeChatListViewModel() -> ChatListViewModel {
         return ChatListViewModel(chatRepository: chatRepository)
     }
+    
+    func makeSearchViewModel() -> SearchViewModel {
+        return SearchViewModel(activityService: activityService)
+    }
 }
 
 extension DIContainer {
