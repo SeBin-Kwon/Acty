@@ -68,6 +68,7 @@ struct ActyApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                .accentColor(.accent)
                 .preferredColorScheme(.light)
                 .onOpenURL(perform: { url in
                     if (AuthApi.isKakaoTalkLoginUrl(url)) {
