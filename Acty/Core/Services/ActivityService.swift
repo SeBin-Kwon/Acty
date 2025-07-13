@@ -50,6 +50,18 @@ final class ActivityService: ActivityServiceProtocol {
             return []
         }
     }
+    
+    func searchActivities(title: String) async -> [Activity] {
+        do {
+            let result: ActivityListResponseDTO = try await networkManager.fetchResults(api: ActivityEndPoint.searchActivity(title))
+            print("액티비티 검색 성공")
+            print(result.data)
+            return result.toEntity().activities
+        } catch {
+            print("액티비티 검색 실패")
+            return []
+        }
+    }
 }
 
 class MockActivityService: ActivityServiceProtocol {
