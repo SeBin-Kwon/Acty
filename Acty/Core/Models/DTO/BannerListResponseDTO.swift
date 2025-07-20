@@ -6,3 +6,18 @@
 //
 
 import Foundation
+
+struct BannerListResponseDTO: Decodable {
+    let data: [BannerDTO]
+}
+
+struct BannerDTO: Decodable {
+    let name: String
+    let imageUrl: String
+    let payload: PayloadDTO
+}
+
+struct PayloadDTO: Decodable {
+    let type: String
+    let value: String
+}
