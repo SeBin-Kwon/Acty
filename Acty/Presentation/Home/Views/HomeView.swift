@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import NukeUI
 
 struct HomeView: View {
     
@@ -14,9 +15,15 @@ struct HomeView: View {
     @State private var selectedCountry: Country? = nil
     @State private var selectedCategory: ActivityCategory? = nil
     
+    @State private var currentBannerIndex = 0
+    @State private var bannerTimer: Timer?
+    
     var body: some View {
         ScrollView {
             LazyVStack() {
+                
+                bannerSection
+                
                 ActivityCarouselListView(activities: viewModel.output.newActivityList) { activity in
                     ActivityBannerView(activity: activity)
                         .onTapGesture {
@@ -45,6 +52,9 @@ struct HomeView: View {
         .onAppear {
             viewModel.input.onAppear.send(())
         }
+        .onReceive(viewModel.output.bannersLoaded) { _ in
+            startBannerTimer()
+        }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -68,6 +78,114 @@ struct HomeView: View {
         }
     }
 }
+
+extension HomeView {
+    
+    private var bannerSection: some View {
+        VStack(spacing: 0) {
+            if !viewModel.output.banners.isEmpty {
+                TabView(selection: $currentBannerIndex) {
+                    ForEach(Array(viewModel.output.banners.enumerated()), id: \.offset) { index, banner in
+                        BannerView(banner: banner) {
+                            viewModel.input.bannerTapped.send(banner)
+                        }
+                        .tag(index)
+                    }
+                }
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+                .frame(height: 100)
+                .onChange(of: currentBannerIndex) { _ in
+                    restartBannerTimer()
+                }
+            }
+        }
+    }
+    
+    // 배너 타이머 관리
+    private func startBannerTimer() {
+        guard !viewModel.output.banners.isEmpty else { return }
+        
+        bannerTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
+            withAnimation(.easeInOut(duration: 0.5)) {
+                currentBannerIndex = (currentBannerIndex + 1) % viewModel.output.banners.count
+            }
+        }
+    }
+    
+    private func stopBannerTimer() {
+        bannerTimer?.invalidate()
+        bannerTimer = nil
+    }
+    
+    private func restartBannerTimer() {
+        stopBannerTimer()
+        startBannerTimer()
+    }
+}
+
+struct BannerView: View {
+    let banner: Banner
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            LazyImage(url: URL(string: banner.fullImageURL)) { state in
+                if let image = state.image {
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } else if state.error != nil {
+                    Rectangle()
+                        .fill(LinearGradient(
+                            colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.8)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ))
+                        .overlay(
+                            Text(banner.name)
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                        )
+                } else {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .overlay(
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        )
+                }
+            }
+            .frame(height: 100)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+//            .overlay(
+//                // 배너 제목 오버레이
+//                VStack {
+//                    Spacer()
+//                    HStack {
+//                        Text(banner.name)
+//                            .font(.headline)
+//                            .fontWeight(.bold)
+//                            .foregroundColor(.white)
+//                            .padding(.horizontal, 16)
+//                            .padding(.vertical, 8)
+//                            .background(
+//                                LinearGradient(
+//                                    colors: [Color.black.opacity(0.6), Color.clear],
+//                                    startPoint: .bottom,
+//                                    endPoint: .top
+//                                )
+//                            )
+//                        Spacer()
+//                    }
+//                }
+//            )
+        }
+        .buttonStyle(PlainButtonStyle())
+        .padding(.horizontal, 16)
+    }
+}
+
 
 extension HomeView {
     
@@ -164,5 +282,5 @@ extension HomeView {
 }
 
 #Preview {
-    HomeView(viewModel: HomeViewModel(activityService: MockActivityService()))
+    HomeView(viewModel: HomeViewModel(activityService: MockActivityService(), bannerService: MockBannerService()))
 }
