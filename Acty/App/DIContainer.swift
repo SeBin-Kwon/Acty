@@ -35,6 +35,7 @@ final class DIContainer: ObservableObject {
     let chatRepository: ChatRepositoryProtocol
     let coreDataManaager: CoreDataManagerProtocol
     let socketIOChatService: SocketIOChatServiceProtocol
+    let bannerService: BannerServiceProtocol
     
     private init() {
         self.keychainManager = KeychainManager.shared
@@ -50,6 +51,7 @@ final class DIContainer: ObservableObject {
         self.coreDataManaager = CoreDataManager.shared
         self.socketIOChatService = SocketIOChatService(tokenService: tokenService)
         self.chatRepository = ChatRepository(chatService: chatService, coreDataManager: coreDataManaager, socketIOChatService: socketIOChatService)
+        self.bannerService = BannerService(networkManager: networkManager)
     }
     
     func makeSignInViewModel() -> SignInViewModel {
@@ -65,7 +67,7 @@ final class DIContainer: ObservableObject {
     }
     
     func makeHomeViewModel() -> HomeViewModel {
-        return HomeViewModel(activityService: activityService)
+        return HomeViewModel(activityService: activityService, bannerService: bannerService)
     }
     
     func makeDetailViewModel() -> DetailViewModel {

@@ -14,6 +14,7 @@ final class HomeViewModel: ViewModelType {
     @Published var output = Output()
     var cancellables = Set<AnyCancellable>()
     private let activityService: ActivityServiceProtocol
+    private let bannerService: BannerServiceProtocol
     
     private var currentFilters: (country: String, category: String) = ("", "")
     private var nextCursor = ""
@@ -23,6 +24,7 @@ final class HomeViewModel: ViewModelType {
         var filterButtonTapped = PassthroughSubject<(Country?, ActivityCategory?), Never>()
         var loadData = PassthroughSubject<Void, Never>()
 //        var activityDetail = PassthroughSubject<String, Never>()
+        var bannerTapped = PassthroughSubject<Banner, Never>()
     }
     
     struct Output {
@@ -31,10 +33,14 @@ final class HomeViewModel: ViewModelType {
         var isLoading = false
 //        var activityDescription = ""
 //        var activityDetails = [String: ActivityDetail]()
+        var banners = [Banner]()
+        var navigateToWebView = PassthroughSubject<String, Never>()
+        var bannersLoaded = PassthroughSubject<Void, Never>()
     }
     
-    init(activityService: ActivityServiceProtocol) {
+    init(activityService: ActivityServiceProtocol, bannerService: BannerServiceProtocol) {
         self.activityService = activityService
+        self.bannerService = bannerService
         transform()
     }
     
@@ -44,6 +50,7 @@ final class HomeViewModel: ViewModelType {
                 guard let self else { return }
                 let dto = ActivityRequestDTO(country: "", category: "", limit: 10, next: "")
                 fetchActivityData(isOnAppear: true, dto: dto)
+                self.loadBanners()
             }
             .store(in: &cancellables)
         
@@ -66,6 +73,12 @@ final class HomeViewModel: ViewModelType {
             }
             .store(in: &cancellables)
         
+        input.bannerTapped
+            .sink { [weak self] banner in
+                self?.handleBannerTap(banner)
+            }
+            .store(in: &cancellables)
+        
 //        input.activityDetail
 //            .sink { [weak self] id in
 //                guard let self else { return }
@@ -80,6 +93,26 @@ final class HomeViewModel: ViewModelType {
 //            }
 //            .store(in: &cancellables)
     }
+    
+    private func loadBanners() {
+            Task {
+                let banners = try await bannerService.fetchMainBanners()
+                
+                await MainActor.run {
+                    self.output.banners = banners
+                    if !banners.isEmpty {
+                        self.output.bannersLoaded.send(())
+                    }
+                }
+            }
+        }
+        
+    private func handleBannerTap(_ banner: Banner) {
+        switch banner.payload.type {
+            case .webview:
+                output.navigateToWebView.send(banner.payload.value)
+            }
+        }
     
     private func fetchActivityData(isOnAppear: Bool, dto: ActivityRequestDTO) {
         guard !output.isLoading else { return }
