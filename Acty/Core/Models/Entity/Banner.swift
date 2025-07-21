@@ -16,6 +16,10 @@ struct Banner: Identifiable, Hashable {
     var fullImageURL: String {
         return BASE_URL + imageUrl
     }
+    
+    var fullWebURL: String {
+        return "\(BASE_URL.replacingOccurrences(of: "/v1", with: ""))" + payload.value
+    }
 }
 
 struct Payload: Hashable {
@@ -26,3 +30,5 @@ struct Payload: Hashable {
 enum PayloadType: String {
     case webview = "WEBVIEW"
 }
+
+

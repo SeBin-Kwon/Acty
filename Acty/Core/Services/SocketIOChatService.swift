@@ -15,7 +15,7 @@ protocol SocketIOChatServiceProtocol {
     
     func connect(roomId: String)
     func disconnect()
-    func sendMessage(_ message: ChatRequestDTO, roomId: String)
+//    func sendMessage(_ message: ChatRequestDTO, roomId: String)
 }
 
 enum SocketConnectionState: Equatable {
@@ -87,7 +87,7 @@ final class SocketIOChatService: SocketIOChatServiceProtocol {
         
         print("📤 Socket.IO 메시지 전송: \(message.content)")
         // 🔧 서버 문서에 따라 "chat" 이벤트로 전송
-        socket.emit("chat", messageData)
+//        socket.emit("chat", messageData)
     }
     
     // MARK: - Private Methods

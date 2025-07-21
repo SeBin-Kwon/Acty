@@ -17,6 +17,8 @@ struct HomeView: View {
     
     @State private var currentBannerIndex = 0
     @State private var bannerTimer: Timer?
+    @State private var selectedBannerURL: String? = nil
+    @State private var showWebView: Bool = false
     
     var body: some View {
         ScrollView {
@@ -87,7 +89,8 @@ extension HomeView {
                 TabView(selection: $currentBannerIndex) {
                     ForEach(Array(viewModel.output.banners.enumerated()), id: \.offset) { index, banner in
                         BannerView(banner: banner) {
-                            viewModel.input.bannerTapped.send(banner)
+                            selectedBannerURL = banner.fullWebURL
+                                showWebView = true
                         }
                         .tag(index)
                     }
@@ -97,6 +100,11 @@ extension HomeView {
                 .onChange(of: currentBannerIndex) { _ in
                     restartBannerTimer()
                 }
+            }
+        }
+        .sheet(isPresented: $showWebView) {
+            if let url = selectedBannerURL {
+                BannerWebView(url: url)
             }
         }
     }

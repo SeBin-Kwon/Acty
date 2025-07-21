@@ -24,7 +24,6 @@ final class HomeViewModel: ViewModelType {
         var filterButtonTapped = PassthroughSubject<(Country?, ActivityCategory?), Never>()
         var loadData = PassthroughSubject<Void, Never>()
 //        var activityDetail = PassthroughSubject<String, Never>()
-        var bannerTapped = PassthroughSubject<Banner, Never>()
     }
     
     struct Output {
@@ -34,7 +33,6 @@ final class HomeViewModel: ViewModelType {
 //        var activityDescription = ""
 //        var activityDetails = [String: ActivityDetail]()
         var banners = [Banner]()
-        var navigateToWebView = PassthroughSubject<String, Never>()
         var bannersLoaded = PassthroughSubject<Void, Never>()
     }
     
@@ -73,12 +71,6 @@ final class HomeViewModel: ViewModelType {
             }
             .store(in: &cancellables)
         
-        input.bannerTapped
-            .sink { [weak self] banner in
-                self?.handleBannerTap(banner)
-            }
-            .store(in: &cancellables)
-        
 //        input.activityDetail
 //            .sink { [weak self] id in
 //                guard let self else { return }
@@ -104,13 +96,6 @@ final class HomeViewModel: ViewModelType {
                         self.output.bannersLoaded.send(())
                     }
                 }
-            }
-        }
-        
-    private func handleBannerTap(_ banner: Banner) {
-        switch banner.payload.type {
-            case .webview:
-                output.navigateToWebView.send(banner.payload.value)
             }
         }
     
