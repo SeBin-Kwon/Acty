@@ -166,28 +166,6 @@ struct BannerView: View {
             }
             .frame(height: 100)
             .clipShape(RoundedRectangle(cornerRadius: 12))
-//            .overlay(
-//                // 배너 제목 오버레이
-//                VStack {
-//                    Spacer()
-//                    HStack {
-//                        Text(banner.name)
-//                            .font(.headline)
-//                            .fontWeight(.bold)
-//                            .foregroundColor(.white)
-//                            .padding(.horizontal, 16)
-//                            .padding(.vertical, 8)
-//                            .background(
-//                                LinearGradient(
-//                                    colors: [Color.black.opacity(0.6), Color.clear],
-//                                    startPoint: .bottom,
-//                                    endPoint: .top
-//                                )
-//                            )
-//                        Spacer()
-//                    }
-//                }
-//            )
         }
         .buttonStyle(PlainButtonStyle())
         .padding(.horizontal, 16)
