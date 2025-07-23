@@ -25,12 +25,15 @@ struct ActivityDetailInfoView: View {
             
             // 가격 정보
             priceSection
+                .padding(.vertical, 10)
             
             // 액티비티 커리큘럼
             curriculumSection
+                .padding(.vertical, 10)
             
             // 위치 정보
-            locationSection
+//            locationSection
+//                .padding(.vertical, 10)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)

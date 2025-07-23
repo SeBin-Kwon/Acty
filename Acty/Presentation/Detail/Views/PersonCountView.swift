@@ -23,10 +23,14 @@ struct PersonCountView: View {
             HStack {
                 Text("인원 선택")
                     .font(.pretendard(.body2(.bold)))
+                    .foregroundColor(.gray75)
                 Spacer()
-                Text("\(count)명")
-                    .font(.pretendard(.body2(.medium)))
-                    .foregroundColor(.gray)
+                Text("최소 \(minCount)명, 최대 \(maxCount)명")
+                    .font(.pretendard(.body3(.regular)))
+                    .foregroundColor(.gray60)
+//                Text("\(count)명")
+//                    .font(.pretendard(.body2(.medium)))
+//                    .foregroundColor(.gray)
             }
             
             HStack(spacing: 0) {
@@ -67,12 +71,12 @@ struct PersonCountView: View {
             }
             
             // 제한 안내
-            HStack {
-                Text("최소 \(minCount)명, 최대 \(maxCount)명")
-                    .font(.pretendard(.caption1(.regular)))
-                    .foregroundColor(.gray)
-                Spacer()
-            }
+//            HStack {
+//                Text("최소 \(minCount)명, 최대 \(maxCount)명")
+//                    .font(.pretendard(.caption1(.regular)))
+//                    .foregroundColor(.gray)
+//                Spacer()
+//            }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)

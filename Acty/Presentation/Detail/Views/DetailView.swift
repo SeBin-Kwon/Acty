@@ -260,12 +260,13 @@ extension DetailView {
         VStack(spacing: 20) {
             
             if let activityDetail = viewModel.output.activityDetail {
-                        ActivityDetailInfoView(activityDetail: activityDetail)
-                    }
+                ActivityDetailInfoView(activityDetail: activityDetail)
+            }
             
             HStack {
                 Text("액티비티 예약설정")
-                    .font(.pretendard(.body2(.bold)))
+                    .font(.paperLogy(.body1))
+                    .foregroundColor(.gray90)
                 Spacer()
             }
             .padding(.horizontal, 20)
@@ -278,11 +279,11 @@ extension DetailView {
             .padding(.horizontal, 20)
             reservationSection
 
-            VStack(spacing: 16) {
+            HStack(spacing: 16) {
                 Text("\(totalPrice)원")
                     .font(.paperLogy(.title1))
-                    .foregroundColor(.primary)
-                
+                    .foregroundColor(.gray90)
+                Spacer()
                 paymentButton
             }
             .padding(.horizontal, 20)
@@ -371,15 +372,14 @@ extension DetailView {
                 }
                 .padding(.horizontal, 20)
             }
-            .padding(.bottom, 20)
+//            .padding(.bottom, 10)
         }
     }
     
     private func dateButton(_ item: ReservationDate) -> some View {
         let isAllReserved = item.times.allSatisfy(\.isReserved)
         
-        return Button(item.date) {
-            print("d")
+        return Button(formatDate(item.date)) {
             withAnimation {
                 if selectedDate == item.date {
                     selectedDate = ""
@@ -394,6 +394,20 @@ extension DetailView {
         .buttonStyle(.actySelected(selectedDate == item.date, isAllReserved))
         .disabled(isAllReserved)
     }
+    
+    private func formatDate(_ dateString: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "ko_KR")
+        
+        if let date = formatter.date(from: dateString) {
+            formatter.dateFormat = "M월 d일"
+            return formatter.string(from: date)
+        }
+        
+        return dateString
+    }
+
 }
 
 #Preview {
