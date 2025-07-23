@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct PushRequestDTO: Encodable {
+struct PushRequestDTO: Codable {
     let userIds: [String]
     let title: String
     let subtitle: String

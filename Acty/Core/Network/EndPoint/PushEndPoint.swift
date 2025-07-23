@@ -9,7 +9,7 @@ import Foundation
 import Alamofire
 
 enum PushEndPoint: EndPoint {
-    case push
+    case push(PushRequestDTO)
     
     var path: String {
         switch self {
@@ -25,7 +25,12 @@ enum PushEndPoint: EndPoint {
     
     var parameters: Parameters? {
         switch self {
-        case .push: nil
+        case .push(let request): return [
+            "user_ids": request.userIds,
+            "title": request.title,
+            "subtitle": request.subtitle,
+            "body": request.body
+        ]
         }
     }
     
