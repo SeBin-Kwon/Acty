@@ -16,6 +16,7 @@ final class ChatViewModel: ViewModelType {
     private let chatService: ChatServiceProtocol
     private let chatRepository: ChatRepositoryProtocol
     private let socketIOChatService: SocketIOChatServiceProtocol
+    private let pushNotificationService: PushNotificationServiceProtocol
     let userId: String
     private var roomId: String?
     
@@ -37,10 +38,11 @@ final class ChatViewModel: ViewModelType {
         var socketConnectionState = CurrentValueSubject<SocketConnectionState, Never>(.disconnected)
     }
     
-    init(chatService: ChatServiceProtocol, chatRepository: ChatRepositoryProtocol, socketIOChatService: SocketIOChatServiceProtocol,userId: String) {
+    init(chatService: ChatServiceProtocol, chatRepository: ChatRepositoryProtocol, socketIOChatService: SocketIOChatServiceProtocol, pushNotificationService: PushNotificationServiceProtocol, userId: String) {
         self.chatService = chatService
         self.chatRepository = chatRepository
         self.socketIOChatService = socketIOChatService
+        self.pushNotificationService = pushNotificationService
         self.userId = userId
         transform()
         setupRealtimeBinding()
@@ -203,12 +205,35 @@ final class ChatViewModel: ViewModelType {
             do {
                 _ = try await chatRepository.sendMessage(message, roomId: roomId)
                 print("메시지 전송 완료")
-                
+                try await sendPushNotification(for: content)
             } catch {
                 await MainActor.run {
                     self.output.errorMessage.send("메시지 전송 실패: \(error.localizedDescription)")
                 }
             }
+        }
+    }
+    
+    private func sendPushNotification(for messageContent: String) async throws {
+        guard let roomId = roomId,
+              let currentUserNickname = DIContainer.shared.currentUser?.nick else {
+            print("⚠️ 푸시 알림 전송 건너뜀 - 필요한 정보 부족")
+            return
+        }
+        
+        do {
+            try await pushNotificationService.sendChatNotification(
+                to: userId,                        // 상대방 ID (수신자)
+                from: currentUserNickname,         // 현재 사용자 닉네임 (발신자)
+                message: messageContent,           // 메시지 내용
+                chatRoomId: roomId                 // 채팅방 ID
+            )
+            
+            print("✅ 푸시 알림 전송 성공")
+            
+        } catch {
+            print("⚠️ 푸시 알림 전송 실패: \(error)")
+            // 푸시 실패는 채팅 자체에는 영향 주지 않음 (조용히 실패)
         }
     }
 }
