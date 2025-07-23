@@ -59,7 +59,7 @@ final class SignInViewModel: ViewModelType {
                     let dto = EmailSignInRequestDTO(
                         email: input.email,
                         password: input.password,
-                        deviceToken: nil
+                        deviceToken: FCMService.shared.fcmToken
                     )
                     let result = try await authService.signIn(with: dto)
                     
@@ -82,7 +82,14 @@ final class SignInViewModel: ViewModelType {
             // 애플 로그인
             appleSignInService.signIn(
                 onSuccess: { result in
-                    if let dto = result as? AppleSignInRequestDTO {
+                    if var dto = result as? AppleSignInRequestDTO {
+                        
+                        dto = AppleSignInRequestDTO(
+                            idToken: dto.idToken,
+                            deviceToken: FCMService.shared.fcmToken,
+                            nick: dto.nick
+                        )
+                        
                         print("애플 로그인 시도: \(dto)")
                         Task {
                             do {
@@ -116,7 +123,13 @@ final class SignInViewModel: ViewModelType {
             // 카카오 로그인
             kakaoSignInService.signIn(
                 onSuccess: { result in
-                    if let dto = result as? KakaoSignInRequestDTO {
+                    if var dto = result as? KakaoSignInRequestDTO {
+                        
+                        dto = KakaoSignInRequestDTO(
+                            oauthToken: dto.oauthToken,
+                            deviceToken: FCMService.shared.fcmToken
+                        )
+                        
                         print("카카오 로그인 시도: \(dto)")
                         Task {
                             do {

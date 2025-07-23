@@ -37,6 +37,6 @@ enum PushEndPoint: EndPoint {
     }
     
     var isAuthRequired: Bool {
-        false
+        true
     }
 }

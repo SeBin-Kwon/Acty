@@ -77,17 +77,8 @@ final class FCMService: NSObject, FCMServiceProtocol {
                 print("🔑 FCM 토큰: \(token)")
                 self?.fcmToken = token
                 self?.tokenDidChange.send(token)
-                self?.sendTokenToServer(token)
             }
         }
-    }
-    
-    // 토큰을 서버로 전송 (나중에 로그인 API와 연동)
-    private func sendTokenToServer(_ token: String) {
-        print("📤 서버에 FCM 토큰 전송 준비: \(token.prefix(20))...")
-        
-        // TODO: 로그인 시 AuthService에서 이 토큰을 사용하도록 연동
-        // 현재는 로그에만 출력
     }
 }
 
@@ -99,7 +90,6 @@ extension FCMService: MessagingDelegate {
             print("🔑 새로운 FCM 토큰: \(token)")
             self.fcmToken = token
             tokenDidChange.send(token)
-            sendTokenToServer(token)
         }
     }
 }
