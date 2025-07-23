@@ -11,12 +11,12 @@ struct ActivityDetailInfoView: View {
     let activityDetail: ActivityDetail
     
     // 할인율 계산
-    private var discountPercentage: Int {
-        let originalPrice = Double(activityDetail.price.original)
-        let finalPrice = Double(activityDetail.price.final)
-        let discount = ((originalPrice - finalPrice) / originalPrice) * 100
-        return Int(discount.rounded())
-    }
+//    private var discountPercentage: Int {
+//        let originalPrice = Double(activityDetail.price.original)
+//        let finalPrice = Double(activityDetail.price.final)
+//        let discount = ((originalPrice - finalPrice) / originalPrice) * 100
+//        return Int(discount.rounded())
+//    }
     
     var body: some View {
         VStack(spacing: 24) {
@@ -103,25 +103,25 @@ extension ActivityDetailInfoView {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("판매가")
-                    .font(.paperLogy(.body1))
+                    .font(.pretendard(.body1(.bold)))
                     .foregroundColor(.gray90)
                 Spacer()
             }
             
             HStack(alignment: .bottom, spacing: 8) {
                 // 원가 (취소선)
-                Text("\(activityDetail.price.original.formatted())원")
+                Text(activityDetail.formattedOriginalPrice)
                     .font(.paperLogy(.body1))
                     .foregroundColor(.gray45)
                     .strikethrough()
                 
                 // 할인가
-                Text("\(activityDetail.price.final.formatted())원")
+                Text(activityDetail.formattedFinalPrice)
                     .font(.paperLogy(.body1))
                     .foregroundColor(.gray75)
                 
                 // 할인율
-                Text("\(discountPercentage)%")
+                Text("\(activityDetail.discountPercentage)%")
                     .font(.paperLogy(.body1))
                     .foregroundColor(.deepBlue)
                 
@@ -133,7 +133,7 @@ extension ActivityDetailInfoView {
     private var curriculumSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("커리큘럼")
-                .font(.paperLogy(.body1))
+                .font(.pretendard(.body1(.bold)))
                 .foregroundColor(.gray90)
             
             VStack(alignment: .leading) {
@@ -166,12 +166,12 @@ extension ActivityDetailInfoView {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(duration)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    .font(.pretendard(.caption1(.regular)))
+                    .foregroundColor(.gray60)
                 
                 Text(description)
-                    .font(.system(size: 15))
-                    .foregroundColor(.primary)
+                    .font(.pretendard(.body3(.medium)))
+                    .foregroundColor(.gray90)
                     .multilineTextAlignment(.leading)
             }
             
@@ -179,45 +179,45 @@ extension ActivityDetailInfoView {
         }
     }
     
-    private var locationSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("용프라우, 스위스")
-                .font(.system(size: 18, weight: .medium))
-                .foregroundColor(.primary)
-            
-            HStack(spacing: 12) {
-                // 지도 썸네일
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(.systemGray5))
-                        .frame(width: 60, height: 60)
-                    
-                    Image(systemName: "map")
-                        .font(.title2)
-                        .foregroundColor(.gray)
-                }
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("용프라우, 스위스")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
-                    
-                    Text("위도: \(String(format: "%.6f", activityDetail.geolocation.latitude))")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Text("경도: \(String(format: "%.6f", activityDetail.geolocation.longitude))")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-            }
-            .padding(12)
-            .background(Color(.systemGray6))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-    }
+//    private var locationSection: some View {
+//        VStack(alignment: .leading, spacing: 12) {
+//            Text("용프라우, 스위스")
+//                .font(.system(size: 18, weight: .medium))
+//                .foregroundColor(.primary)
+//            
+//            HStack(spacing: 12) {
+//                // 지도 썸네일
+//                ZStack {
+//                    RoundedRectangle(cornerRadius: 8)
+//                        .fill(Color(.systemGray5))
+//                        .frame(width: 60, height: 60)
+//                    
+//                    Image(systemName: "map")
+//                        .font(.title2)
+//                        .foregroundColor(.gray)
+//                }
+//                
+//                VStack(alignment: .leading, spacing: 4) {
+//                    Text("용프라우, 스위스")
+//                        .font(.system(size: 16, weight: .medium))
+//                        .foregroundColor(.primary)
+//                    
+//                    Text("위도: \(String(format: "%.6f", activityDetail.geolocation.latitude))")
+//                        .font(.caption)
+//                        .foregroundColor(.secondary)
+//                    
+//                    Text("경도: \(String(format: "%.6f", activityDetail.geolocation.longitude))")
+//                        .font(.caption)
+//                        .foregroundColor(.secondary)
+//                }
+//                
+//                Spacer()
+//            }
+//            .padding(12)
+//            .background(Color(.systemGray6))
+//            .clipShape(RoundedRectangle(cornerRadius: 12))
+//        }
+//    }
 }
 
 // MARK: - Preview
@@ -238,7 +238,7 @@ struct ActivityDetailInfoView_Previews: PreviewProvider {
         geolocation: Geolocation(longitude: 127.049914, latitude: 37.654215),
         startDate: "2025-07-01",
         endDate: "2025-09-30",
-        price: Price(original: 605000, final: 520000),
+        price: Price(original: 605, final: 520),
         tags: ["New 오픈특가", "인기급상승", "얼리버드"],
         pointReward: 5200,
         restrictions: Restrictions(minHeight: 150, minAge: 16, maxParticipants: 8),

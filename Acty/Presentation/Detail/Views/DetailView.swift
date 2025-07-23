@@ -24,7 +24,7 @@ struct DetailView: View {
     @State private var currentImageIndex = 0
     
     private var totalPrice: Int {
-        participantCount * (viewModel.output.activityDetail?.price.final ?? 0)
+        participantCount * (viewModel.output.activityDetail?.finalPriceInKRW ?? 0)
     }
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 4)
     
@@ -210,8 +210,8 @@ extension DetailView {
     
     private var contentHeader: some View {
         VStack(spacing: 16) {
-            HStack {
-                Text(viewModel.output.activityDetail?.title ?? "겨울 새싹 스키 원정대")
+            HStack(alignment: .bottom) {
+                Text(viewModel.output.activityDetail?.title ?? "")
                     .font(.paperLogy(.title1))
                     .foregroundStyle(.gray90)
                 Spacer()
@@ -265,7 +265,7 @@ extension DetailView {
             
             HStack {
                 Text("액티비티 예약설정")
-                    .font(.paperLogy(.body1))
+                    .font(.pretendard(.body1(.bold)))
                     .foregroundColor(.gray90)
                 Spacer()
             }
@@ -292,16 +292,19 @@ extension DetailView {
     }
     
     private var description: some View {
-        Text(viewModel.output.activityDetail?.description ?? "")
-            .font(.pretendard(.caption1(.regular)))
-            .foregroundStyle(.gray60)
+        HStack {
+            Text(viewModel.output.activityDetail?.description ?? "")
+                .font(.pretendard(.caption1(.regular)))
+                .foregroundStyle(.gray60)
+            Spacer()
+        }
     }
     
     private var chatButton: some View {
-        Text("채팅")
+        Image(systemName: "paperplane.fill")
             .font(.pretendard(.body1(.bold)))
             .foregroundStyle(.white)
-            .padding(.horizontal, 10)
+            .padding(.horizontal, 8)
             .padding(.vertical, 5)
             .background(.accent)
             .clipShape(.rect(cornerRadius: 10))
