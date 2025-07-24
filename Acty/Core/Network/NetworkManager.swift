@@ -113,3 +113,61 @@ final class NetworkManager: Sendable {
         }
     }
 }
+
+extension NetworkManager {
+    
+    // MARK: - MultipartFormData 파일 업로드
+    func uploadFiles<T: Decodable>(api: EndPoint, images: [Data], fileNames: [String]? = nil) async throws -> T {
+        print("📤 파일 업로드 API 요청: \(api.method.rawValue) \(api.path)")
+        
+        var headers = api.headers
+        
+        if !api.isAuthRequired {
+            headers.add(name: "X-Requires-Auth", value: "false")
+        }
+        
+        // Content-Type을 multipart/form-data로 변경 (Alamofire가 자동으로 boundary 추가)
+        headers.remove(name: "Content-Type")
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            session.upload(
+                multipartFormData: { multipartFormData in
+                    // 각 이미지를 files 필드로 추가
+                    for (index, imageData) in images.enumerated() {
+                        let fileName = fileNames?[safe: index] ?? "image_\(index).jpg"
+                        multipartFormData.append(
+                            imageData,
+                            withName: "files",
+                            fileName: fileName,
+                            mimeType: "image/jpeg"
+                        )
+                    }
+                },
+                to: api.path,
+                method: api.method,
+                headers: headers
+            )
+            .validate(statusCode: 200..<300)
+            .responseDecodable(of: T.self) { response in
+                switch response.result {
+                case .success(let result):
+                    print("✅ 파일 업로드 성공: \(api.path)")
+                    continuation.resume(returning: result)
+                case .failure(let error):
+                    print("❌ 파일 업로드 실패: \(api.path) - \(error)")
+                    if let data = response.data, let errorString = String(data: data, encoding: .utf8) {
+                        print("📋 서버 응답: \(errorString)")
+                    }
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+}
+
+// 안전한 배열 접근을 위한 extension
+extension Array {
+    subscript(safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+}
