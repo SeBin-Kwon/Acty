@@ -13,7 +13,7 @@ enum ChatEndPoint: EndPoint {
     case createChats(String)
     case sendChat(String, ChatRequestDTO)
     case getChatHistory(String, String)
-    case uploadChatFiles(String, [String])
+    case uploadChatFiles(String, [Data])
     
     var path: String {
         switch self {
@@ -37,7 +37,7 @@ enum ChatEndPoint: EndPoint {
         case .createChats(let id): ["opponent_id": id]
         case .sendChat(_, let message): ["content": message.content, "files": message.files]
         case .getChatHistory(let id, let date): ["room_id": id, "next": date]
-        case .uploadChatFiles(let id, let files): ["room_id": id, "files": files]
+        case .uploadChatFiles: nil
         }
     }
     

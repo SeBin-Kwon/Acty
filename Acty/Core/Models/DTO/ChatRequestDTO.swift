@@ -9,11 +9,7 @@ import Foundation
 
 struct ChatRequestDTO: Codable {
     let content: String
-    let files: [ChatFiles]
-}
-
-struct ChatFiles: Codable {
-    let url: String
+    let files: [String]
 }
 
 
