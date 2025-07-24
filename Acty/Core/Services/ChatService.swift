@@ -12,7 +12,7 @@ protocol ChatServiceProtocol {
     func getChatRooms() async -> [ChatRoomResponseDTO]
     func getMessages(roomId: String, date: String?) async -> [ChatResponseDTO]
     func sendMessage(roomId: String, message: ChatRequestDTO) async -> ChatResponseDTO?
-    func uploadFiles(roomId: String, files: [String]) async -> Bool
+    func uploadFiles(roomId: String, images: [Data]) async -> ChatFileResponseDTO?
 }
 
 final class ChatService: ChatServiceProtocol {
@@ -76,16 +76,17 @@ final class ChatService: ChatServiceProtocol {
     }
     
     // MARK: - 파일 업로드
-    func uploadFiles(roomId: String, files: [String]) async -> Bool {
+    func uploadFiles(roomId: String, images: [Data]) async -> ChatFileResponseDTO? {
         do {
-            let _: EmptyResponse = try await networkManager.fetchResults(
-                api: ChatEndPoint.uploadChatFiles(roomId, files)
+            let result: ChatFileResponseDTO = try await networkManager.uploadFiles(
+                api: ChatEndPoint.uploadChatFiles(roomId, images),
+                images: images
             )
-            print("파일 업로드 성공")
-            return true
+            print("파일 업로드 성공: \(result.files.count)개")
+            return result
         } catch {
             print("파일 업로드 실패: \(error)")
-            return false
+            return nil
         }
     }
 }

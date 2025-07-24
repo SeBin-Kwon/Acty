@@ -78,16 +78,7 @@ final class SocketIOChatService: SocketIOChatServiceProtocol {
             print("❌ Socket.IO가 연결되지 않음 - 메시지 전송 실패")
             return
         }
-        
-        // ChatRequestDTO를 Dictionary로 변환
-        let messageData: [String: Any] = [
-            "content": message.content,
-            "files": message.files.map { ["url": $0.url] }
-        ]
-        
         print("📤 Socket.IO 메시지 전송: \(message.content)")
-        // 🔧 서버 문서에 따라 "chat" 이벤트로 전송
-//        socket.emit("chat", messageData)
     }
     
     // MARK: - Private Methods
