@@ -23,7 +23,7 @@ final class ChatViewModel: ViewModelType {
     struct Input {
         var onAppear = PassthroughSubject<Void, Never>()
         var onDisappear = PassthroughSubject<Void, Never>()
-        var sendMessage = PassthroughSubject<String, Never>()
+        var sendMessage = PassthroughSubject<(String, [Data]), Never>()
         var loadMoreMessages = PassthroughSubject<Void, Never>()
         var onForeground = PassthroughSubject<Void, Never>()
         var onBackground = PassthroughSubject<Void, Never>()
@@ -36,6 +36,7 @@ final class ChatViewModel: ViewModelType {
         var errorMessage = PassthroughSubject<String, Never>()
         var chatRoomCreated = PassthroughSubject<String, Never>()
         var socketConnectionState = CurrentValueSubject<SocketConnectionState, Never>(.disconnected)
+        var isUploading = CurrentValueSubject<Bool, Never>(false)
     }
     
     init(chatService: ChatServiceProtocol, chatRepository: ChatRepositoryProtocol, socketIOChatService: SocketIOChatServiceProtocol, pushNotificationService: PushNotificationServiceProtocol, userId: String) {
@@ -70,8 +71,13 @@ final class ChatViewModel: ViewModelType {
             .store(in: &cancellables)
         
         input.sendMessage
-            .sink { [weak self] content in
-                self?.sendMessage(content: content)
+            .sink { [weak self] (content, images) in
+                if !images.isEmpty {
+                    self?.uploadAndSendImages(images, content: content)
+                } else {
+                    let message = ChatRequestDTO(content: content, files: [])
+                    self?.sendMessage(message)
+                }
             }
             .store(in: &cancellables)
         
@@ -90,7 +96,33 @@ final class ChatViewModel: ViewModelType {
                 self?.disconnectSocket()
             }
             .store(in: &cancellables)
-
+    }
+    
+    private func uploadAndSendImages(_ imageDataArray: [Data], content: String = "사진") {
+        guard let roomId = roomId else { return }
+        
+        output.isUploading.send(true)
+        
+        Task {
+            // 1. 서버에 이미지 업로드
+            if let result = await chatService.uploadFiles(roomId: roomId, images: imageDataArray) {
+                // 2. 업로드된 파일 경로로 메시지 전송
+                let message = ChatRequestDTO(
+                    content: content,
+                    files: result.files
+                )
+                sendMessage(message)
+                
+                await MainActor.run {
+                    output.isUploading.send(false)
+                }
+            } else {
+                await MainActor.run {
+                    output.errorMessage.send("이미지 업로드에 실패했습니다.")
+                    output.isUploading.send(false)
+                }
+            }
+        }
     }
     
     private func setupRealtimeBinding() {
@@ -193,19 +225,17 @@ final class ChatViewModel: ViewModelType {
         }
     }
     
-    private func sendMessage(content: String) {
+    private func sendMessage(_ message: ChatRequestDTO) {
         guard let roomId = roomId else {
             output.errorMessage.send("채팅방이 준비되지 않았습니다.")
             return
         }
         
-        let message = ChatRequestDTO(content: content, files: [])
-        
         Task {
             do {
-                _ = try await chatRepository.sendMessage(message, roomId: roomId)
+                let sentMessage = try await chatRepository.sendMessage(message, roomId: roomId)
                 print("메시지 전송 완료")
-                try await sendPushNotification(for: content)
+                try await sendPushNotification(for: sentMessage.content ?? "")
             } catch {
                 await MainActor.run {
                     self.output.errorMessage.send("메시지 전송 실패: \(error.localizedDescription)")
