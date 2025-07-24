@@ -10,6 +10,7 @@ import SwiftUI
 struct ChatInputView: View {
     @Binding var messageText: String
     let onSend: () -> Void
+    let onImageTap: () -> Void
     @FocusState private var isTextFieldFocused: Bool
     
     var body: some View {
@@ -17,6 +18,14 @@ struct ChatInputView: View {
             Divider()
             
             HStack(spacing: 12) {
+                Button {
+                    onImageTap()
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 28))
+                        .foregroundColor(.deepBlue)
+                }
+
                 // 텍스트 입력 필드
                 HStack {
                     TextField("메시지를 입력하세요...", text: $messageText, axis: .vertical)

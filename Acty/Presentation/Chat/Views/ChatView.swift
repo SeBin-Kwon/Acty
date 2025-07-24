@@ -6,13 +6,16 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct ChatView: View {
     let userId: String
     @StateObject var viewModel: ChatViewModel
     
     @State private var messageText = ""
-    
+    @State private var selectedPhotos: [PhotosPickerItem] = []
+    @State private var selectedImageData: [Data] = []
+    @State private var showPhotoPicker = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -25,11 +28,11 @@ struct ChatView: View {
                         ForEach(Array(viewModel.output.messages.enumerated()), id: \.element.chatId) { index, message in
                             
                             if shouldShowDateSeparator(for: message, at: index, in: viewModel.output.messages) {
-                                                                DateSeparatorView(date: message.createdAtDate)
-                                                                    .listRowSeparator(.hidden)
-                                                                    .listRowBackground(Color.clear)
-                                                                    .listRowInsets(EdgeInsets())
-                                                            }
+                                DateSeparatorView(date: message.createdAtDate)
+                                    .listRowSeparator(.hidden)
+                                    .listRowBackground(Color.clear)
+                                    .listRowInsets(EdgeInsets())
+                            }
                             
                             ChatMessageRow(message: message, currentUserId: DIContainer.shared.currentUserId ?? "", shouldShowTime: shouldShowTime(for: message, at: index, in: viewModel.output.messages))
                                 .id(message.chatId)
@@ -43,11 +46,32 @@ struct ChatView: View {
                     .onChange(of: viewModel.output.messages) { messages in
                         scrollToBottom(proxy: proxy, messages: messages)
                     }
+                    .onChange(of: selectedPhotos) { newPhotos in
+                        handleSelectedPhotos(newPhotos)
+                    }
+                    .photosPicker(
+                        isPresented: $showPhotoPicker,
+                        selection: $selectedPhotos,
+                        maxSelectionCount: 5,
+                        matching: .images
+                    )
                 }
+                
+                if !selectedImageData.isEmpty {
+                    ImagePreviewView(
+                        selectedImages: selectedImageData,
+                        onRemove: { index in
+                            guard index >= 0 && index < selectedImageData.count else { return }
+                            selectedImageData.remove(at: index)
+                        }
+                    )
+                }
+                
                 ChatInputView(
                     messageText: $messageText,
-                    onSend: sendMessage
-                )
+                    onSend: sendMessage) {
+                        showPhotoPicker = true
+                    }
             }
         }
         .navigationTitle(viewModel.output.chatUserNickname ?? "")
@@ -76,12 +100,35 @@ struct ChatView: View {
         }
     }
     
+    private func handleSelectedPhotos(_ photos: [PhotosPickerItem]) {
+            guard !photos.isEmpty else { return }
+            
+            Task {
+                var imageDataArray: [Data] = []
+                
+                for photo in photos {
+                    if let data = try? await photo.loadTransferable(type: Data.self) {
+                        imageDataArray.append(data)
+                    }
+                }
+                
+                // ViewModel에 이미지 데이터 전달
+                await MainActor.run {
+                    selectedImageData = imageDataArray
+                    selectedPhotos = []
+                }
+            }
+        }
+    
     private func sendMessage() {
         let content = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
+        
         guard !content.isEmpty else { return }
         
-        viewModel.input.sendMessage.send(content)
+        viewModel.input.sendMessage.send((content, selectedImageData))
+        
         messageText = ""
+        selectedImageData = []
     }
     
     private func scrollToBottom(proxy: ScrollViewProxy, messages: [ChatResponseDTO]) {
@@ -118,7 +165,7 @@ struct ChatView: View {
         // 다음 메시지와 다른 분이면 시간 표시, 같은 분이면 시간 숨김
         return currentMinute != nextMinute
     }
-
+    
 }
 
 struct DateSeparatorView: View {
@@ -162,32 +209,41 @@ struct ChatMessageRow: View {
     let shouldShowTime: Bool
     
     private var isFromCurrentUser: Bool {
-            let result = message.sender.userId == currentUserId
-            print("💬 메시지 발신자 확인:")
-            print("   - 메시지 발신자: \(message.sender.nick) (\(message.sender.userId))")
-            print("   - 현재 사용자: \(currentUserId)")
-            return result
-        }
+        let result = message.sender.userId == currentUserId
+        print("💬 메시지 발신자 확인:")
+        print("   - 메시지 발신자: \(message.sender.nick) (\(message.sender.userId))")
+        print("   - 현재 사용자: \(currentUserId)")
+        return result
+    }
     
     var body: some View {
         HStack {
             if isFromCurrentUser {
                 Spacer(minLength: 50)
-                
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text(message.content ?? "")
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(.deepBlue)
-                        .foregroundColor(.white)
-                        .clipShape(
-                            .rect(
-                                topLeadingRadius: 18,
-                                bottomLeadingRadius: 18,
-                                bottomTrailingRadius: 4,
-                                topTrailingRadius: 18
-                            )
+                    if let files = message.files, !files.isEmpty {
+                        ChatImageLayoutView(
+                            imageUrls: files,
+                            isUploading: false
                         )
+                    }
+                    
+                    if let content = message.content, !content.isEmpty {
+                        Text(content)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(.deepBlue)
+                            .foregroundColor(.white)
+                            .clipShape(
+                                .rect(
+                                    topLeadingRadius: 18,
+                                    bottomLeadingRadius: 18,
+                                    bottomTrailingRadius: 4,
+                                    topTrailingRadius: 18
+                                )
+                            )
+                    }
+                    
                     if shouldShowTime {
                         Text(message.displayTime)
                             .font(.caption2)
@@ -215,20 +271,31 @@ struct ChatMessageRow: View {
                     .clipShape(Circle())
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(message.content ?? "")
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(Color(.systemBackground))
-                            .foregroundColor(.primary)
-                            .clipShape(
-                                .rect(
-                                    topLeadingRadius: 4,
-                                    bottomLeadingRadius: 18,
-                                    bottomTrailingRadius: 18,
-                                    topTrailingRadius: 18
-                                )
+                        // ✅ 이미지를 먼저 표시 (위쪽)
+                        if let files = message.files, !files.isEmpty {
+                            ChatImageLayoutView(
+                                imageUrls: files,
+                                isUploading: false
                             )
-                            .shadow(color: .black.opacity(0.05), radius: 1, x: 0, y: 1)
+                        }
+
+                        if let content = message.content, !content.isEmpty {
+                            Text(content)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(Color(.systemBackground))
+                                .foregroundColor(.primary)
+                                .clipShape(
+                                    .rect(
+                                        topLeadingRadius: 4,
+                                        bottomLeadingRadius: 18,
+                                        bottomTrailingRadius: 18,
+                                        topTrailingRadius: 18
+                                    )
+                                )
+                                .shadow(color: .black.opacity(0.05), radius: 1, x: 0, y: 1)
+                        }
+                        
                         if shouldShowTime {
                             Text(message.displayTime)
                                 .font(.caption2)
