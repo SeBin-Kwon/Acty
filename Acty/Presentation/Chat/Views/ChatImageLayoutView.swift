@@ -13,6 +13,10 @@ struct ChatImageLayoutView: View {
     let isUploading: Bool
     let maxWidth: CGFloat = 200
     
+    // 🔧 상태를 내부에서 관리
+    @State private var showImageViewer = false
+    @State private var selectedImageIndex = 0
+    
     var body: some View {
         Group {
             switch imageUrls.count {
@@ -31,29 +35,38 @@ struct ChatImageLayoutView: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .fullScreenCover(isPresented: $showImageViewer) {
+            ImageViewerView(
+                imageUrls: imageUrls,
+                initialIndex: selectedImageIndex,
+                isPresented: $showImageViewer
+            )
+        }
     }
     
     // MARK: - 1개 이미지
     private var singleImageLayout: some View {
-        imageView(for: imageUrls[0], width: maxWidth, height: maxWidth * 0.75)
+        imageView(for: imageUrls[0], imageIndex: 0, width: maxWidth, height: maxWidth * 0.75)
     }
     
     // MARK: - 2개 이미지
     private var twoImagesLayout: some View {
         HStack(spacing: 2) {
-            imageView(for: imageUrls[0], width: maxWidth/2 - 1, height: maxWidth * 0.6)
-            imageView(for: imageUrls[1], width: maxWidth/2 - 1, height: maxWidth * 0.6)
+            ForEach(0..<2) { i in
+                imageView(for: imageUrls[i], imageIndex: i, width: maxWidth/2 - 1, height: maxWidth * 0.6)
+            }
         }
     }
     
     // MARK: - 3개 이미지
     private var threeImagesLayout: some View {
         HStack(spacing: 2) {
-            imageView(for: imageUrls[0], width: maxWidth/2 - 1, height: maxWidth * 0.8)
+            imageView(for: imageUrls[0], imageIndex: 0, width: maxWidth/2 - 1, height: maxWidth * 0.8)
             
             VStack(spacing: 2) {
-                imageView(for: imageUrls[1], width: maxWidth/2 - 1, height: maxWidth * 0.4 - 1)
-                imageView(for: imageUrls[2], width: maxWidth/2 - 1, height: maxWidth * 0.4 - 1)
+                ForEach(1..<3) { i in
+                    imageView(for: imageUrls[i], imageIndex: i, width: maxWidth/2 - 1, height: maxWidth * 0.4 - 1)
+                }
             }
         }
     }
@@ -62,12 +75,14 @@ struct ChatImageLayoutView: View {
     private var fourImagesLayout: some View {
         VStack(spacing: 2) {
             HStack(spacing: 2) {
-                imageView(for: imageUrls[0], width: maxWidth/2 - 1, height: maxWidth * 0.4)
-                imageView(for: imageUrls[1], width: maxWidth/2 - 1, height: maxWidth * 0.4)
+                ForEach(0..<2) { i in
+                    imageView(for: imageUrls[i], imageIndex: i, width: maxWidth/2 - 1, height: maxWidth * 0.4)
+                }
             }
             HStack(spacing: 2) {
-                imageView(for: imageUrls[2], width: maxWidth/2 - 1, height: maxWidth * 0.4)
-                imageView(for: imageUrls[3], width: maxWidth/2 - 1, height: maxWidth * 0.4)
+                ForEach(2..<4) { i in
+                    imageView(for: imageUrls[i], imageIndex: i, width: maxWidth/2 - 1, height: maxWidth * 0.4)
+                }
             }
         }
     }
@@ -76,22 +91,23 @@ struct ChatImageLayoutView: View {
     private var fiveImagesLayout: some View {
         VStack(spacing: 2) {
             HStack(spacing: 2) {
-                imageView(for: imageUrls[0], width: maxWidth/2 - 1, height: maxWidth * 0.35)
-                imageView(for: imageUrls[1], width: maxWidth/2 - 1, height: maxWidth * 0.35)
+                ForEach(0..<2) { i in
+                    imageView(for: imageUrls[i], imageIndex: i, width: maxWidth/2 - 1, height: maxWidth * 0.35)
+                }
             }
             HStack(spacing: 2) {
-                imageView(for: imageUrls[2], width: maxWidth/2 - 1, height: maxWidth * 0.35)
-                imageView(for: imageUrls[3], width: maxWidth/2 - 1, height: maxWidth * 0.35)
+                ForEach(2..<4) { i in
+                    imageView(for: imageUrls[i], imageIndex: i, width: maxWidth/2 - 1, height: maxWidth * 0.35)
+                }
             }
-            imageView(for: imageUrls[4], width: maxWidth, height: maxWidth * 0.3)
+            imageView(for: imageUrls[4], imageIndex: 4, width: maxWidth, height: maxWidth * 0.3)
         }
     }
     
     // MARK: - 이미지뷰 생성 헬퍼
-    private func imageView(for url: String, width: CGFloat, height: CGFloat) -> some View {
+    private func imageView(for url: String, imageIndex: Int, width: CGFloat, height: CGFloat) -> some View {
         ZStack {
             if isUploading {
-                // 업로드 중일 때 ProgressView
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
                     .overlay(
@@ -99,7 +115,6 @@ struct ChatImageLayoutView: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     )
             } else {
-                // 업로드 완료 후 실제 이미지
                 LazyImage(url: URL(string: BASE_URL + url)) { state in
                     if let image = state.image {
                         image
@@ -120,6 +135,12 @@ struct ChatImageLayoutView: View {
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             )
                     }
+                }
+                // 🔧 직접 탭 제스처 사용
+                .onTapGesture {
+                    print("🖼️ 이미지 탭됨 - 인덱스: \(imageIndex)")
+                    selectedImageIndex = imageIndex
+                    showImageViewer = true
                 }
             }
         }

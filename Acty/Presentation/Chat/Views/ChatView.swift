@@ -207,6 +207,8 @@ struct ChatMessageRow: View {
     let message: ChatResponseDTO
     let currentUserId: String
     let shouldShowTime: Bool
+    @State private var showImageViewer = false
+    @State private var selectedImageIndex = 0
     
     private var isFromCurrentUser: Bool {
         let result = message.sender.userId == currentUserId
@@ -271,7 +273,6 @@ struct ChatMessageRow: View {
                     .clipShape(Circle())
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        // ✅ 이미지를 먼저 표시 (위쪽)
                         if let files = message.files, !files.isEmpty {
                             ChatImageLayoutView(
                                 imageUrls: files,
