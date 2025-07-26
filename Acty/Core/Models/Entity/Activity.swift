@@ -98,6 +98,21 @@ extension Activity {
         print(baseURL + thumbnail)
         return baseURL + thumbnail
     }
+    
+    var mainVideoThumbnail: String? {
+        let videos = thumbnails.filter {
+            let lowercased = $0.lowercased()
+            return lowercased.hasSuffix(".mp4") ||
+                   lowercased.hasSuffix(".mov") ||
+                   lowercased.hasSuffix(".avi")
+        }
+        return videos.first
+    }
+    
+    func fullVideoURL(baseURL: String = BASE_URL) -> String? {
+        guard let videoThumbnail = mainVideoThumbnail else { return nil }
+        return baseURL + videoThumbnail
+    }
 }
 
 extension Activity {
