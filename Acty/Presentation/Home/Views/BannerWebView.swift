@@ -11,6 +11,7 @@ import WebKit
 struct BannerWebView: View {
     let url: String
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var toastManager: ToastManager
     
     var body: some View {
         VStack(spacing: 0) {
@@ -22,7 +23,7 @@ struct BannerWebView: View {
             }
             .padding()
             
-            WebViewRepresentable(url: url)
+            WebViewRepresentable(url: url, toastManager: toastManager)
         }
         .navigationBarHidden(true)
     }

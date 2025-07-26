@@ -14,11 +14,6 @@ struct HomeView: View {
     @State private var selectedCountry: Country? = nil
     @State private var selectedCategory: ActivityCategory? = nil
     
-    @State private var currentBannerIndex = 0
-    @State private var bannerTimer: Timer?
-    @State private var selectedBannerURL: String? = nil
-    @State private var showWebView: Bool = false
-    
     var body: some View {
         ScrollView {
             LazyVStack() {

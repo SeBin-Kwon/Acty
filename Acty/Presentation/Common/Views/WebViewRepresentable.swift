@@ -10,6 +10,7 @@ import WebKit
 
 struct WebViewRepresentable: UIViewRepresentable {
     let url: String
+    let toastManager: ToastManager
     
     func makeUIView(context: Context) -> WKWebView {
         let coordinator = context.coordinator
@@ -33,6 +34,7 @@ struct WebViewRepresentable: UIViewRepresentable {
             webView.load(request)
         }
         
+        coordinator.toastManager = toastManager
         // 4. coordinator에 webView 참조 전달
         coordinator.webView = webView
         
@@ -51,6 +53,12 @@ struct WebViewRepresentable: UIViewRepresentable {
 // MARK: - 웹뷰 브릿지 처리 Coordinator
 class WebViewCoordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
     weak var webView: WKWebView?
+    var toastManager: ToastManager?
+    
+    deinit {
+        webView?.configuration.userContentController.removeScriptMessageHandler(forName: "click_attendance_button")
+        webView?.configuration.userContentController.removeScriptMessageHandler(forName: "complete_attendance")
+    }
     
     // 웹에서 앱으로 메시지 수신
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -105,6 +113,7 @@ class WebViewCoordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate
             // 출석 완료 알림이나 액션 (선택사항)
             DispatchQueue.main.async {
                 // 예: 토스트 메시지, 알럿, 뒤로가기 등
+                self.toastManager?.showToast(message: "🎉 \(attendanceCount)번째 출석 완료!", isSuccess: true)
                 print("🎊 \(attendanceCount)번째 출석 완료!")
             }
         }

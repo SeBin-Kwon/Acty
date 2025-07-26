@@ -52,6 +52,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct ActyApp: App {
     
     @StateObject private var diContainer = DIContainer.shared
+    @StateObject private var toastManager = ToastManager()
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     init() {
@@ -79,6 +80,7 @@ struct ActyApp: App {
                     }
                 })
                 .environmentObject(diContainer)
+                .environmentObject(toastManager)
                 .task {
                     await requestNotificationPermission()
                 }
