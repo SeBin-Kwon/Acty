@@ -179,6 +179,6 @@ extension HomeView {
     }
 }
 
-#Preview {
-    HomeView(viewModel: HomeViewModel(activityService: MockActivityService(), bannerService: MockBannerService()))
-}
+//#Preview {
+//    HomeView(viewModel: HomeViewModel(activityService: MockActivityService(), bannerService: MockBannerService()))
+//}

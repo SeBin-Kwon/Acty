@@ -35,25 +35,25 @@ final class BannerService: BannerServiceProtocol {
     }
 }
 
-class MockBannerService: BannerServiceProtocol {
-    func fetchMainBanners() async throws -> [Banner] {
-        // 테스트용 더미 데이터
-        return [
-            Banner(
-                name: "테스트 배너 1",
-                imageUrl: "/images/banner1.jpg",
-                payload: Payload(type: .webview, value: "https://example.com")
-            ),
-            Banner(
-                name: "테스트 배너 2",
-                imageUrl: "/images/banner2.jpg",
-                payload: Payload(type: .webview, value: "https://example.com")
-            ),
-            Banner(
-                name: "테스트 배너 3",
-                imageUrl: "/images/banner3.jpg",
-                payload: Payload(type: .webview, value: "https://example.com")
-            )
-        ]
-    }
-}
+//class MockBannerService: BannerServiceProtocol {
+//    func fetchMainBanners() async throws -> [Banner] {
+//        // 테스트용 더미 데이터
+//        return [
+//            Banner(
+//                name: "테스트 배너 1",
+//                imageUrl: "/images/banner1.jpg",
+//                payload: Payload(type: .webview, value: "https://example.com")
+//            ),
+//            Banner(
+//                name: "테스트 배너 2",
+//                imageUrl: "/images/banner2.jpg",
+//                payload: Payload(type: .webview, value: "https://example.com")
+//            ),
+//            Banner(
+//                name: "테스트 배너 3",
+//                imageUrl: "/images/banner3.jpg",
+//                payload: Payload(type: .webview, value: "https://example.com")
+//            )
+//        ]
+//    }
+//}

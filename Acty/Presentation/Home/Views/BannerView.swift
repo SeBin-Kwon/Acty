@@ -44,6 +44,5 @@ struct BannerView: View {
             .frame(height: 100)
         }
         .buttonStyle(PlainButtonStyle())
-        .padding(.horizontal, 16)
     }
 }

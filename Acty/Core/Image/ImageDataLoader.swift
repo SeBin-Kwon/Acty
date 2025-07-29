@@ -26,6 +26,22 @@ final class ImageDataLoader: DataLoading {
         completion: @escaping (Error?) -> Void
     ) -> Cancellable {
         
+        if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+            DispatchQueue.main.async {
+                completion(URLError(.notConnectedToInternet))
+            }
+            return EmptyCancellable()
+        }
+        
+        guard let url = request.url,
+              !url.absoluteString.isEmpty,
+              url.absoluteString != BASE_URL else {
+            DispatchQueue.main.async {
+                completion(URLError(.badURL))
+            }
+            return EmptyCancellable()
+        }
+        
         var authenticatedRequest = request
         
         do {
@@ -41,4 +57,8 @@ final class ImageDataLoader: DataLoading {
             completion: completion
         )
     }
+}
+
+final class EmptyCancellable: Cancellable {
+    func cancel() {}
 }
