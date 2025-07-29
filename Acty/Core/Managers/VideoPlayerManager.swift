@@ -156,8 +156,12 @@ class VideoPlayerItem: ObservableObject {
     init(id: String, url: URL) {
         self.id = id
         
-        // AVPlayer 설정
-        let playerItem = AVPlayerItem(url: url)
+        let headers = [
+            "SeSACKey": API_KEY,
+            "Authorization": (try? DIContainer.shared.tokenService.getAccessToken()) ?? ""
+        ]
+        let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
+        let playerItem = AVPlayerItem(asset: asset)
         self.player = AVPlayer(playerItem: playerItem)
         self.playerLayer = AVPlayerLayer(player: player)
         

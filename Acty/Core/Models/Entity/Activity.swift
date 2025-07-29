@@ -95,7 +95,6 @@ extension Activity {
     /// 완전한 이미지 URL 생성 (BASE_URL과 결합)
     func fullImageURL(baseURL: String = BASE_URL) -> String? {
         guard let thumbnail = mainThumbnail else { return nil }
-        print(baseURL + thumbnail)
         return baseURL + thumbnail
     }
     

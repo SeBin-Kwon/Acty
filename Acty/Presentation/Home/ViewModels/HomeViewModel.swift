@@ -110,6 +110,7 @@ final class HomeViewModel: ViewModelType {
                 let newActivityResult = await self.activityService.fetchNewActivities(dto: dto)
                 await MainActor.run {
                     output.newActivityList = newActivityResult
+                    print("newActivityResult", newActivityResult)
                 }
             }
             let activityResult = await self.activityService.fetchActivities(dto: dto)

@@ -32,44 +32,35 @@ struct AVPlayerView: UIViewRepresentable {
     }
 }
 
-// MARK: - Activity Video View
 struct ActivityVideoView: View {
     let videoURL: String
     let activityId: String
     
-    @StateObject private var viewModel = ActivityVideoViewModel()
-    @State private var isVisible: Bool = false
-    
-    private var fullVideoURL: URL? {
-        URL(string: BASE_URL + videoURL)
-    }
+    @State private var playerItem: VideoPlayerItem? = nil
+    @State private var isInCenter: Bool = false
     
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                if let url = fullVideoURL {
-                    // 영상 플레이어
-                    if let playerItem = viewModel.playerItem {
-                        AVPlayerView(playerItem: playerItem)
-                            .clipped()
-                            .cornerRadius(12)
-                    } else {
-                        // 로딩 중 플레이스홀더
-                        loadingPlaceholder
-                    }
+                // 영상 플레이어
+                if let playerItem = playerItem {
+                    AVPlayerView(playerItem: playerItem)
+                        .clipped()
+                        .cornerRadius(12)
+                        .background(Color.blue.opacity(0.3))
                 } else {
-                    // URL 오류 플레이스홀더
-                    errorPlaceholder
+                    // 로딩 중 플레이스홀더
+                    loadingPlaceholder
                 }
             }
             .onAppear {
                 setupPlayer()
             }
             .onDisappear {
-                cleanup()
+                pauseVideo()
             }
             .onChange(of: geometry.frame(in: .global)) { newFrame in
-                checkVisibility(frame: newFrame)
+                checkIfInCenter(frame: newFrame)
             }
         }
     }
@@ -77,29 +68,58 @@ struct ActivityVideoView: View {
     // MARK: - Private Methods
     
     private func setupPlayer() {
-        guard let url = fullVideoURL else { return }
-        viewModel.setupPlayer(id: activityId, url: url)
+        guard let url = URL(string: videoURL) else {
+            print("❌ Invalid video URL: \(videoURL)")
+            return
+        }
+        
+        print("🎬 Setting up player for: \(videoURL)")
+        let player = VideoPlayerManager.shared.getPlayer(for: activityId, url: url)
+        self.playerItem = player
     }
     
-    private func cleanup() {
-        viewModel.cleanup()
-        updateVisibility(false)
-    }
-    
-    private func checkVisibility(frame: CGRect) {
+    private func checkIfInCenter(frame: CGRect) {
         let screenBounds = UIScreen.main.bounds
-        let visibleFrame = frame.intersection(screenBounds)
+        let screenCenter = CGPoint(x: screenBounds.midX, y: screenBounds.midY)
         
-        // 영상의 50% 이상이 화면에 보이면 재생
-        let visibilityThreshold: CGFloat = 0.5
-        let visibleArea = visibleFrame.width * visibleFrame.height
-        let totalArea = frame.width * frame.height
+        // 영상의 중앙 부분이 화면 중앙과 가까운지 확인
+        let videoCenterY = frame.midY
+        let distanceFromCenter = abs(videoCenterY - screenCenter.y)
         
-        let newVisibility = totalArea > 0 && (visibleArea / totalArea) >= visibilityThreshold
+        // 화면 높이의 25% 이내에 있으면 "중앙"으로 간주
+        let centerThreshold = screenBounds.height * 0.25
+        let shouldBeInCenter = distanceFromCenter < centerThreshold && frame.intersects(screenBounds)
         
-        if newVisibility != isVisible {
-            isVisible = newVisibility
-            updateVisibility(newVisibility)
+        if shouldBeInCenter != isInCenter {
+            isInCenter = shouldBeInCenter
+            
+            if isInCenter {
+                print("🎯 Video entered center: \(activityId)")
+                playVideo()
+            } else {
+                print("🎯 Video left center: \(activityId)")
+                pauseVideo()
+            }
+        }
+    }
+    
+    private func playVideo() {
+        print("🎬 playVideo() called for: \(activityId)")
+        print("🎬 Current playing ID: \(VideoPlayerManager.shared.currentPlayingId ?? "nil")")
+        
+        // 다른 모든 영상 정지 후 현재 영상만 재생
+        VideoPlayerManager.shared.setCurrentPlaying(activityId)
+        
+        // 확인: 실제로 설정되었는지
+        print("🎬 After setCurrentPlaying: \(VideoPlayerManager.shared.currentPlayingId ?? "nil")")
+    }
+    
+    private func pauseVideo() {
+        if VideoPlayerManager.shared.currentPlayingId == activityId {
+            print("🛑 Pausing current video: \(activityId)")
+            VideoPlayerManager.shared.setPlayerVisibility(activityId, isVisible: false)
+        } else {
+            print("🤐 Skipping pause for non-current video: \(activityId)")
         }
     }
     
@@ -123,52 +143,22 @@ struct ActivityVideoView: View {
     private var errorPlaceholder: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.gray.opacity(0.2))
+                .fill(Color.red.opacity(0.3))
             
             VStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle")
                     .font(.title2)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.white)
                 
-                Text("영상을 불러올 수 없습니다")
+                Text("영상 URL 오류")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.white)
+                
+                Text(videoURL)
+                    .font(.caption2)
+                    .foregroundColor(.white.opacity(0.7))
             }
         }
-    }
-}
-
-// MARK: - Activity Video ViewModel
-class ActivityVideoViewModel: ObservableObject {
-    @Published var playerItem: VideoPlayerItem? = nil
-    
-    private var cancellables = Set<AnyCancellable>()
-    
-    func setupPlayer(id: String, url: URL) {
-        // VideoPlayerManager에서 플레이어 가져오기
-        let player = VideoPlayerManager.shared.getPlayer(for: id, url: url)
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.playerItem = player
-        }
-        
-        // 플레이어 상태 관찰
-        player.$isPlaying
-            .receive(on: DispatchQueue.main)
-            .sink { isPlaying in
-                // 필요시 UI 업데이트
-                print("Video \(id) is \(isPlaying ? "playing" : "paused")")
-            }
-            .store(in: &cancellables)
-    }
-    
-    func cleanup() {
-        cancellables.removeAll()
-        // Note: VideoPlayerManager가 플레이어 생명주기를 관리하므로 여기서는 정리하지 않음
-    }
-    
-    deinit {
-        cleanup()
     }
 }
 
@@ -176,13 +166,13 @@ class ActivityVideoViewModel: ObservableObject {
 #Preview {
     VStack(spacing: 20) {
         ActivityVideoView(
-            videoURL: "/data/activities/sample_video.mp4",
+            videoURL: BASE_URL + "/data/activities/8290926-sd_640_360_30fps_1750835811684.mp4",
             activityId: "preview_activity_1"
         )
         .frame(height: 200)
         
         ActivityVideoView(
-            videoURL: "/data/activities/sample_video2.mp4",
+            videoURL: BASE_URL + "/data/activities/8290926-sd_640_360_30fps_1750835811684.mp4",
             activityId: "preview_activity_2"
         )
         .frame(height: 200)

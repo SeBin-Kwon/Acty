@@ -46,6 +46,10 @@ struct HomeView: View {
         }
         .onAppear {
             viewModel.input.onAppear.send(())
+            VideoPlayerManager.shared.setupAppLifecycleObservers()
+        }
+        .onDisappear {
+            VideoPlayerManager.shared.pauseAll()
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -93,6 +97,16 @@ extension HomeView {
                 .onAppear {
                     if index == viewModel.output.activityList.count - 3 {
                         viewModel.input.loadData.send(())
+                    }
+                    if let videoURL = activity.fullVideoURL(), let url = URL(string: videoURL) {
+                        let _ = VideoPlayerManager.shared.getPlayer(for: activity.id, url: url)
+                    }
+                }
+                .onDisappear {
+                    VideoPlayerManager.shared.setPlayerVisibility(activity.id, isVisible: false)
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                        VideoPlayerManager.shared.removePlayer(for: activity.id)
                     }
                 }
         }
