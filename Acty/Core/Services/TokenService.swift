@@ -23,6 +23,9 @@ final class TokenService: TokenServiceProtocol {
     private var tokenCacheTime: Date?
     private let cacheValidDuration: TimeInterval = 60 * 5
     
+    private var refreshTask: Task<String, Error>?
+    private let refreshLock = NSLock()
+    
     private enum TokenType {
         static let accessToken = "accessToken"
         static let refreshToken = "refreshToken"
@@ -34,12 +37,50 @@ final class TokenService: TokenServiceProtocol {
     }
     
     func refreshToken() async throws -> String {
-        let refreshToken = try getRefreshToken()
-        let endpoint: AuthEndPoint = .refreshToken(refreshToken)
-        let result: RefreshTokenResponse = try await networkManager.fetchResults(api: endpoint)
         
-        try saveTokens(accessToken: result.accessToken, refreshToken: result.refreshToken)
-        return result.accessToken
+        refreshLock.lock()
+        defer { refreshLock.unlock() }
+        
+        // 🚩 이미 진행 중인 토큰 갱신이 있다면 해당 결과를 반환
+        if let existingTask = refreshTask {
+            print("🔄 진행 중인 토큰 갱신 대기...")
+            return try await existingTask.value
+        }
+        
+        let task = Task<String, Error> {
+            do {
+                print("🔄 토큰 갱신 시작")
+                let refreshToken = try getRefreshToken()
+                let endpoint: AuthEndPoint = .refreshToken(refreshToken)
+                let result: RefreshTokenResponse = try await networkManager.fetchResults(api: endpoint)
+                
+                try saveTokens(accessToken: result.accessToken, refreshToken: result.refreshToken)
+                print("✅ 토큰 갱신 완료")
+                return result.accessToken
+            } catch {
+                print("❌ 토큰 갱신 실패: \(error)")
+                try? deleteTokens()
+                throw error
+            }
+        }
+        
+        refreshTask = task
+        
+        do {
+            let result = try await task.value
+            refreshTask = nil // 🚩 작업 완료 후 정리
+            return result
+        } catch {
+            refreshTask = nil // 🚩 실패 시에도 정리
+            throw error
+        }
+        
+//        let refreshToken = try getRefreshToken()
+//        let endpoint: AuthEndPoint = .refreshToken(refreshToken)
+//        let result: RefreshTokenResponse = try await networkManager.fetchResults(api: endpoint)
+//        
+//        try saveTokens(accessToken: result.accessToken, refreshToken: result.refreshToken)
+//        return result.accessToken
     }
     
     func saveTokens(accessToken: String, refreshToken: String) throws {

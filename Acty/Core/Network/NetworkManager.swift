@@ -40,7 +40,7 @@ final class AuthInterceptor: RequestInterceptor {
 
     func retry(_ request: Request, for session: Session, dueTo error: Error, completion: @escaping (RetryResult) -> Void) {
         guard let response = request.task?.response as? HTTPURLResponse,
-              response.statusCode == 401 else {
+              response.statusCode == 401 || response.statusCode == 419 else {
             print("🚫 재시도 불가: \(error)")
             completion(.doNotRetry)
             return
@@ -53,7 +53,7 @@ final class AuthInterceptor: RequestInterceptor {
             return
         }
         
-        print("🔄 401 에러 - 토큰 갱신 시도")
+        print("🔄 \(response.statusCode) 에러 - 토큰 갱신 시도")
         Task {
             do {
                 let newToken = try await tokenService.refreshToken()

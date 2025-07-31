@@ -55,9 +55,20 @@ enum AuthEndPoint: EndPoint {
         case .kakaoSignIn(let dto):
             return ["oauthToken": dto.oauthToken,
                    "deviceToken": dto.deviceToken ?? ""]
-        case .refreshToken(let token):
-            return ["refreshToken": token]
+        case .refreshToken: return nil
         case .myProfileGet: return nil
+        }
+    }
+    
+    var headers: HTTPHeaders {
+        var defaultHeaders: HTTPHeaders = ["Content-Type": "application/json", "SeSACKey": API_KEY]
+        
+        switch self {
+        case .refreshToken(let token):
+            defaultHeaders.add(name: "RefreshToken", value: token)
+            return defaultHeaders
+        default:
+            return defaultHeaders
         }
     }
     
@@ -71,8 +82,8 @@ enum AuthEndPoint: EndPoint {
     
     var isAuthRequired: Bool {
         switch self {
-        case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken: false
-        case .myProfileGet: true
+        case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn: false
+        case .myProfileGet, .refreshToken: true
         }
     }
 }

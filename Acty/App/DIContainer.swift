@@ -44,7 +44,7 @@ final class DIContainer: ObservableObject {
         self.networkManager = NetworkManager(tokenService: tokenService)
         self.appleSignInService = AppleSignInService()
         self.kakaoSignInService = KakaoSignInService()
-        self.authService = AuthService(networkManager: networkManager, tokenService: tokenService)
+        self.authService = AuthService(networkManager: networkManager, tokenService: tokenService, appleSignInService: appleSignInService, kakaoSignInService: kakaoSignInService)
         self.activityService = ActivityService(networkManager: networkManager)
         self.paymentService = PaymentService(networkManager: networkManager)
         self.orderService = OrderService(networkManager: networkManager)
@@ -57,11 +57,7 @@ final class DIContainer: ObservableObject {
     }
     
     func makeSignInViewModel() -> SignInViewModel {
-        return SignInViewModel(
-            appleSignInService: appleSignInService,
-            kakaoSignInService: kakaoSignInService,
-            authService: authService
-        )
+        return SignInViewModel(authService: authService)
     }
     
     func makeSignUpViewModel() -> SignUpViewModel {
