@@ -54,7 +54,7 @@ extension AppleSignInService: ASAuthorizationControllerPresentationContextProvid
             let fullName = appleIDCredential.fullName //전체 이름
             let idToken = appleIDCredential.identityToken! //idToken
             
-            let appleOAuthUser = AppleSignInRequestDTO(idToken: String(data: idToken, encoding: .utf8) ?? "", deviceToken: "deviceToken", nick: userIdentifier)
+            let appleOAuthUser = AppleSignInRequestDTO(idToken: String(data: idToken, encoding: .utf8) ?? "", deviceToken: "deviceToken", nick: PersonNameComponentsFormatter().string(from: fullName ?? PersonNameComponents()))
             successCallback?(appleOAuthUser)
             
 //            oauthUserData.oauthId = userIdentifier

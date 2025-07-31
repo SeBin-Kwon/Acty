@@ -235,7 +235,7 @@ final class ChatViewModel: ViewModelType {
             do {
                 let sentMessage = try await chatRepository.sendMessage(message, roomId: roomId)
                 print("메시지 전송 완료")
-                try await sendPushNotification(for: sentMessage.content ?? "")
+//                try await sendPushNotification(for: sentMessage.content ?? "")
             } catch {
                 await MainActor.run {
                     self.output.errorMessage.send("메시지 전송 실패: \(error.localizedDescription)")
