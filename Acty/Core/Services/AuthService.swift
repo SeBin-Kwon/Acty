@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 protocol AuthServiceProtocol {
-    func signIn(with dto: Any) async throws -> UserDTO
+    func signIn(with type: SignInType, email: String?, password: String?) async throws -> UserDTO
     func checkAuthenticationStatus() async -> Bool
     func signOut() async throws
     var isAuthenticated: PassthroughSubject<Bool, Never> { get set }
@@ -20,40 +20,131 @@ protocol AuthServiceProtocol {
 final class AuthService: AuthServiceProtocol {
     private let networkManager: NetworkManager
     private let tokenService: TokenServiceProtocol
+    private let appleSignInService: SignInServiceProtocol
+    private let kakaoSignInService: SignInServiceProtocol
     private let userDefaults = UserDefaults.standard
     private let currentUserKey = "current_user"
     private var cachedUser: UserDTO?
     var isAuthenticated = PassthroughSubject<Bool, Never>()
     
-    init(networkManager: NetworkManager, tokenService: TokenServiceProtocol) {
+    init(
+        networkManager: NetworkManager,
+        tokenService: TokenServiceProtocol,
+        appleSignInService: SignInServiceProtocol,
+        kakaoSignInService: SignInServiceProtocol
+    ) {
         self.networkManager = networkManager
         self.tokenService = tokenService
+        self.appleSignInService = appleSignInService
+        self.kakaoSignInService = kakaoSignInService
     }
     
-    func signIn(with dto: Any) async throws -> UserDTO {
-        print(#function)
-        let endpoint: AuthEndPoint
+    // MARK: - 통합 로그인 인터페이스
+    func signIn(with type: SignInType, email: String? = nil, password: String? = nil) async throws -> UserDTO {
+        print("통합 로그인 시작 - type: \(type)")
         
-        switch dto {
-        case let emailDTO as EmailSignInRequestDTO:
-            endpoint = .emailSignIn(emailDTO)
-        case let appleDTO as AppleSignInRequestDTO:
-            endpoint = .appleSignIn(appleDTO)
-        case let kakaoDTO as KakaoSignInRequestDTO:
-            endpoint = .kakaoSignIn(kakaoDTO)
-        default:
-            throw NSError(domain: "Invalid DTO type", code: 400)
+        switch type {
+        case .email:
+            return try await signInWithEmail(email: email, password: password)
+        case .apple:
+            return try await signInWithApple()
+        case .kakao:
+            return try await signInWithKakao()
         }
+    }
+    
+    // MARK: - Private 로그인 구현
+    private func signInWithEmail(email: String?, password: String?) async throws -> UserDTO {
+        guard let email = email, let password = password else {
+            throw AuthError.invalidCredentials
+        }
+        
+        let dto = EmailSignInRequestDTO(
+            email: email,
+            password: password,
+            deviceToken: FCMService.shared.fcmToken
+        )
+        
+        return try await performNetworkSignIn(endpoint: .emailSignIn(dto))
+    }
+    
+    private func signInWithApple() async throws -> UserDTO {
+        return try await withCheckedThrowingContinuation { continuation in
+            appleSignInService.signIn(
+                onSuccess: { result in
+                    Task {
+                        do {
+                            guard var dto = result as? AppleSignInRequestDTO else {
+                                continuation.resume(throwing: AuthError.invalidResponse)
+                                return
+                            }
+                            
+                            dto = AppleSignInRequestDTO(
+                                idToken: dto.idToken,
+                                deviceToken: FCMService.shared.fcmToken,
+                                nick: dto.nick
+                            )
+                            
+                            let user = try await self.performNetworkSignIn(endpoint: .appleSignIn(dto))
+                            continuation.resume(returning: user)
+                        } catch {
+                            continuation.resume(throwing: error)
+                        }
+                    }
+                },
+                onError: { error in
+                    continuation.resume(throwing: AuthError.externalServiceError(error))
+                }
+            )
+        }
+    }
+    
+    private func signInWithKakao() async throws -> UserDTO {
+        return try await withCheckedThrowingContinuation { continuation in
+            Task { @MainActor in
+                kakaoSignInService.signIn(
+                    onSuccess: { result in
+                        Task {
+                            do {
+                                guard var dto = result as? KakaoSignInRequestDTO else {
+                                    continuation.resume(throwing: AuthError.invalidResponse)
+                                    return
+                                }
+                                
+                                dto = KakaoSignInRequestDTO(
+                                    oauthToken: dto.oauthToken,
+                                    deviceToken: FCMService.shared.fcmToken
+                                )
+                                
+                                let user = try await self.performNetworkSignIn(endpoint: .kakaoSignIn(dto))
+                                continuation.resume(returning: user)
+                            } catch {
+                                continuation.resume(throwing: error)
+                            }
+                        }
+                    },
+                    onError: { error in
+                        continuation.resume(throwing: AuthError.externalServiceError(error))
+                    }
+                )
+            }
+        }
+    }
+    
+    // MARK: - 공통 네트워크 처리
+    private func performNetworkSignIn(endpoint: AuthEndPoint) async throws -> UserDTO {
         let result: UserDTO = try await networkManager.fetchResults(api: endpoint)
         
         print("Access Token: \(result.accessToken)")
         print("Refresh Token: \(result.refreshToken)")
         print("로그인 성공, 토큰 저장 시작")
-        try tokenService.saveTokens(accessToken: result.accessToken, refreshToken: result.refreshToken)
         
-        print("AuthRepository: 토큰 저장 완료")
+        try tokenService.saveTokens(accessToken: result.accessToken, refreshToken: result.refreshToken)
+        print("AuthService: 토큰 저장 완료")
+        
         cachedUser = result
         saveCurrentUser(result)
+        
         await MainActor.run {
             isAuthenticated.send(true)
         }
@@ -94,6 +185,7 @@ final class AuthService: AuthServiceProtocol {
         print("로그아웃 시작")
         
         try tokenService.deleteTokens()
+        clearCurrentUser()
         isAuthenticated.send(false)
         
         print("로그아웃 완료")
@@ -143,10 +235,28 @@ final class AuthService: AuthServiceProtocol {
         return userId
     }
     
-    
     private func clearCurrentUser() {
         userDefaults.removeObject(forKey: currentUserKey)
+        cachedUser = nil
         print("👤 현재 유저 정보 삭제 완료")
+    }
+}
+
+// MARK: - AuthError
+enum AuthError: LocalizedError {
+    case invalidCredentials
+    case invalidResponse
+    case externalServiceError(String)
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidCredentials:
+            return "이메일 또는 비밀번호가 올바르지 않습니다"
+        case .invalidResponse:
+            return "서버 응답이 올바르지 않습니다"
+        case .externalServiceError(let message):
+            return "외부 서비스 오류: \(message)"
+        }
     }
 }
 

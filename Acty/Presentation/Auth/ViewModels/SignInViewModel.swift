@@ -7,7 +7,6 @@
 
 import Foundation
 import Combine
-import KakaoSDKUser
 
 final class SignInViewModel: ViewModelType {
     
@@ -15,8 +14,6 @@ final class SignInViewModel: ViewModelType {
     @Published var output = Output()
     var cancellables = Set<AnyCancellable>()
     
-    private let appleSignInService: SignInServiceProtocol
-    private let kakaoSignInService: SignInServiceProtocol
     private let authService: AuthServiceProtocol
     
     struct Input {
@@ -31,15 +28,12 @@ final class SignInViewModel: ViewModelType {
         var isLoading = PassthroughSubject<Bool, Never>()
     }
     
-    init(appleSignInService: SignInServiceProtocol, kakaoSignInService: SignInServiceProtocol, authService: AuthServiceProtocol) {
-        self.appleSignInService = appleSignInService
-        self.kakaoSignInService = kakaoSignInService
+    init(authService: AuthServiceProtocol) {
         self.authService = authService
         transform()
     }
     
     func transform() {
-        
         input.signInTapped
             .sink { [weak self] type in
                 guard let self else { return }
@@ -51,113 +45,23 @@ final class SignInViewModel: ViewModelType {
     private func signIn(_ type: SignInType) {
         output.isLoading.send(true)
         
-        switch type {
-        case .email:
-            // 이메일 로그인
-            Task {
-                do {
-                    let dto = EmailSignInRequestDTO(
-                        email: input.email,
-                        password: input.password,
-                        deviceToken: FCMService.shared.fcmToken
-                    )
-                    let result = try await authService.signIn(with: dto)
-                    
-                    await MainActor.run {
-                        self.output.isLoading.send(false)
-                        self.output.isSignIn.send(true)
-                    }
-                } catch {
-                    print("이메일 로그인 오류: \(error)")
-                    
-                    await MainActor.run {
-                        self.output.isLoading.send(false)
-                        self.output.errorMessage.send("로그인 실패: \(error.localizedDescription)")
-                        self.output.isSignIn.send(false)
-                    }
+        Task {
+            do {
+                let _ = try await authService.signIn(with: type, email: input.email, password: input.password)
+                
+                await MainActor.run {
+                    self.output.isLoading.send(false)
+                    self.output.isSignIn.send(true)
+                }
+            } catch {
+                print("\(type) 로그인 오류: \(error)")
+                
+                await MainActor.run {
+                    self.output.isLoading.send(false)
+                    self.output.errorMessage.send("로그인 실패: \(error.localizedDescription)")
+                    self.output.isSignIn.send(false)
                 }
             }
-            
-        case .apple:
-            // 애플 로그인
-            appleSignInService.signIn(
-                onSuccess: { result in
-                    if var dto = result as? AppleSignInRequestDTO {
-                        
-                        dto = AppleSignInRequestDTO(
-                            idToken: dto.idToken,
-                            deviceToken: FCMService.shared.fcmToken,
-                            nick: dto.nick
-                        )
-                        
-                        print("애플 로그인 시도: \(dto)")
-                        Task {
-                            do {
-                                let _ = try await self.authService.signIn(with: dto)
-                                
-                                await MainActor.run {
-                                    self.output.isLoading.send(false)
-                                    self.output.isSignIn.send(true)
-                                }
-                            } catch {
-                                print("애플 로그인 서버 오류: \(error)")
-                                
-                                await MainActor.run {
-                                    self.output.isLoading.send(false)
-                                    self.output.errorMessage.send("서버 로그인 실패: \(error.localizedDescription)")
-                                    self.output.isSignIn.send(false)
-                                }
-                            }
-                        }
-                    }
-                },
-                onError: { error in
-                    print("애플 로그인 오류: \(error)")
-                    self.output.isLoading.send(false)
-                    self.output.errorMessage.send(error)
-                    self.output.isSignIn.send(false)
-                }
-            )
-            
-        case .kakao:
-            // 카카오 로그인
-            kakaoSignInService.signIn(
-                onSuccess: { result in
-                    if var dto = result as? KakaoSignInRequestDTO {
-                        
-                        dto = KakaoSignInRequestDTO(
-                            oauthToken: dto.oauthToken,
-                            deviceToken: FCMService.shared.fcmToken
-                        )
-                        
-                        print("카카오 로그인 시도: \(dto)")
-                        Task {
-                            do {
-                                let _ = try await self.authService.signIn(with: dto)
-                                
-                                await MainActor.run {
-                                    self.output.isLoading.send(false)
-                                    self.output.isSignIn.send(true)
-                                }
-                            } catch {
-                                print("카카오 로그인 서버 오류: \(error)")
-                                
-                                await MainActor.run {
-                                    self.output.isLoading.send(false)
-                                    self.output.errorMessage.send("서버 로그인 실패: \(error.localizedDescription)")
-                                    self.output.isSignIn.send(false)
-                                }
-                            }
-                        }
-                    }
-                },
-                onError: { error in
-                    print("카카오 로그인 오류: \(error)")
-                    self.output.isLoading.send(false)
-                    self.output.errorMessage.send(error)
-                    self.output.isSignIn.send(false)
-                }
-            )
         }
     }
 }
