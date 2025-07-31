@@ -14,15 +14,16 @@ final class ToastManager: ObservableObject {
    @Published var isToastSuccess = true
    
    func showToast(message: String, isSuccess: Bool = true) {
-       toastMessage = message
-       isToastSuccess = isSuccess
-       showToast = true
-       
-       showUIKitToast(message: message, isSuccess: isSuccess)
+       DispatchQueue.main.async {
+          self.toastMessage = message
+          self.isToastSuccess = isSuccess
+          self.showToast = true
+          
+          self.showUIKitToast(message: message, isSuccess: isSuccess)
+      }
    }
    
    private func showUIKitToast(message: String, isSuccess: Bool) {
-       DispatchQueue.main.async {
            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                  let window = windowScene.windows.first else { return }
            
@@ -69,6 +70,5 @@ final class ToastManager: ObservableObject {
                    hostingController.view.removeFromSuperview()
                }
            }
-       }
    }
 }
