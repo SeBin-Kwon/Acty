@@ -26,6 +26,11 @@ struct DetailView: View {
     private var totalPrice: Int {
         participantCount * (viewModel.output.activityDetail?.finalPriceInKRW ?? 0)
     }
+    
+    private var orderTotalPrice: Int {
+        participantCount * (viewModel.output.activityDetail?.price.final ?? 0)
+    }
+    
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 4)
     
     let id: String
@@ -327,7 +332,7 @@ extension DetailView {
                 paymentViewModel.input.selectedDate = selectedDate
                 paymentViewModel.input.selectedTime = selectedTime
                 paymentViewModel.input.participantCount = participantCount
-                paymentViewModel.input.totalPrice = totalPrice
+                paymentViewModel.input.totalPrice = orderTotalPrice
                 paymentViewModel.input.productName = viewModel.output.activityDetail?.title ?? ""
                 paymentViewModel.input.paymentButtonTapped.send(())
             }
