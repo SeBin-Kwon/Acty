@@ -15,12 +15,6 @@ final class ImagePipelineManager {
         // 1. 커스텀 DataLoader 설정
         configuration.dataLoader = ImageDataLoader(tokenService: tokenService)
         
-        // 2. 기본 캐시 설정만
-        configuration.imageCache = ImageCache(
-            costLimit: 100 * 1024 * 1024,
-            countLimit: 300
-        )
-        
         ImagePipeline.shared = ImagePipeline(configuration: configuration)
     }
 }
