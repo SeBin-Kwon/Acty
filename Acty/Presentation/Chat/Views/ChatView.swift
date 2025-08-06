@@ -25,6 +25,22 @@ struct ChatView: View {
             } else {
                 ScrollViewReader { proxy in
                     List {
+                        // 페이지네이션 트리거 (상단)
+                        if viewModel.output.hasMoreMessages.value {
+                            pagingTriggerView
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
+                                .listRowInsets(EdgeInsets())
+                        }
+                        
+                        // 로딩 인디케이터 (더 로드 중일 때)
+                        if viewModel.output.isLoadingMore.value {
+                            loadingMoreView
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
+                                .listRowInsets(EdgeInsets())
+                        }
+                        
                         ForEach(Array(viewModel.output.messages.enumerated()), id: \.element.chatId) { index, message in
                             
                             if shouldShowDateSeparator(for: message, at: index, in: viewModel.output.messages) {
@@ -44,7 +60,9 @@ struct ChatView: View {
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
                     .onChange(of: viewModel.output.messages) { messages in
-                        scrollToBottom(proxy: proxy, messages: messages)
+                        if !viewModel.output.isLoadingMore.value {
+                            scrollToBottom(proxy: proxy, messages: messages)
+                        }
                     }
                     .onChange(of: selectedPhotos) { newPhotos in
                         handleSelectedPhotos(newPhotos)
@@ -100,25 +118,53 @@ struct ChatView: View {
         }
     }
     
+    // MARK: - 페이지네이션 뷰들
+    private var pagingTriggerView: some View {
+        Color.clear
+            .frame(height: 10)
+            .onAppear {
+                loadMoreMessages()
+            }
+    }
+    
+    private var loadingMoreView: some View {
+        HStack {
+            ProgressView()
+                .scaleEffect(0.8)
+            Text("이전 메시지 불러오는 중...")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+    }
+    
+    private func loadMoreMessages() {
+        guard !viewModel.output.isLoadingMore.value else { return }
+        
+        print("🔄 페이지네이션 트리거 - 이전 메시지 로드")
+        viewModel.input.loadMoreMessages.send()
+    }
+    
+    // 기존 메서드들...
     private func handleSelectedPhotos(_ photos: [PhotosPickerItem]) {
-            guard !photos.isEmpty else { return }
+        guard !photos.isEmpty else { return }
+        
+        Task {
+            var imageDataArray: [Data] = []
             
-            Task {
-                var imageDataArray: [Data] = []
-                
-                for photo in photos {
-                    if let data = try? await photo.loadTransferable(type: Data.self) {
-                        imageDataArray.append(data)
-                    }
-                }
-                
-                // ViewModel에 이미지 데이터 전달
-                await MainActor.run {
-                    selectedImageData = imageDataArray
-                    selectedPhotos = []
+            for photo in photos {
+                if let data = try? await photo.loadTransferable(type: Data.self) {
+                    imageDataArray.append(data)
                 }
             }
+            
+            await MainActor.run {
+                selectedImageData = imageDataArray
+                selectedPhotos = []
+            }
         }
+    }
     
     private func sendMessage() {
         let content = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -140,32 +186,25 @@ struct ChatView: View {
     }
     
     private func shouldShowDateSeparator(for message: ChatResponseDTO, at index: Int, in messages: [ChatResponseDTO]) -> Bool {
-        // 첫 번째 메시지는 항상 날짜 표시
         guard index > 0 else { return true }
         
         let previousMessage = messages[index - 1]
         let currentDate = Calendar.current.startOfDay(for: message.createdAtDate)
         let previousDate = Calendar.current.startOfDay(for: previousMessage.createdAtDate)
         
-        // 이전 메시지와 다른 날짜면 구분선 표시
         return currentDate != previousDate
     }
     
-    // 시간 표시 여부 결정 (같은 분의 마지막 메시지에만 표시)
     private func shouldShowTime(for message: ChatResponseDTO, at index: Int, in messages: [ChatResponseDTO]) -> Bool {
-        // 마지막 메시지는 항상 시간 표시
         guard index < messages.count - 1 else { return true }
         
         let nextMessage = messages[index + 1]
         
-        // 다음 메시지와 같은 분(HH:mm)인지 확인
         let currentMinute = message.displayTime
         let nextMinute = nextMessage.displayTime
         
-        // 다음 메시지와 다른 분이면 시간 표시, 같은 분이면 시간 숨김
         return currentMinute != nextMinute
     }
-    
 }
 
 struct DateSeparatorView: View {

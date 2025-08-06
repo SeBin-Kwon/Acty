@@ -17,6 +17,8 @@ protocol CoreDataManagerProtocol {
     func deleteAllMessages(for roomId: String) throws
     func getChatRooms() throws -> [ChatRoomResponseDTO]
     func saveChatRoom(_ room: ChatRoomResponseDTO) throws
+    func getMessages(for roomId: String, limit: Int, before: Date?) throws -> [ChatResponseDTO]
+    func getRecentMessages(for roomId: String, limit: Int) throws -> [ChatResponseDTO]
 }
 
 final class CoreDataManager: CoreDataManagerProtocol {
@@ -150,4 +152,30 @@ final class CoreDataManager: CoreDataManagerProtocol {
     }
 }
 
-
+extension CoreDataManager {
+    
+    /// 커서 기반 페이지네이션 - 특정 날짜 이전 메시지 조회
+    func getMessages(for roomId: String, limit: Int, before: Date?) throws -> [ChatResponseDTO] {
+        let fetchRequest: NSFetchRequest<ChatMessageEntity> = ChatMessageEntity.fetchRequest()
+        
+        // 기본 조건: 해당 채팅방
+        var predicates = [NSPredicate(format: "roomId == %@", roomId)]
+        
+        // 커서 조건: before 날짜 이전 메시지만
+        if let before = before {
+            predicates.append(NSPredicate(format: "createdAt < %@", before as NSDate))
+        }
+        
+        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
+        fetchRequest.fetchLimit = limit
+        
+        let entities = try context.fetch(fetchRequest)
+        return entities.map { $0.toDTO() }.reversed()
+    }
+    
+    /// 최신 메시지 조회 (첫 로드용)
+    func getRecentMessages(for roomId: String, limit: Int = 20) throws -> [ChatResponseDTO] {
+        return try getMessages(for: roomId, limit: limit, before: nil)
+    }
+}

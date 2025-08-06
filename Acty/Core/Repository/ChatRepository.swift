@@ -16,6 +16,8 @@ protocol ChatRepositoryProtocol {
     func createOrGetChatRoom(opponentId: String) async throws -> ChatRoomResponseDTO
     func getChatRoomsList() async throws -> [ChatRoomResponseDTO]
     func deleteAllMessages(roomId: String) async throws
+    func getLocalMessages(roomId: String, limit: Int, before: Date?) -> [ChatResponseDTO]
+    func loadMoreLocalMessages(roomId: String, before: Date, limit: Int) -> [ChatResponseDTO]
 }
 
 final class ChatRepository: ChatRepositoryProtocol {
@@ -186,5 +188,24 @@ private extension ChatRepository {
             seen.insert(message.chatId)
             return true
         }
+    }
+}
+
+extension ChatRepository {
+    
+    // MARK: - 페이지네이션 로컬 메시지 조회
+    func getLocalMessages(roomId: String, limit: Int, before: Date?) -> [ChatResponseDTO] {
+        do {
+            let messages = try coreDataManager.getMessages(for: roomId, limit: limit, before: before)
+            print("페이지네이션 로컬 메시지 조회: \(messages.count)개")
+            return messages
+        } catch {
+            print("페이지네이션 메시지 조회 실패: \(error)")
+            return []
+        }
+    }
+    
+    func loadMoreLocalMessages(roomId: String, before: Date, limit: Int = 50) -> [ChatResponseDTO] {
+        return getLocalMessages(roomId: roomId, limit: limit, before: before)
     }
 }

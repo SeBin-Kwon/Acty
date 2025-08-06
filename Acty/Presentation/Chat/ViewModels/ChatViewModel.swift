@@ -37,6 +37,8 @@ final class ChatViewModel: ViewModelType {
         var chatRoomCreated = PassthroughSubject<String, Never>()
         var socketConnectionState = CurrentValueSubject<SocketConnectionState, Never>(.disconnected)
         var isUploading = CurrentValueSubject<Bool, Never>(false)
+        var hasMoreMessages = CurrentValueSubject<Bool, Never>(true)
+        var isLoadingMore = CurrentValueSubject<Bool, Never>(false)
     }
     
     init(chatService: ChatServiceProtocol, chatRepository: ChatRepositoryProtocol, socketIOChatService: SocketIOChatServiceProtocol, pushNotificationService: PushNotificationServiceProtocol, userId: String) {
@@ -96,6 +98,39 @@ final class ChatViewModel: ViewModelType {
                 self?.disconnectSocket()
             }
             .store(in: &cancellables)
+        
+        input.loadMoreMessages
+            .sink { [weak self] _ in
+                self?.loadMoreMessages()
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func loadMoreMessages() {
+        guard let roomId = roomId,
+              !output.isLoadingMore.value,
+              output.hasMoreMessages.value,
+              let oldestMessage = output.messages.first else { return }
+        
+        print("📄 이전 메시지 로드 시작")
+        output.isLoadingMore.send(true)
+        
+        let olderMessages = chatRepository.loadMoreLocalMessages(
+            roomId: roomId,
+            before: oldestMessage.createdAtDate,
+            limit: 20
+        )
+        
+        if olderMessages.isEmpty {
+            print("📄 더 이상 로드할 메시지 없음")
+            output.hasMoreMessages.send(false)
+        } else {
+            print("📄 이전 메시지 \(olderMessages.count)개 로드됨")
+            // 기존 메시지 앞에 추가
+            output.messages.insert(contentsOf: olderMessages, at: 0)
+        }
+        
+        output.isLoadingMore.send(false)
     }
     
     private func uploadAndSendImages(_ imageDataArray: [Data], content: String = "사진") {
@@ -200,7 +235,7 @@ final class ChatViewModel: ViewModelType {
         guard let roomId = roomId else { return }
         
         // 1. 먼저 로컬 메시지 로드 (빠른 UI 표시)
-        let localMessages = chatRepository.getLocalMessages(roomId: roomId)
+        let localMessages = chatRepository.getLocalMessages(roomId: roomId, limit: 20, before: nil)
         output.messages = localMessages
         
         // 2. 서버에서 최신 메시지 동기화
@@ -208,7 +243,7 @@ final class ChatViewModel: ViewModelType {
             do {
                 try await chatRepository.syncMessagesFromServer(roomId: roomId)
 
-                let updatedMessages = chatRepository.getLocalMessages(roomId: roomId)
+                let updatedMessages = chatRepository.getLocalMessages(roomId: roomId, limit: 20, before: nil)
                 
                 await MainActor.run {
                     self.output.messages = updatedMessages
