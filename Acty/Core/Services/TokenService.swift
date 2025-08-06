@@ -16,7 +16,7 @@ protocol TokenServiceProtocol: Sendable {
 }
 
 final class TokenService: TokenServiceProtocol {
-    private let networkManager: NetworkManager
+    private weak var networkManager: NetworkManager?
     private let keychainManager: KeychainManager
     
     private var cachedAccessToken: String?
@@ -31,12 +31,20 @@ final class TokenService: TokenServiceProtocol {
         static let refreshToken = "refreshToken"
     }
     
-    init(keychainManager: KeychainManager = .shared) {
-        self.networkManager = NetworkManager()
+    init(networkManager: NetworkManager, keychainManager: KeychainManager = .shared) {
+        self.networkManager = networkManager
         self.keychainManager = keychainManager
     }
     
+    func setNetworkManager(_ networkManager: NetworkManager) {
+        self.networkManager = networkManager
+    }
+    
     func refreshToken() async throws -> String {
+        
+        guard let networkManager = networkManager else {
+            throw AppError.networkError("NetworkManager가 설정되지 않았습니다")
+        }
         
         refreshLock.lock()
         defer { refreshLock.unlock() }
@@ -51,15 +59,23 @@ final class TokenService: TokenServiceProtocol {
             do {
                 print("🔄 토큰 갱신 시작")
                 let refreshToken = try getRefreshToken()
+                print("🔑 사용할 Refresh Token: \(refreshToken)")
                 let endpoint: AuthEndPoint = .refreshToken(refreshToken)
+                print("📋 최종 헤더: \(endpoint.headers)")
                 let result: RefreshTokenResponse = try await networkManager.fetchResults(api: endpoint)
-                
                 try saveTokens(accessToken: result.accessToken, refreshToken: result.refreshToken)
                 print("✅ 토큰 갱신 완료")
                 return result.accessToken
             } catch {
                 print("❌ 토큰 갱신 실패: \(error)")
-                try? deleteTokens()
+                if let afError = error.asAFError,
+                   case .responseValidationFailed(reason: .unacceptableStatusCode(code: let statusCode)) = afError {
+                    if statusCode == 418 { // 리프레시 토큰 만료
+                        try? deleteTokens()
+                        print("🗑 리프레시 토큰 만료로 토큰 삭제")
+                    }
+                    // 444나 다른 에러는 토큰 삭제 안 함
+                }
                 throw error
             }
         }
@@ -75,17 +91,17 @@ final class TokenService: TokenServiceProtocol {
             throw error
         }
         
-//        let refreshToken = try getRefreshToken()
-//        let endpoint: AuthEndPoint = .refreshToken(refreshToken)
-//        let result: RefreshTokenResponse = try await networkManager.fetchResults(api: endpoint)
-//        
-//        try saveTokens(accessToken: result.accessToken, refreshToken: result.refreshToken)
-//        return result.accessToken
+        //        let refreshToken = try getRefreshToken()
+        //        let endpoint: AuthEndPoint = .refreshToken(refreshToken)
+        //        let result: RefreshTokenResponse = try await networkManager.fetchResults(api: endpoint)
+        //
+        //        try saveTokens(accessToken: result.accessToken, refreshToken: result.refreshToken)
+        //        return result.accessToken
     }
     
     func saveTokens(accessToken: String, refreshToken: String) throws {
         print("키체인에 토큰 저장 시도")
-                
+        
         try keychainManager.saveToken(token: accessToken, for: TokenType.accessToken)
         try keychainManager.saveToken(token: refreshToken, for: TokenType.refreshToken)
         

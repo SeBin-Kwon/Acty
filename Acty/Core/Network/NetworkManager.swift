@@ -18,7 +18,11 @@ final class AuthInterceptor: RequestInterceptor {
     func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
         var request = urlRequest
         
+        print("🔍 AuthInterceptor.adapt() 호출됨")
+        print("🌐 요청 URL: \(request.url?.absoluteString ?? "nil")")
+        
         if let requiresAuth = request.value(forHTTPHeaderField: "X-Requires-Auth") {
+            print("🏷 X-Requires-Auth 헤더 값: \(requiresAuth)")
             request.setValue(nil, forHTTPHeaderField: "X-Requires-Auth")
             if requiresAuth == "false" {
                 print("🔓 인증 불필요한 API: \(request.url?.absoluteString ?? "")")
@@ -26,11 +30,11 @@ final class AuthInterceptor: RequestInterceptor {
                 return
             }
         }
-        
+        print("🔐 토큰 추가 시도 중...")
         do {
             let token = try tokenService.getAccessToken()
             request.headers.add(name: "Authorization", value: token)
-            print("🔐 토큰 추가됨: \(token)")
+            print("🔐 엑세스 토큰: \(token)")
             completion(.success(request))
         } catch {
             print("❌ 토큰 없음: \(error)")
@@ -60,8 +64,8 @@ final class AuthInterceptor: RequestInterceptor {
                 print("✅ 토큰 갱신 성공: \(newToken.prefix(10))...")
                 completion(.retry)
             } catch {
-                print("❌ 토큰 갱신 실패 - 로그아웃: \(error)")
-                try? tokenService.deleteTokens()
+                print("❌ 토큰 갱신 실패 - 네트워크매니저: \(error)")
+//                try? tokenService.deleteTokens()
                 completion(.doNotRetry)
             }
         }

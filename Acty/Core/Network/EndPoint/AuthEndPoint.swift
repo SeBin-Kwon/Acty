@@ -30,8 +30,8 @@ enum AuthEndPoint: EndPoint {
     
     var method: HTTPMethod {
         switch self {
-        case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken: .post
-        case .myProfileGet: .get
+        case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn: .post
+        case .myProfileGet, .refreshToken: .get
         }
     }
     
@@ -74,8 +74,8 @@ enum AuthEndPoint: EndPoint {
     
     var encoding: ParameterEncoding {
         switch self {
-        case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn, .refreshToken:  JSONEncoding.default
-        case .myProfileGet: URLEncoding(destination: .queryString)
+        case .signUp, .emailSignIn, .appleSignIn, .kakaoSignIn:  JSONEncoding.default
+        case .myProfileGet, .refreshToken: URLEncoding(destination: .queryString)
         }
        
     }

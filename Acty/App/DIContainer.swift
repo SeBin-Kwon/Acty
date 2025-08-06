@@ -40,8 +40,10 @@ final class DIContainer: ObservableObject {
     
     private init() {
         self.keychainManager = KeychainManager.shared
-        self.tokenService = TokenService(keychainManager: keychainManager)
+        let tempNetworkManager = NetworkManager()
+        self.tokenService = TokenService(networkManager: tempNetworkManager, keychainManager: keychainManager)
         self.networkManager = NetworkManager(tokenService: tokenService)
+        (self.tokenService as? TokenService)?.setNetworkManager(networkManager)
         self.appleSignInService = AppleSignInService()
         self.kakaoSignInService = KakaoSignInService()
         self.authService = AuthService(networkManager: networkManager, tokenService: tokenService, appleSignInService: appleSignInService, kakaoSignInService: kakaoSignInService)
