@@ -22,8 +22,7 @@ final class AuthService: AuthServiceProtocol {
     private let tokenService: TokenServiceProtocol
     private let appleSignInService: SignInServiceProtocol
     private let kakaoSignInService: SignInServiceProtocol
-    private let userDefaults = UserDefaults.standard
-    private let currentUserKey = "current_user"
+    private let userDefaultsManager = UserDefaultsManager.shared
     private var cachedUser: UserDTO?
     var isAuthenticated = PassthroughSubject<Bool, Never>()
     
@@ -192,18 +191,12 @@ final class AuthService: AuthServiceProtocol {
     }
     
     private func saveCurrentUser(_ user: UserDTO) {
-        do {
-            let userData = try JSONEncoder().encode(user)
-            userDefaults.set(userData, forKey: currentUserKey)
-            
-            print("👤 현재 유저 정보 저장 완료:")
-            print("   - userId: \(user.id)")
-            print("   - nick: \(user.nick)")
-            print("   - email: \(user.email)")
-            
-        } catch {
-            print("❌ 현재 유저 저장 실패: \(error)")
-        }
+        userDefaultsManager.save(user, forKey: UserDefaultsManager.Keys.currentUser)
+        
+        print("👤 현재 유저 정보 저장 완료:")
+        print("   - userId: \(user.id)")
+        print("   - nick: \(user.nick)")
+        print("   - email: \(user.email)")
     }
     
     // MARK: - 현재 유저 조회
@@ -213,20 +206,14 @@ final class AuthService: AuthServiceProtocol {
             return cachedUser
         }
         
-        guard let userData = userDefaults.data(forKey: currentUserKey) else {
+        guard let user = userDefaultsManager.load(UserDTO.self, forKey: UserDefaultsManager.Keys.currentUser) else {
             print("⚠️ 저장된 현재 유저 정보 없음")
             return nil
         }
         
-        do {
-            let user = try JSONDecoder().decode(UserDTO.self, from: userData)
-            cachedUser = user
-            print("👤 현재 유저 정보 조회: \(user.nick)(\(user.id))")
-            return user
-        } catch {
-            print("❌ 현재 유저 정보 디코딩 실패: \(error)")
-            return nil
-        }
+        cachedUser = user
+        print("👤 현재 유저 정보 조회: \(user.nick)(\(user.id))")
+        return user
     }
     
     func getCurrentUserId() -> String? {
@@ -236,7 +223,7 @@ final class AuthService: AuthServiceProtocol {
     }
     
     private func clearCurrentUser() {
-        userDefaults.removeObject(forKey: currentUserKey)
+        userDefaultsManager.remove(forKey: UserDefaultsManager.Keys.currentUser)
         cachedUser = nil
         print("👤 현재 유저 정보 삭제 완료")
     }

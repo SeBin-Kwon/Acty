@@ -15,6 +15,7 @@ final class SearchViewModel: ViewModelType {
     var cancellables = Set<AnyCancellable>()
     
     private let activityService: ActivityServiceProtocol
+    private let userDefaultsManager = UserDefaultsManager.shared
     private var lastSearchQuery = ""
     private var searchHistory = [String]()
     
@@ -137,7 +138,7 @@ final class SearchViewModel: ViewModelType {
     // MARK: - Search History Management
     
     private func loadSearchHistory() {
-        if let savedHistory = UserDefaults.standard.array(forKey: "SearchHistory") as? [String] {
+        if let savedHistory = userDefaultsManager.loadStringArray(forKey: UserDefaultsManager.Keys.searchHistory) {
             searchHistory = savedHistory
             output.recentSearches = savedHistory
         }
@@ -156,7 +157,7 @@ final class SearchViewModel: ViewModelType {
         }
         
         // UserDefaults에 저장
-        UserDefaults.standard.set(searchHistory, forKey: "SearchHistory")
+        userDefaultsManager.saveStringArray(searchHistory, forKey: UserDefaultsManager.Keys.searchHistory)
         
         // output 업데이트
         output.recentSearches = searchHistory
@@ -164,13 +165,13 @@ final class SearchViewModel: ViewModelType {
     
     private func removeFromSearchHistory(_ query: String) {
         searchHistory.removeAll { $0 == query }
-        UserDefaults.standard.set(searchHistory, forKey: "SearchHistory")
+        userDefaultsManager.saveStringArray(searchHistory, forKey: UserDefaultsManager.Keys.searchHistory)
         output.recentSearches = searchHistory
     }
     
     func clearSearchHistory() {
         searchHistory.removeAll()
-        UserDefaults.standard.removeObject(forKey: "SearchHistory")
+        userDefaultsManager.remove(forKey: UserDefaultsManager.Keys.searchHistory)
         output.recentSearches = []
     }
 }
