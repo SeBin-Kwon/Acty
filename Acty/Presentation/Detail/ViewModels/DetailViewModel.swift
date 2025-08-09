@@ -21,7 +21,6 @@ final class DetailViewModel: ViewModelType {
     
     struct Output {
         var activityDetail: ActivityDetail? = nil
-//        var userId = ""
     }
     
     init(activityService: ActivityServiceProtocol) {

@@ -128,7 +128,6 @@ struct ActyApp: App {
         let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         let queryItems = components?.queryItems
         
-        // 예시: acty-payment://result?status=success&orderId=12345
         if let status = queryItems?.first(where: { $0.name == "status" })?.value {
             if status == "success" {
                 // 결제 성공 처리
