@@ -55,7 +55,7 @@ final class AuthService: AuthServiceProtocol {
     // MARK: - Private 로그인 구현
     private func signInWithEmail(email: String?, password: String?) async throws -> UserDTO {
         guard let email = email, let password = password else {
-            throw AuthError.invalidCredentials
+            throw AppError.invalidCredentials
         }
         
         let dto = EmailSignInRequestDTO(
@@ -74,7 +74,7 @@ final class AuthService: AuthServiceProtocol {
                     Task {
                         do {
                             guard var dto = result as? AppleSignInRequestDTO else {
-                                continuation.resume(throwing: AuthError.invalidResponse)
+                                continuation.resume(throwing: AppError.invalidResponse)
                                 return
                             }
                             
@@ -92,7 +92,7 @@ final class AuthService: AuthServiceProtocol {
                     }
                 },
                 onError: { error in
-                    continuation.resume(throwing: AuthError.externalServiceError(error))
+                    continuation.resume(throwing: AppError.networkError(error))
                 }
             )
         }
