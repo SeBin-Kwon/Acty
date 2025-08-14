@@ -34,6 +34,8 @@ final class HomeViewModel: ViewModelType {
 //        var activityDetails = [String: ActivityDetail]()
         var banners = [Banner]()
         var bannersLoaded = PassthroughSubject<Void, Never>()
+        var errorMessage: String?
+        var showError = PassthroughSubject<String, Never>()
     }
     
     init(activityService: ActivityServiceProtocol, bannerService: BannerServiceProtocol) {
@@ -87,7 +89,8 @@ final class HomeViewModel: ViewModelType {
     }
     
     private func loadBanners() {
-            Task {
+        Task {
+            do {
                 let banners = try await bannerService.fetchMainBanners()
                 
                 await MainActor.run {
@@ -96,8 +99,20 @@ final class HomeViewModel: ViewModelType {
                         self.output.bannersLoaded.send(())
                     }
                 }
+            } catch let error as AppError {
+                await MainActor.run {
+                    self.output.errorMessage = error.localizedDescription
+                    self.output.showError.send(error.localizedDescription)
+                }
+            } catch {
+                await MainActor.run {
+                    let errorMessage = "배너를 불러올 수 없습니다"
+                    self.output.errorMessage = errorMessage
+                    self.output.showError.send(errorMessage)
+                }
             }
         }
+    }
     
     private func fetchActivityData(isOnAppear: Bool, dto: ActivityRequestDTO) {
         guard !output.isLoading else { return }
@@ -106,24 +121,37 @@ final class HomeViewModel: ViewModelType {
             await MainActor.run {
                 output.isLoading = true
             }
-            if isOnAppear {
-                let newActivityResult = await self.activityService.fetchNewActivities(dto: dto)
+            
+            do {
+                if isOnAppear {
+                    let newActivityResult = try await self.activityService.fetchNewActivities(dto: dto)
+                    await MainActor.run {
+                        output.newActivityList = newActivityResult
+                        print("newActivityResult", newActivityResult)
+                    }
+                }
+                let activityResult = try await self.activityService.fetchActivities(dto: dto)
                 await MainActor.run {
-                    output.newActivityList = newActivityResult
-                    print("newActivityResult", newActivityResult)
+                    nextCursor = activityResult.nextCursor ?? ""
+                    output.activityList.append(contentsOf: activityResult.activities)
+                    print(activityResult)
+                    output.isLoading = false
+                }
+            } catch let error as AppError {
+                await MainActor.run {
+                    self.output.isLoading = false
+                    self.output.errorMessage = error.localizedDescription
+                    self.output.showError.send(error.localizedDescription)
+                }
+            } catch {
+                await MainActor.run {
+                    self.output.isLoading = false
+                    let errorMessage = "액티비티를 불러올 수 없습니다"
+                    self.output.errorMessage = errorMessage
+                    self.output.showError.send(errorMessage)
                 }
             }
-            let activityResult = await self.activityService.fetchActivities(dto: dto)
-            await MainActor.run {
-                
-                nextCursor = activityResult.nextCursor ?? ""
-                output.activityList.append(contentsOf: activityResult.activities)
-                print(activityResult)
-                output.isLoading = false
-            }
-            
         }
-        
     }
     
     private func pagenationData(dto: ActivityRequestDTO) {

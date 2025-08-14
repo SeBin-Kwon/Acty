@@ -106,7 +106,7 @@ final class AuthService: AuthServiceProtocol {
                         Task {
                             do {
                                 guard var dto = result as? KakaoSignInRequestDTO else {
-                                    continuation.resume(throwing: AuthError.invalidResponse)
+                                    continuation.resume(throwing: AppError.invalidResponse)
                                     return
                                 }
                                 
@@ -123,7 +123,7 @@ final class AuthService: AuthServiceProtocol {
                         }
                     },
                     onError: { error in
-                        continuation.resume(throwing: AuthError.externalServiceError(error))
+                        continuation.resume(throwing: AppError.networkError(error))
                     }
                 )
             }
@@ -229,23 +229,6 @@ final class AuthService: AuthServiceProtocol {
     }
 }
 
-// MARK: - AuthError
-enum AuthError: LocalizedError {
-    case invalidCredentials
-    case invalidResponse
-    case externalServiceError(String)
-    
-    var errorDescription: String? {
-        switch self {
-        case .invalidCredentials:
-            return "이메일 또는 비밀번호가 올바르지 않습니다"
-        case .invalidResponse:
-            return "서버 응답이 올바르지 않습니다"
-        case .externalServiceError(let message):
-            return "외부 서비스 오류: \(message)"
-        }
-    }
-}
 
 struct ProfileGetDTO: Decodable {
     let userId: String

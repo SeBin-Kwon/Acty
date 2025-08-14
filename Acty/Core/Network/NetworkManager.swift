@@ -111,7 +111,8 @@ final class NetworkManager: Sendable {
                     if let data = response.data, let errorString = String(data: data, encoding: .utf8) {
                         print("📋 서버 응답: \(errorString)")
                     }
-                    continuation.resume(throwing: error)
+                    let appError = self.mapAlamofireError(error, response: response.response)
+                    continuation.resume(throwing: appError)
                 }
             }
         }
@@ -162,9 +163,52 @@ extension NetworkManager {
                     if let data = response.data, let errorString = String(data: data, encoding: .utf8) {
                         print("📋 서버 응답: \(errorString)")
                     }
-                    continuation.resume(throwing: error)
+                    let appError = self.mapAlamofireError(error, response: response.response)
+                    continuation.resume(throwing: appError)
                 }
             }
+        }
+    }
+    
+    // MARK: - Error Mapping
+    private func mapAlamofireError(_ error: AFError, response: HTTPURLResponse?) -> AppError {
+        if let response = response {
+            let statusCode = response.statusCode
+            switch statusCode {
+            case 401:
+                return .authenticationRequired
+            case 403:
+                return .invalidCredentials
+            case 404:
+                return .dataNotFound
+            case 400:
+                return .invalidInput("잘못된 요청입니다")
+            case 500...599:
+                return .serverError(statusCode, "서버 오류가 발생했습니다")
+            default:
+                return AppError.mapAPIError(statusCode)
+            }
+        }
+        
+        switch error {
+        case .sessionTaskFailed(let sessionError):
+            if let urlError = sessionError as? URLError {
+                switch urlError.code {
+                case .notConnectedToInternet, .networkConnectionLost:
+                    return .networkError("인터넷 연결을 확인해주세요")
+                case .timedOut:
+                    return .networkError("요청 시간이 초과되었습니다")
+                default:
+                    return .networkError("네트워크 오류가 발생했습니다")
+                }
+            }
+            return .networkError("네트워크 요청 실패")
+        case .responseValidationFailed:
+            return .invalidResponse
+        case .responseSerializationFailed:
+            return .invalidData
+        default:
+            return .networkError("알 수 없는 네트워크 오류")
         }
     }
 }

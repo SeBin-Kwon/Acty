@@ -53,12 +53,20 @@ final class SignInViewModel: ViewModelType {
                     self.output.isLoading.send(false)
                     self.output.isSignIn.send(true)
                 }
-            } catch {
-                print("\(type) 로그인 오류: \(error)")
+            } catch let error as AppError {
+                print("\(type) 로그인 AppError: \(error)")
                 
                 await MainActor.run {
                     self.output.isLoading.send(false)
-                    self.output.errorMessage.send("로그인 실패: \(error.localizedDescription)")
+                    self.output.errorMessage.send(error.localizedDescription)
+                    self.output.isSignIn.send(false)
+                }
+            } catch {
+                print("\(type) 로그인 기타 오류: \(error)")
+                
+                await MainActor.run {
+                    self.output.isLoading.send(false)
+                    self.output.errorMessage.send("로그인 중 오류가 발생했습니다")
                     self.output.isSignIn.send(false)
                 }
             }

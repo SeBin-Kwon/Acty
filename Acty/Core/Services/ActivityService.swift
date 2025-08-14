@@ -8,10 +8,10 @@
 import Foundation
 
 protocol ActivityServiceProtocol {
-    func fetchActivities(dto: ActivityRequestDTO) async -> ActivityList
-    func fetchNewActivities(dto: ActivityRequestDTO) async -> [Activity]
+    func fetchActivities(dto: ActivityRequestDTO) async throws -> ActivityList
+    func fetchNewActivities(dto: ActivityRequestDTO) async throws -> [Activity]
     func fetchActivityDetails(id: String) async throws -> ActivityDetail
-    func fetchSearchActivities(title: String) async -> [Activity]
+    func fetchSearchActivities(title: String) async throws -> [Activity]
 }
 
 final class ActivityService: ActivityServiceProtocol {
@@ -27,46 +27,53 @@ final class ActivityService: ActivityServiceProtocol {
         return result.toEntity()
     }
     
-    func fetchActivities(dto: ActivityRequestDTO) async -> ActivityList {
+    func fetchActivities(dto: ActivityRequestDTO) async throws -> ActivityList {
         do {
             let result: ActivityListResponseDTO = try await networkManager.fetchResults(api: ActivityEndPoint.activity(dto))
             print("액티비티 fetch 성공")
             return result.toEntity()
+        } catch let error as AppError {
+            print("액티비티 fetch 실패: AppError")
+            throw error
         } catch {
-            print("액티비티 fetch 실패")
-            print(error)
-            return ActivityList(activities: [], nextCursor: nil)
+            print("액티비티 fetch 실패: \(error)")
+            throw AppError.networkError("액티비티 목록을 불러올 수 없습니다")
         }
     }
     
-    func fetchNewActivities(dto: ActivityRequestDTO) async -> [Activity] {
+    func fetchNewActivities(dto: ActivityRequestDTO) async throws -> [Activity] {
         do {
             let result: ActivityListResponseDTO = try await networkManager.fetchResults(api: ActivityEndPoint.newActivity(dto))
             print("액티비티 fetch 성공")
             print(result.data)
             return result.toEntity().activities
+        } catch let error as AppError {
+            print("신규 액티비티 fetch 실패: AppError")
+            throw error
         } catch {
-            print("액티비티 fetch 실패")
-            print(error)
-            return []
+            print("신규 액티비티 fetch 실패: \(error)")
+            throw AppError.networkError("신규 액티비티를 불러올 수 없습니다")
         }
     }
     
-    func fetchSearchActivities(title: String) async -> [Activity] {
+    func fetchSearchActivities(title: String) async throws -> [Activity] {
         do {
             let result: ActivityListResponseDTO = try await networkManager.fetchResults(api: ActivityEndPoint.searchActivity(title))
             print("액티비티 검색 성공")
             print(result.data)
             return result.toEntity().activities
+        } catch let error as AppError {
+            print("액티비티 검색 실패: AppError")
+            throw error
         } catch {
-            print("액티비티 검색 실패")
-            return []
+            print("액티비티 검색 실패: \(error)")
+            throw AppError.networkError("액티비티 검색에 실패했습니다")
         }
     }
 }
 
 class MockActivityService: ActivityServiceProtocol {
-    func fetchSearchActivities(title: String) async -> [Activity] {
+    func fetchSearchActivities(title: String) async throws -> [Activity] {
         [
             Activity(
                 id: "mock1",
@@ -365,12 +372,12 @@ class MockActivityService: ActivityServiceProtocol {
             )
         ]
     
-    func fetchActivityDetails(id: String) async -> ActivityDetail {
+    func fetchActivityDetails(id: String) async throws -> ActivityDetail {
         return mockData
     }
     
     
-    func fetchNewActivities(dto: ActivityRequestDTO) async -> [Activity] {
+    func fetchNewActivities(dto: ActivityRequestDTO) async throws -> [Activity] {
         try? await Task.sleep(nanoseconds: 500_000_000)
         
         return [
@@ -461,7 +468,7 @@ class MockActivityService: ActivityServiceProtocol {
         ]
     }
     
-    func fetchActivities(dto: ActivityRequestDTO) async -> ActivityList {
+    func fetchActivities(dto: ActivityRequestDTO) async throws -> ActivityList {
        try? await Task.sleep(nanoseconds: 500_000_000)
        
        return ActivityList(activities: [

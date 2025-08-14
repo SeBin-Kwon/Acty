@@ -10,7 +10,7 @@ import iamport_ios
 
 protocol PaymentServiceProtocol {
     func createIamportPayment(from request: PortonePaymentRequestDTO) -> IamportPayment
-    func processPaymentResult(_ response: IamportResponse) -> PortonePaymentResponseDTO
+    func processPaymentResult(_ response: IamportResponse) throws -> PortonePaymentResponseDTO
     func validatePayment(impUid: String, orderCode: String) async throws -> PaymentValidationResponseDTO
 }
 
@@ -37,23 +37,33 @@ final class PaymentService: PaymentServiceProtocol {
     }
     
     // 포트원 결제 응답을 앱 내부 DTO로 변환
-    func processPaymentResult(_ response: IamportResponse) -> PortonePaymentResponseDTO {
-        return PortonePaymentResponseDTO(
+    func processPaymentResult(_ response: IamportResponse) throws -> PortonePaymentResponseDTO {
+        let result = PortonePaymentResponseDTO(
             success: response.success ?? false,
             merchantUid: response.merchant_uid ?? "",
             impUid: response.imp_uid,
             errorCode: response.error_code,
             errorMsg: response.error_msg
         )
+        
+        if !result.success {
+            if let errorMsg = result.errorMsg {
+                throw AppError.networkError("결제 실패: \(errorMsg)")
+            } else {
+                throw AppError.networkError("결제 처리 중 오류가 발생했습니다")
+            }
+        }
+        
+        return result
     }
     
     func validatePayment(impUid: String, orderCode: String) async throws -> PaymentValidationResponseDTO {
-            
-            print("=== 결제 검증 요청 ===")
-            print("imp_uid: \(impUid)")
-            print("order_code: \(orderCode)")
-            print("===================")
-            
+        print("=== 결제 검증 요청 ===")
+        print("imp_uid: \(impUid)")
+        print("order_code: \(orderCode)")
+        print("===================")
+        
+        do {
             let response: PaymentValidationResponseDTO = try await networkManager.fetchResults(
                 api: OrdersEndPoint.paymentValidation(impUid) as any EndPoint
             )
@@ -63,5 +73,12 @@ final class PaymentService: PaymentServiceProtocol {
             print("===================")
             
             return response
+        } catch let error as AppError {
+            print("결제 검증 실패: AppError")
+            throw error
+        } catch {
+            print("결제 검증 실패: \(error)")
+            throw AppError.networkError("결제 검증에 실패했습니다")
         }
+    }
 }
