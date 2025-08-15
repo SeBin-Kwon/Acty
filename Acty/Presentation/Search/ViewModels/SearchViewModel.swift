@@ -106,16 +106,28 @@ final class SearchViewModel: ViewModelType {
         addToSearchHistory(query)
         
         Task {
-            let searchResults = await activityService.fetchSearchActivities(title: query)
-            
-            await MainActor.run {
-                self.output.searchResults = searchResults
-                self.output.isLoading.send(false)
+            do {
+                let searchResults = try await activityService.fetchSearchActivities(title: query)
                 
-                if searchResults.isEmpty {
-                    print("검색 결과 없음: \(query)")
-                } else {
-                    print("검색 완료: \(searchResults.count)개 결과")
+                await MainActor.run {
+                    self.output.searchResults = searchResults
+                    self.output.isLoading.send(false)
+                    
+                    if searchResults.isEmpty {
+                        print("검색 결과 없음: \(query)")
+                    } else {
+                        print("검색 완료: \(searchResults.count)개 결과")
+                    }
+                }
+            } catch let error as AppError {
+                await MainActor.run {
+                    self.output.isLoading.send(false)
+                    self.output.errorMessage.send(error.localizedDescription)
+                }
+            } catch {
+                await MainActor.run {
+                    self.output.isLoading.send(false)
+                    self.output.errorMessage.send("검색 중 오류가 발생했습니다")
                 }
             }
         }

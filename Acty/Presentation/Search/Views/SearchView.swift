@@ -12,6 +12,8 @@ struct SearchView: View {
     @StateObject var viewModel: SearchViewModel
     @State private var searchText = ""
     @FocusState private var isSearchFieldFocused: Bool
+    @State private var showErrorAlert = false
+    @State private var errorMessage = ""
     
     var body: some View {
         VStack(spacing: 0) {
@@ -30,7 +32,13 @@ struct SearchView: View {
         }
         .background(Color(.systemBackground))
         .onReceive(viewModel.output.errorMessage) { errorMessage in
-            print("검색 에러: \(errorMessage)")
+            self.errorMessage = errorMessage
+            showErrorAlert = true
+        }
+        .alert("오류", isPresented: $showErrorAlert) {
+            Button("확인") { }
+        } message: {
+            Text(errorMessage)
         }
     }
     

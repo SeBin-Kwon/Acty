@@ -11,6 +11,8 @@ import NukeUI
 struct ChatListView: View {
     @EnvironmentObject var navigationRouter: NavigationRouter
     @StateObject var viewModel: ChatListViewModel
+    @State private var showErrorAlert = false
+    @State private var errorMessage = ""
     
     var body: some View {
         NavigationView {
@@ -36,7 +38,13 @@ struct ChatListView: View {
                 viewModel.input.refreshTriggered.send(())
             }
             .onReceive(viewModel.output.errorMessage) { errorMessage in
-                print("Error: \(errorMessage)")
+                self.errorMessage = errorMessage
+                showErrorAlert = true
+            }
+            .alert("오류", isPresented: $showErrorAlert) {
+                Button("확인") { }
+            } message: {
+                Text(errorMessage)
             }
         }
     }

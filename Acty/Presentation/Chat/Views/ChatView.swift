@@ -16,6 +16,8 @@ struct ChatView: View {
     @State private var selectedPhotos: [PhotosPickerItem] = []
     @State private var selectedImageData: [Data] = []
     @State private var showPhotoPicker = false
+    @State private var showErrorAlert = false
+    @State private var errorMessage = ""
     
     var body: some View {
         VStack(spacing: 0) {
@@ -103,7 +105,13 @@ struct ChatView: View {
             viewModel.input.onDisappear.send(())
         }
         .onReceive(viewModel.output.errorMessage) { errorMessage in
-            print("Error: \(errorMessage)")
+            self.errorMessage = errorMessage
+            showErrorAlert = true
+        }
+        .alert("오류", isPresented: $showErrorAlert) {
+            Button("확인") { }
+        } message: {
+            Text(errorMessage)
         }
         .onReceive(viewModel.output.socketConnectionState) { state in
             print("🔗 Socket.IO 상태 UI 업데이트: \(state)")

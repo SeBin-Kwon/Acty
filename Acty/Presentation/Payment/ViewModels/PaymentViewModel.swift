@@ -132,19 +132,24 @@ final class PaymentViewModel: ViewModelType {
             return
         }
         
-        let paymentResult = paymentService.processPaymentResult(response)
-        
-        if paymentResult.success {
-            setLoading(false)
-            output.paymentSuccess.send(paymentResult)
-            Task {
-                await validatePayment(impUid: paymentResult.impUid, merchantUid: paymentResult.merchantUid)
-            }
+        do {
+            let paymentResult = try paymentService.processPaymentResult(response)
             
-        } else {
+            if paymentResult.success {
+                setLoading(false)
+                output.paymentSuccess.send(paymentResult)
+                Task {
+                    await validatePayment(impUid: paymentResult.impUid, merchantUid: paymentResult.merchantUid)
+                }
+                
+            } else {
+                setLoading(false)
+                let errorMessage = paymentResult.errorMsg ?? "결제에 실패했습니다."
+                output.paymentFailed.send(errorMessage)
+            }
+        } catch {
             setLoading(false)
-            let errorMessage = paymentResult.errorMsg ?? "결제에 실패했습니다."
-            output.paymentFailed.send(errorMessage)
+            output.paymentFailed.send("결제 처리 중 오류: \(error.localizedDescription)")
         }
     }
     
