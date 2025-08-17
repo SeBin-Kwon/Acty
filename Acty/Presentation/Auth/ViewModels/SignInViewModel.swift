@@ -66,7 +66,8 @@ final class SignInViewModel: ViewModelType {
                 
                 await MainActor.run {
                     self.output.isLoading.send(false)
-                    self.output.errorMessage.send("로그인 중 오류가 발생했습니다")
+                    let appError = (error as? AppError) ?? AppError.authenticationRequired
+                    self.output.errorMessage.send(appError.localizedDescription)
                     self.output.isSignIn.send(false)
                 }
             }

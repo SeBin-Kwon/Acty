@@ -127,7 +127,8 @@ final class SearchViewModel: ViewModelType {
             } catch {
                 await MainActor.run {
                     self.output.isLoading.send(false)
-                    self.output.errorMessage.send("검색 중 오류가 발생했습니다")
+                    let appError = (error as? AppError) ?? AppError.networkError("검색 중 오류")
+                    self.output.errorMessage.send(appError.localizedDescription)
                 }
             }
         }

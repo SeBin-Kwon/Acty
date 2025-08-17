@@ -64,7 +64,7 @@ final class PaymentViewModel: ViewModelType {
     
     private func initiatePayment() {
         guard validateInput() else {
-            output.paymentFailed.send("입력 정보를 확인해주세요.")
+            output.paymentFailed.send(AppError.invalidInput("필수 정보").localizedDescription)
             return
         }
         
@@ -115,7 +115,8 @@ final class PaymentViewModel: ViewModelType {
             } catch {
                 await MainActor.run {
                     self.setLoading(false)
-                    self.output.paymentFailed.send("주문 생성 실패: \(error.localizedDescription)")
+                    let errorMessage = (error as? AppError)?.localizedDescription ?? AppError.networkError("주문 생성 실패").localizedDescription
+                    self.output.paymentFailed.send(errorMessage)
                 }
             }
         }
@@ -128,7 +129,7 @@ final class PaymentViewModel: ViewModelType {
         
         guard let response = response else {
             setLoading(false)
-            output.paymentFailed.send("결제가 취소되었습니다.")
+            output.paymentFailed.send(AppError.paymentCancelled.localizedDescription)
             return
         }
         
@@ -144,12 +145,13 @@ final class PaymentViewModel: ViewModelType {
                 
             } else {
                 setLoading(false)
-                let errorMessage = paymentResult.errorMsg ?? "결제에 실패했습니다."
+                let errorMessage = paymentResult.errorMsg ?? AppError.paymentProcessingFailed("알 수 없는 오류").localizedDescription
                 output.paymentFailed.send(errorMessage)
             }
         } catch {
             setLoading(false)
-            output.paymentFailed.send("결제 처리 중 오류: \(error.localizedDescription)")
+            let errorMessage = (error as? AppError)?.localizedDescription ?? AppError.paymentProcessingFailed(error.localizedDescription).localizedDescription
+            output.paymentFailed.send(errorMessage)
         }
     }
     
@@ -157,7 +159,7 @@ final class PaymentViewModel: ViewModelType {
         guard let impUid, let merchantUid else {
             await MainActor.run {
                 self.setLoading(false)
-                self.output.paymentFailed.send("결제 정보가 올바르지 않습니다.")
+                self.output.paymentFailed.send(AppError.invalidPaymentInfo.localizedDescription)
             }
             return
         }
@@ -174,7 +176,8 @@ final class PaymentViewModel: ViewModelType {
         } catch {
             await MainActor.run {
                 self.setLoading(false)
-                self.output.paymentFailed.send("결제 검증 중 오류: \(error.localizedDescription)")
+                let errorMessage = (error as? AppError)?.localizedDescription ?? AppError.paymentValidationFailed(error.localizedDescription).localizedDescription
+                self.output.paymentFailed.send(errorMessage)
             }
         }
         

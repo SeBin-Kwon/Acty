@@ -103,8 +103,8 @@ final class ChatListViewModel: ViewModelType {
             } catch {
                 await MainActor.run {
                     self.output.isLoading.send(false)
-                    self.output.errorMessage.send("채팅방 목록을 불러오는데 실패했습니다: \(error.localizedDescription)")
-                    print("채팅방 목록 로드 실패: \(error)")
+                    let appError = (error as? AppError) ?? AppError.networkError("채팅방 목록 로드 실패")
+                    self.output.errorMessage.send(appError.localizedDescription)
                 }
             }
         }

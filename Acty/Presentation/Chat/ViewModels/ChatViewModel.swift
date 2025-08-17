@@ -153,7 +153,7 @@ final class ChatViewModel: ViewModelType {
                 }
             } else {
                 await MainActor.run {
-                    output.errorMessage.send("이미지 업로드에 실패했습니다.")
+                    output.errorMessage.send(AppError.networkError("이미지 업로드 실패").localizedDescription)
                     output.isUploading.send(false)
                 }
             }
@@ -222,7 +222,7 @@ final class ChatViewModel: ViewModelType {
                         }
                         
                     } else {
-                        self.output.errorMessage.send("채팅방 생성에 실패했습니다.")
+                        self.output.errorMessage.send(AppError.chatError.localizedDescription)
                         self.output.isLoading.send(false)
                     }
                 }
@@ -253,7 +253,8 @@ final class ChatViewModel: ViewModelType {
                 }
             } catch {
                 await MainActor.run {
-                    self.output.errorMessage.send("메시지 로드 실패: \(error.localizedDescription)")
+                    let appError = (error as? AppError) ?? AppError.networkError("메시지 로드 실패")
+                    self.output.errorMessage.send(appError.localizedDescription)
                     self.output.isLoading.send(false)
                 }
             }
@@ -262,7 +263,7 @@ final class ChatViewModel: ViewModelType {
     
     private func sendMessage(_ message: ChatRequestDTO) {
         guard let roomId = roomId else {
-            output.errorMessage.send("채팅방이 준비되지 않았습니다.")
+            output.errorMessage.send(AppError.chatError.localizedDescription)
             return
         }
         
@@ -273,7 +274,8 @@ final class ChatViewModel: ViewModelType {
 //                try await sendPushNotification(for: sentMessage.content ?? "")
             } catch {
                 await MainActor.run {
-                    self.output.errorMessage.send("메시지 전송 실패: \(error.localizedDescription)")
+                    let appError = (error as? AppError) ?? AppError.chatError
+                    self.output.errorMessage.send(appError.localizedDescription)
                 }
             }
         }

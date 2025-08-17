@@ -33,7 +33,14 @@ enum AppError: Error {
     // MARK: - 키체인 오류
     case keychainError(KeychainManager.KeychainError)
     
+    // MARK: - 채팅 오류
     case chatError
+    
+    // MARK: - 결제 오류
+    case paymentCancelled
+    case paymentProcessingFailed(String)
+    case paymentValidationFailed(String)
+    case invalidPaymentInfo
 }
 
 
@@ -90,6 +97,16 @@ extension AppError: LocalizedError {
             }
         case .chatError:
             return "채팅을 보낼 수 없습니다."
+            
+        // 결제 오류
+        case .paymentCancelled:
+            return "결제가 취소되었습니다."
+        case .paymentProcessingFailed(let message):
+            return "결제 처리 중 오류가 발생했습니다: \(message)"
+        case .paymentValidationFailed(let message):
+            return "결제 검증 중 오류가 발생했습니다: \(message)"
+        case .invalidPaymentInfo:
+            return "결제 정보가 올바르지 않습니다."
         }
     }
 }
