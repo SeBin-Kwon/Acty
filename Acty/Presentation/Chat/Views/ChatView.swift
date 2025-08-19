@@ -162,8 +162,10 @@ struct ChatView: View {
             var imageDataArray: [Data] = []
             
             for photo in photos {
-                if let data = try? await photo.loadTransferable(type: Data.self) {
-                    imageDataArray.append(data)
+                if let data = try? await photo.loadTransferable(type: Data.self),
+                   let uiImage = UIImage(data: data),
+                   let jpegData = uiImage.jpegData(compressionQuality: 0.8) {
+                    imageDataArray.append(jpegData)
                 }
             }
             
