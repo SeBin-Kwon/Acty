@@ -25,7 +25,8 @@ final class KeychainManager: Sendable {
             let query: [String: Any] = [
                 kSecClass as String: kSecClassGenericPassword,
                 kSecAttrAccount as String: account,
-                kSecValueData as String: tokenData
+                kSecValueData as String: tokenData,
+                kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
             ]
             
             let status = SecItemAdd(query as CFDictionary, nil)
