@@ -18,6 +18,7 @@ final class UserDefaultsManager {
     struct Keys {
         static let currentUser = "current_user"
         static let searchHistory = "SearchHistory"
+        static let hasBeenLaunchedBefore = "hasBeenLaunchedBeforeFlag"
     }
     
     // MARK: - Generic Methods
@@ -59,5 +60,17 @@ final class UserDefaultsManager {
     
     func exists(forKey key: String) -> Bool {
         return userDefaults.object(forKey: key) != nil
+    }
+}
+
+// MARK: - First Launch Detection
+extension UserDefaults {
+    static func isFirstLaunch() -> Bool {
+        let isFirstLaunch = !UserDefaults.standard.bool(forKey: UserDefaultsManager.Keys.hasBeenLaunchedBefore)
+        if isFirstLaunch {
+            UserDefaults.standard.set(true, forKey: UserDefaultsManager.Keys.hasBeenLaunchedBefore)
+            UserDefaults.standard.synchronize()
+        }
+        return isFirstLaunch
     }
 }

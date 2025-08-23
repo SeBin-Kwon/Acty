@@ -20,6 +20,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             return true
         }
         
+        removeKeychainAtFirstLaunch()
+        
         print("🚀 앱 시작 - Firebase 설정 중...")
         FirebaseApp.configure()
         
@@ -45,6 +47,19 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             return
         }
         FCMService.shared.didFailToRegisterForRemoteNotifications(with: error)
+    }
+    
+    private func removeKeychainAtFirstLaunch() {
+        guard UserDefaults.isFirstLaunch() else {
+            return
+        }
+        
+        do {
+            try DIContainer.shared.tokenService.deleteTokens()
+            print("🔑 첫 실행: 키체인 데이터 정리 완료")
+        } catch {
+            print("❌ 키체인 데이터 정리 실패: \(error)")
+        }
     }
 }
 
