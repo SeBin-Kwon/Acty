@@ -33,7 +33,7 @@ final class DIContainer: ObservableObject {
     let orderService: OrderServiceProtocol
     let chatService: ChatServiceProtocol
     let chatRepository: ChatRepositoryProtocol
-    let coreDataManaager: CoreDataManagerProtocol
+    let coreDataManager: CoreDataManagerProtocol
     let socketIOChatService: SocketIOChatServiceProtocol
     let bannerService: BannerServiceProtocol
     let pushNotificationService: PushNotificationServiceProtocol
@@ -43,7 +43,9 @@ final class DIContainer: ObservableObject {
         let tempNetworkManager = NetworkManager()
         self.tokenService = TokenService(networkManager: tempNetworkManager, keychainManager: keychainManager)
         self.networkManager = NetworkManager(tokenService: tokenService)
-        (self.tokenService as? TokenService)?.setNetworkManager(networkManager)
+        if let tokenService = self.tokenService as? TokenService {
+            tokenService.setNetworkManager(networkManager)
+        }
         self.appleSignInService = AppleSignInService()
         self.kakaoSignInService = KakaoSignInService()
         self.authService = AuthService(networkManager: networkManager, tokenService: tokenService, appleSignInService: appleSignInService, kakaoSignInService: kakaoSignInService)
@@ -51,9 +53,9 @@ final class DIContainer: ObservableObject {
         self.paymentService = PaymentService(networkManager: networkManager)
         self.orderService = OrderService(networkManager: networkManager)
         self.chatService = ChatService(networkManager: networkManager)
-        self.coreDataManaager = CoreDataManager.shared
+        self.coreDataManager = CoreDataManager.shared
         self.socketIOChatService = SocketIOChatService(tokenService: tokenService)
-        self.chatRepository = ChatRepository(chatService: chatService, coreDataManager: coreDataManaager, socketIOChatService: socketIOChatService)
+        self.chatRepository = ChatRepository(chatService: chatService, coreDataManager: coreDataManager, socketIOChatService: socketIOChatService)
         self.bannerService = BannerService(networkManager: networkManager)
         self.pushNotificationService = PushNotificationService(networkManager: networkManager)
     }
