@@ -69,7 +69,6 @@ extension UserDefaults {
         let isFirstLaunch = !UserDefaults.standard.bool(forKey: UserDefaultsManager.Keys.hasBeenLaunchedBefore)
         if isFirstLaunch {
             UserDefaults.standard.set(true, forKey: UserDefaultsManager.Keys.hasBeenLaunchedBefore)
-            UserDefaults.standard.synchronize()
         }
         return isFirstLaunch
     }
