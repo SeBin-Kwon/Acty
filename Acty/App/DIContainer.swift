@@ -7,17 +7,6 @@
 
 import Foundation
 
-//protocol DIContainerProtocol {
-//    var authRepository: AuthRepositoryProtocol { get }
-//    var networkManager: NetworkManager { get }
-//    var tokenService: TokenServiceProtocol { get }
-//    var appleSignInService: SignInServiceProtocol { get }
-//    var kakaoSignInService: SignInServiceProtocol { get }
-//    
-//    func makeSignInViewModel() -> SignInViewModel
-//    func makeSignUpViewModel() -> SignUpViewModel
-//}
-
 final class DIContainer: ObservableObject {
     static let shared = DIContainer()
     private lazy var _currentUser: UserDTO? = authService.getCurrentUser()
