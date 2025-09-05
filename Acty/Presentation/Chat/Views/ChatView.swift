@@ -19,6 +19,8 @@ struct ChatView: View {
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
     
+    private let currentUserId: String = DIContainer.shared.currentUserId ?? ""
+    
     var body: some View {
         VStack(spacing: 0) {
             if viewModel.output.isLoading.value {
@@ -52,7 +54,7 @@ struct ChatView: View {
                                     .listRowInsets(EdgeInsets())
                             }
                             
-                            ChatMessageRow(message: message, currentUserId: DIContainer.shared.currentUserId ?? "", shouldShowTime: shouldShowTime(for: message, at: index, in: viewModel.output.messages))
+                            ChatMessageRow(message: message, currentUserId: currentUserId, shouldShowTime: shouldShowTime(for: message, at: index, in: viewModel.output.messages))
                                 .id(message.chatId)
                                 .listRowSeparator(.hidden)
                                 .listRowBackground(Color.clear)

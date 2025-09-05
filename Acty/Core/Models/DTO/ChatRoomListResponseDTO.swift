@@ -26,8 +26,9 @@ struct ChatRoomResponseDTO: Codable {
 
 extension ChatRoomResponseDTO {
     var opponentUser: SenderDTO? {
-        return participants.first { $0.userId != DIContainer.shared.currentUserId }
-        }
+        let currentUserId = DIContainer.shared.currentUserId
+        return participants.first { $0.userId != currentUserId }
+    }
 }
 
 extension ChatRoomResponseDTO {

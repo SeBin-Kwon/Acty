@@ -19,6 +19,7 @@ final class ChatViewModel: ViewModelType {
     private let pushNotificationService: PushNotificationServiceProtocol
     let userId: String
     private var roomId: String?
+    private let currentUser: UserDTO?
     
     struct Input {
         var onAppear = PassthroughSubject<Void, Never>()
@@ -47,6 +48,7 @@ final class ChatViewModel: ViewModelType {
         self.socketIOChatService = socketIOChatService
         self.pushNotificationService = pushNotificationService
         self.userId = userId
+        self.currentUser = DIContainer.shared.currentUser
         transform()
         setupRealtimeBinding()
     }
@@ -283,7 +285,7 @@ final class ChatViewModel: ViewModelType {
     
     private func sendPushNotification(for messageContent: String) async throws {
         guard let roomId = roomId,
-              let currentUserNickname = DIContainer.shared.currentUser?.nick else {
+              let currentUserNickname = currentUser?.nick else {
             print("⚠️ 푸시 알림 전송 건너뜀 - 필요한 정보 부족")
             return
         }
