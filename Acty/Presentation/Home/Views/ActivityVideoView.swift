@@ -39,6 +39,8 @@ struct ActivityVideoView: View {
     @State private var playerItem: VideoPlayerItem? = nil
     @State private var isInCenter: Bool = false
     
+    private let playerManager = VideoPlayerManager.shared
+    
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -74,7 +76,7 @@ struct ActivityVideoView: View {
         }
         
         print("🎬 Setting up player for: \(videoURL)")
-        let player = VideoPlayerManager.shared.getPlayer(for: activityId, url: url)
+        let player = playerManager.getPlayer(for: activityId, url: url)
         self.playerItem = player
     }
     
@@ -105,26 +107,26 @@ struct ActivityVideoView: View {
     
     private func playVideo() {
         print("🎬 playVideo() called for: \(activityId)")
-        print("🎬 Current playing ID: \(VideoPlayerManager.shared.currentPlayingId ?? "nil")")
+        print("🎬 Current playing ID: \(playerManager.currentPlayingId ?? "nil")")
         
         // 다른 모든 영상 정지 후 현재 영상만 재생
-        VideoPlayerManager.shared.setCurrentPlaying(activityId)
+        playerManager.setCurrentPlaying(activityId)
         
         // 확인: 실제로 설정되었는지
-        print("🎬 After setCurrentPlaying: \(VideoPlayerManager.shared.currentPlayingId ?? "nil")")
+        print("🎬 After setCurrentPlaying: \(playerManager.currentPlayingId ?? "nil")")
     }
     
     private func pauseVideo() {
-        if VideoPlayerManager.shared.currentPlayingId == activityId {
+        if playerManager.currentPlayingId == activityId {
             print("🛑 Pausing current video: \(activityId)")
-            VideoPlayerManager.shared.setPlayerVisibility(activityId, isVisible: false)
+            playerManager.setPlayerVisibility(activityId, isVisible: false)
         } else {
             print("🤐 Skipping pause for non-current video: \(activityId)")
         }
     }
     
     private func updateVisibility(_ visible: Bool) {
-        VideoPlayerManager.shared.setPlayerVisibility(activityId, isVisible: visible)
+        playerManager.setPlayerVisibility(activityId, isVisible: visible)
     }
     
     // MARK: - Placeholder Views
