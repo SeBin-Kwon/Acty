@@ -61,14 +61,23 @@ final class UserDefaultsManager {
     func exists(forKey key: String) -> Bool {
         return userDefaults.object(forKey: key) != nil
     }
+    
+    func bool(forKey key: String) -> Bool {
+        return userDefaults.bool(forKey: key)
+    }
+    
+    func setBool(_ value: Bool, forKey key: String) {
+        userDefaults.set(value, forKey: key)
+    }
 }
 
 // MARK: - First Launch Detection
-extension UserDefaults {
+extension UserDefaultsManager {
     static func isFirstLaunch() -> Bool {
-        let isFirstLaunch = !UserDefaults.standard.bool(forKey: UserDefaultsManager.Keys.hasBeenLaunchedBefore)
+        let manager = UserDefaultsManager.shared
+        let isFirstLaunch = !manager.bool(forKey: Keys.hasBeenLaunchedBefore)
         if isFirstLaunch {
-            UserDefaults.standard.set(true, forKey: UserDefaultsManager.Keys.hasBeenLaunchedBefore)
+            manager.setBool(true, forKey: Keys.hasBeenLaunchedBefore)
         }
         return isFirstLaunch
     }

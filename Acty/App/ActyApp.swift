@@ -50,7 +50,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
     
     private func removeKeychainAtFirstLaunch() {
-        guard UserDefaults.isFirstLaunch() else {
+        guard UserDefaultsManager.isFirstLaunch() else {
             return
         }
         
